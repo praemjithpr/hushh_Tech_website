@@ -38,12 +38,7 @@ additional_redirect_urls = [
   "http://localhost:5173/**"
 ]
 
-[auth.external.google]
-enabled = true
-client_id = "env(GOOGLE_CLIENT_ID)"
-secret = "env(GOOGLE_CLIENT_SECRET)"
-
-[auth.external.apple]
-enabled = true
-client_id = "env(APPLE_CLIENT_ID)"
-secret = "env(APPLE_CLIENT_SECRET)"
+# Note: Google and Apple OAuth are configured in Supabase Dashboard
+# Settings -> Authentication -> Providers
+# These are NOT needed in config.toml for Edge Function deployments
+# The actual OAuth credentials are securely stored in the Dashboard
