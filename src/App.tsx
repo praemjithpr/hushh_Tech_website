@@ -78,9 +78,7 @@ import DeveloperDocsPage from './pages/developer-docs';
 import HushhAgentMailerPage from './pages/hushh-agent-mailer';
 import MobileBottomNav from './components/MobileBottomNav';
 import HushhAIPage from './hushh-ai/pages';
-import PortfolioWizardPage from './hushh-ai/pages/portfolio';
 import { LoginPage as HushhAILoginPage, SignupPage as HushhAISignupPage } from './hushh-ai/presentation/pages';
-import PublicPortfolioPage from './pages/p/[slug]';
 
 // Google Analytics configuration
 const GA_TRACKING_ID = 'G-R58S9WWPM0';
@@ -96,10 +94,9 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isA2APlayground = location.pathname.startsWith('/a2a-playground');
   const isInvestorGuide = location.pathname === '/investor-guide';
   const isHushhAI = location.pathname.startsWith('/hushh-ai');
-  const isPublicPortfolio = location.pathname.startsWith('/p/');
 
   return (
-    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isA2APlayground || isInvestorGuide || isHushhAI || isPublicPortfolio ? '' : 'mt-20'}`}>
+    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isA2APlayground || isInvestorGuide || isHushhAI ? '' : 'mt-20'}`}>
       {children}
     </div>
   );
@@ -109,12 +106,11 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
 const useLayoutVisibility = () => {
   const location = useLocation();
   const isHushhAI = location.pathname.startsWith('/hushh-ai');
-  const isPublicPortfolio = location.pathname.startsWith('/p/');
   
   return {
-    showNavbar: !isHushhAI && !isPublicPortfolio,
-    showFooter: !isHushhAI && !isPublicPortfolio,
-    showMobileNav: !isHushhAI && !isPublicPortfolio,
+    showNavbar: !isHushhAI,
+    showFooter: !isHushhAI,
+    showMobileNav: !isHushhAI,
   };
 };
 
@@ -432,11 +428,8 @@ function App() {
             <Route path='/developer-docs' element={<DeveloperDocsPage />} />
             <Route path='/hushh-agent-mailer' element={<HushhAgentMailerPage />} />
             <Route path='/hushh-ai' element={<HushhAIPage />} />
-            <Route path='/hushh-ai/portfolio' element={<PortfolioWizardPage />} />
             <Route path='/hushh-ai/login' element={<HushhAILoginPage />} />
             <Route path='/hushh-ai/signup' element={<HushhAISignupPage />} />
-            {/* Public Portfolio Pages - serves published portfolios at /p/{slug} */}
-            <Route path='/p/:slug' element={<PublicPortfolioPage />} />
           </Routes>
         </ContentWrapper>
         {/* Footer - Only show for non-Hushh AI routes */}
