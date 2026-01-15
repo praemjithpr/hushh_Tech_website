@@ -41,6 +41,7 @@
     "@emailjs/browser": "^4.4.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@google/genai": "^1.36.0",
     "@fontsource/dm-sans": "^5.2.8",
     "@headlessui/react": "^1.7.17",
     "@lottiefiles/dotlottie-react": "^0.17.8",

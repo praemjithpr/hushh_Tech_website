@@ -79,6 +79,7 @@ import HushhAgentMailerPage from './pages/hushh-agent-mailer';
 import MobileBottomNav from './components/MobileBottomNav';
 import HushhAIPage from './hushh-ai/pages';
 import { LoginPage as HushhAILoginPage, SignupPage as HushhAISignupPage } from './hushh-ai/presentation/pages';
+import HushhAgentApp from './hushh-agent/pages';
 
 // Google Analytics configuration
 const GA_TRACKING_ID = 'G-R58S9WWPM0';
@@ -94,9 +95,10 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isA2APlayground = location.pathname.startsWith('/a2a-playground');
   const isInvestorGuide = location.pathname === '/investor-guide';
   const isHushhAI = location.pathname.startsWith('/hushh-ai');
+  const isHushhAgent = location.pathname.startsWith('/hushh-agent');
 
   return (
-    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isA2APlayground || isInvestorGuide || isHushhAI ? '' : 'mt-20'}`}>
+    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent ? '' : 'mt-20'}`}>
       {children}
     </div>
   );
@@ -106,11 +108,12 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
 const useLayoutVisibility = () => {
   const location = useLocation();
   const isHushhAI = location.pathname.startsWith('/hushh-ai');
+  const isHushhAgent = location.pathname.startsWith('/hushh-agent');
   
   return {
-    showNavbar: !isHushhAI,
-    showFooter: !isHushhAI,
-    showMobileNav: !isHushhAI,
+    showNavbar: !isHushhAI && !isHushhAgent,
+    showFooter: !isHushhAI && !isHushhAgent,
+    showMobileNav: !isHushhAI && !isHushhAgent,
   };
 };
 
@@ -430,6 +433,8 @@ function App() {
             <Route path='/hushh-ai' element={<HushhAIPage />} />
             <Route path='/hushh-ai/login' element={<HushhAILoginPage />} />
             <Route path='/hushh-ai/signup' element={<HushhAISignupPage />} />
+            {/* Hushh Agent - AI Voice/Video Coaching Platform */}
+            <Route path='/hushh-agent' element={<HushhAgentApp />} />
           </Routes>
         </ContentWrapper>
         {/* Footer - Only show for non-Hushh AI routes */}
