@@ -4,7 +4,7 @@
  * Beautiful modal for email OTP authentication
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -56,7 +56,7 @@ export const EmailLoginModal: React.FC<EmailLoginModalProps> = ({
   // Local state
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [step, setStep] = useState<'email' | 'otp' | 'success'>('email');
   const emailInputRef = useRef<HTMLInputElement>(null);
 
   // Reset on close
@@ -112,16 +112,22 @@ export const EmailLoginModal: React.FC<EmailLoginModalProps> = ({
 
     const success = await verifyOTP(email, otpValue);
     if (success) {
-      toast({
-        title: 'Welcome! 🎉',
-        description: 'You are now logged in',
-        status: 'success',
-        duration: 3000,
-      });
-      onLoginSuccess?.();
-      onClose();
+      // Show success screen instead of immediately closing
+      setStep('success');
     }
   };
+
+  // Handle success screen timeout and redirect
+  useEffect(() => {
+    if (step === 'success') {
+      const timer = setTimeout(() => {
+        onLoginSuccess?.();
+        onClose();
+      }, 2500); // Show success for 2.5 seconds
+      
+      return () => clearTimeout(timer);
+    }
+  }, [step, onLoginSuccess, onClose]);
 
   // Handle OTP change
   const handleOtpChange = (value: string) => {
@@ -159,7 +165,90 @@ export const EmailLoginModal: React.FC<EmailLoginModalProps> = ({
         
         <ModalBody py={8} px={6}>
           <AnimatePresence mode="wait">
-            {step === 'email' ? (
+            {step === 'success' ? (
+              /* Success Screen */
+              <MotionBox
+                key="success-step"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                <VStack spacing={6} align="center" py={8}>
+                  {/* Animated Checkmark Circle */}
+                  <MotionBox
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 200, 
+                      damping: 15,
+                      delay: 0.1
+                    }}
+                  >
+                    <Box
+                      bg="linear-gradient(135deg, #11998e 0%, #38ef7d 100%)"
+                      p={6}
+                      borderRadius="full"
+                      boxShadow="0 0 60px rgba(56, 239, 125, 0.4)"
+                      position="relative"
+                    >
+                      {/* Pulse Ring Animation */}
+                      <Box
+                        position="absolute"
+                        top="-4px"
+                        left="-4px"
+                        right="-4px"
+                        bottom="-4px"
+                        borderRadius="full"
+                        border="2px solid"
+                        borderColor="green.400"
+                        opacity={0.5}
+                        animation="pulse 1.5s ease-in-out infinite"
+                        sx={{
+                          '@keyframes pulse': {
+                            '0%': { transform: 'scale(1)', opacity: 0.5 },
+                            '50%': { transform: 'scale(1.15)', opacity: 0 },
+                            '100%': { transform: 'scale(1)', opacity: 0.5 },
+                          },
+                        }}
+                      />
+                      <Icon as={FiCheck} boxSize={12} color="white" strokeWidth={3} />
+                    </Box>
+                  </MotionBox>
+
+                  {/* Success Text */}
+                  <MotionBox
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <VStack spacing={2}>
+                      <Heading size="lg" color="white" fontWeight="700">
+                        Email Verified! 
+                      </Heading>
+                      <Text color="gray.400" fontSize="md">
+                        Welcome back! 🎉
+                      </Text>
+                    </VStack>
+                  </MotionBox>
+
+                  {/* Loading Indicator for redirect */}
+                  <MotionBox
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    <VStack spacing={3}>
+                      <Spinner size="sm" color="green.400" thickness="2px" />
+                      <Text color="gray.500" fontSize="sm">
+                        Loading your dashboard...
+                      </Text>
+                    </VStack>
+                  </MotionBox>
+                </VStack>
+              </MotionBox>
+            ) : step === 'email' ? (
               <MotionBox
                 key="email-step"
                 initial={{ opacity: 0, x: -20 }}
