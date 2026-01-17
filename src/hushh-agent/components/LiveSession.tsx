@@ -322,17 +322,17 @@ const LiveSession: React.FC<LiveSessionProps> = ({ coach, onClose, showHeader = 
   useEffect(() => { isFullySyncedRef.current = isFullySynced; }, [isFullySynced]);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex flex-col bg-[#010101] overflow-hidden select-none text-white"
       style={{ paddingTop: !showHeader ? '60px' : '0' }}
     >
       {!isFullySynced && (
-        <div className="absolute inset-0 z-[600] flex flex-col items-center justify-center backdrop-blur-3xl bg-black/95">
-            <div className={`max-w-md w-[85%] p-10 glass rounded-[64px] border border-white/10 text-center space-y-10 shadow-2xl`}>
-                <div className="w-28 h-28 rounded-full flex items-center justify-center text-5xl bg-white/5 text-white/40">
+        <div className="absolute inset-0 z-[600] flex flex-col items-center justify-center backdrop-blur-3xl bg-black/95 p-4">
+            <div className={`max-w-md w-full sm:w-[85%] p-8 sm:p-10 glass rounded-[48px] sm:rounded-[64px] border border-white/10 text-center space-y-8 sm:space-y-10 shadow-2xl`}>
+                <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-4xl sm:text-5xl bg-white/5 text-white/40 mx-auto">
                     <i className={`fas ${coach.category === 'dating' ? 'fa-heart text-rose-500 shadow-[0_0_40px_rgba(244,63,94,0.5)]' : coach.category === 'career' ? 'fa-file-alt text-blue-400' : 'fa-brain'} animate-pulse`}></i>
                 </div>
-                <h2 className="text-xl font-serif font-bold tracking-[0.2em] text-white uppercase">
+                <h2 className="text-base sm:text-xl font-serif font-bold tracking-[0.15em] sm:tracking-[0.2em] text-white uppercase">
                     {coach.category === 'dating' ? 'INITIATING SOVEREIGN SYNC' : coach.category === 'career' ? 'MOUNTING RESUME ARCHITECT' : ANALYSIS_SEQUENCE[analysisIndex]?.label}
                 </h2>
                 <div className="w-full h-[2px] bg-white/5 relative overflow-hidden rounded-full">
@@ -342,49 +342,50 @@ const LiveSession: React.FC<LiveSessionProps> = ({ coach, onClose, showHeader = 
         </div>
       )}
 
-      <div className="relative w-full h-full flex flex-col lg:flex-row z-10 overflow-hidden lg:p-4 gap-4">
-        
+      <div className="relative w-full h-full flex flex-col lg:flex-row z-10 overflow-hidden lg:p-4 gap-2 sm:gap-4">
+
         {/* STAGE AREA */}
-        <div className="relative flex-[2.5] lg:flex-[3] h-[50vh] lg:h-full lg:rounded-[48px] overflow-hidden bg-black">
-          <img 
-            src={coach.avatarUrl} 
-            alt={coach.name} 
+        <div className="relative flex-[2.5] lg:flex-[3] h-[45vh] sm:h-[50vh] lg:h-full rounded-b-[24px] sm:rounded-b-[32px] lg:rounded-[48px] overflow-hidden bg-black">
+          <img
+            src={coach.avatarUrl}
+            alt={coach.name}
             className={`absolute inset-0 w-full h-full object-cover object-top brightness-[0.6] transition-opacity duration-2000 ${isFullySynced ? 'opacity-100' : 'opacity-20'}`}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
 
           {/* HUD OVERLAYS */}
-          <div className="absolute top-0 left-0 right-0 p-6 lg:p-10 flex items-start justify-between z-50">
-             <div className="flex flex-col gap-2">
-                <h2 className="font-serif text-3xl lg:text-7xl font-bold text-white tracking-tighter drop-shadow-2xl">{coach.name}</h2>
-                <div className="flex items-center gap-3">
-                   <span className={`px-4 py-1 rounded-full text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] ${coach.category === 'dating' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : coach.category === 'career' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-white/10 text-white border-white/10'} border backdrop-blur-xl`}>
+          <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 lg:p-10 flex items-start justify-between z-50">
+             <div className="flex flex-col gap-1 sm:gap-2">
+                <h2 className="font-serif text-2xl sm:text-3xl lg:text-7xl font-bold text-white tracking-tighter drop-shadow-2xl">{coach.name}</h2>
+                <div className="flex items-center gap-2 sm:gap-3">
+                   <span className={`px-2 sm:px-4 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] ${coach.category === 'dating' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : coach.category === 'career' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-white/10 text-white border-white/10'} border backdrop-blur-xl`}>
                     {coach.role.toUpperCase()}
                   </span>
                 </div>
              </div>
 
-             <div className="flex flex-col items-end gap-4">
-                <div className={`w-20 lg:w-48 h-28 lg:h-64 rounded-[20px] lg:rounded-[32px] overflow-hidden glass border-2 ${coach.category === 'dating' ? 'border-rose-500/30' : 'border-white/10'} shadow-2xl`}>
+             <div className="flex flex-col items-end gap-2 sm:gap-4">
+                <div className={`w-16 h-20 sm:w-20 sm:h-28 lg:w-48 lg:h-64 rounded-[16px] sm:rounded-[20px] lg:rounded-[32px] overflow-hidden glass border-2 ${coach.category === 'dating' ? 'border-rose-500/30' : 'border-white/10'} shadow-2xl`}>
                   <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
                   <canvas ref={canvasRef} className="hidden" />
                 </div>
                 
                 {coach.category === 'career' && isFullySynced && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            onChange={handleResumeUpload} 
-                            className="hidden" 
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleResumeUpload}
+                            className="hidden"
                             accept="image/*,.pdf"
                         />
-                        <button 
+                        <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-3 px-6 py-4 rounded-full glass border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 transition-all group"
+                            className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 rounded-full glass border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 transition-all group min-h-[44px]"
                         >
-                            <i className="fas fa-file-upload text-blue-400 group-hover:scale-110 transition-transform"></i>
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Sync Resume Node</span>
+                            <i className="fas fa-file-upload text-sm sm:text-base text-blue-400 group-hover:scale-110 transition-transform"></i>
+                            <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white hidden sm:inline">Sync Resume Node</span>
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white sm:hidden">Upload</span>
                         </button>
                     </div>
                 )}
@@ -393,12 +394,12 @@ const LiveSession: React.FC<LiveSessionProps> = ({ coach, onClose, showHeader = 
 
           {/* ATS SCOREBOARD - Conditional Display */}
           {analysisResult && (
-            <div className="absolute inset-0 z-40 flex items-center justify-center p-8 lg:p-20 pointer-events-none">
-                <div className="w-full max-w-4xl glass bg-black/90 backdrop-blur-3xl rounded-[48px] border-2 border-blue-500/30 p-10 shadow-[0_0_100px_rgba(59,130,246,0.2)] pointer-events-auto animate-in zoom-in-95 duration-700">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="absolute inset-0 z-40 flex items-center justify-center p-4 sm:p-8 lg:p-20 pointer-events-none">
+                <div className="w-full max-w-4xl glass bg-black/90 backdrop-blur-3xl rounded-[32px] sm:rounded-[48px] border-2 border-blue-500/30 p-6 sm:p-10 shadow-[0_0_100px_rgba(59,130,246,0.2)] pointer-events-auto animate-in zoom-in-95 duration-700 overflow-y-auto max-h-[90vh]">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
                         {/* SCORE GAUGE */}
-                        <div className="flex flex-col items-center justify-center gap-6 text-center border-r border-white/10">
-                            <div className="relative w-40 h-40 flex items-center justify-center">
+                        <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 text-center md:border-r border-white/10 pb-6 md:pb-0">
+                            <div className="relative w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center">
                                 <svg className="w-full h-full -rotate-90">
                                     <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
                                     <circle 
@@ -409,18 +410,18 @@ const LiveSession: React.FC<LiveSessionProps> = ({ coach, onClose, showHeader = 
                                     />
                                 </svg>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-5xl font-bold font-serif">{analysisResult.atsScore}</span>
-                                    <span className="text-[10px] uppercase font-black tracking-widest text-white/30">ATS SCORE</span>
+                                    <span className="text-4xl sm:text-5xl font-bold font-serif">{analysisResult.atsScore}</span>
+                                    <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-white/30">ATS SCORE</span>
                                 </div>
                             </div>
-                            <button onClick={() => setAnalysisResult(null)} className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+                            <button onClick={() => setAnalysisResult(null)} className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors min-h-[44px] px-4">
                                 DISMISS ANALYSIS
                             </button>
                         </div>
 
                         {/* DATA BREAKDOWN */}
-                        <div className="md:col-span-2 space-y-6">
-                            <div className="grid grid-cols-2 gap-6">
+                        <div className="md:col-span-2 space-y-4 sm:space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                 <div>
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-green-400 mb-3">Strengths</h4>
                                     <ul className="space-y-2">
@@ -452,9 +453,9 @@ const LiveSession: React.FC<LiveSessionProps> = ({ coach, onClose, showHeader = 
 
           {/* FLOATING TRANSCRIPTION */}
           {!analysisResult && (
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 pointer-events-none z-30">
-                <div className={`p-6 lg:p-10 rounded-[32px] lg:rounded-[48px] glass border-2 ${coach.category === 'dating' ? 'border-rose-500/50 shadow-[0_0_60px_rgba(244,63,94,0.3)]' : coach.category === 'career' ? 'border-blue-500/50' : 'border-white/20'} bg-black/80 backdrop-blur-3xl shadow-2xl ${sessionState.outputTranscription ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-                    <p className="text-lg lg:text-3xl font-serif text-white text-center leading-relaxed font-bold">
+            <div className="absolute bottom-16 sm:bottom-20 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 sm:px-6 pointer-events-none z-30">
+                <div className={`p-4 sm:p-6 lg:p-10 rounded-[24px] sm:rounded-[32px] lg:rounded-[48px] glass border-2 ${coach.category === 'dating' ? 'border-rose-500/50 shadow-[0_0_60px_rgba(244,63,94,0.3)]' : coach.category === 'career' ? 'border-blue-500/50' : 'border-white/20'} bg-black/80 backdrop-blur-3xl shadow-2xl transition-all duration-300 ${sessionState.outputTranscription ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+                    <p className="text-sm sm:text-base md:text-lg lg:text-3xl font-serif text-white text-center leading-relaxed font-bold">
                     {sessionState.outputTranscription}
                     </p>
                 </div>
@@ -462,34 +463,35 @@ const LiveSession: React.FC<LiveSessionProps> = ({ coach, onClose, showHeader = 
           )}
 
           {/* AGENT STATUS */}
-          <div className="absolute bottom-6 left-6 flex items-center gap-3 px-4 py-2 rounded-full glass border border-white/10">
+          <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full glass border border-white/10">
               <div className={`w-2 h-2 rounded-full ${sessionState.isModelSpeaking ? 'bg-blue-500 animate-ping' : 'bg-white/20'}`}></div>
-              <span className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40">
-                {executingTask || (sessionState.isModelSpeaking ? 'SYMPHONY NODE ACTIVE' : 'MONITORING UPLINK')}
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-white/40">
+                <span className="hidden sm:inline">{executingTask || (sessionState.isModelSpeaking ? 'SYMPHONY NODE ACTIVE' : 'MONITORING UPLINK')}</span>
+                <span className="sm:hidden">{sessionState.isModelSpeaking ? 'ACTIVE' : 'IDLE'}</span>
               </span>
           </div>
 
           {/* Internal close button - only shown when using internal header */}
           {showHeader && (
-            <button onClick={onClose} className="absolute top-6 left-6 lg:hidden w-12 h-12 rounded-full glass flex items-center justify-center border border-white/20">
-               <i className="fas fa-times text-white"></i>
+            <button onClick={onClose} className="absolute top-4 sm:top-6 left-4 sm:left-6 lg:hidden w-11 h-11 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center border border-white/20 active:scale-95 min-h-[44px] min-w-[44px]">
+               <i className="fas fa-times text-white text-sm sm:text-base"></i>
             </button>
           )}
         </div>
 
         {/* SIDEBAR LOG */}
         <div className="flex-[1] flex flex-col bg-black/40 lg:rounded-[48px] overflow-hidden border border-white/10 backdrop-blur-xl">
-          <div className="p-6 pb-2">
-             <div className="flex items-center justify-between mb-4 px-2">
-                <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em]">Neural Prompts</span>
+          <div className="p-4 sm:p-6 pb-2">
+             <div className="flex items-center justify-between mb-3 sm:mb-4 px-1 sm:px-2">
+                <span className="text-[9px] sm:text-[10px] font-black text-white/30 uppercase tracking-[0.3em] sm:tracking-[0.5em]">Neural Prompts</span>
                 <i className="fas fa-sparkles text-white/20 text-xs"></i>
              </div>
-             <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+             <div className="flex gap-2 overflow-x-auto pb-3 sm:pb-4 no-scrollbar snap-x snap-mandatory">
                 {dynamicSuggestions.map((suggestion, i) => (
-                    <button 
-                      key={i} 
+                    <button
+                      key={i}
                       onClick={() => sendTextPrompt(suggestion)}
-                      className={`whitespace-nowrap px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border ${coach.category === 'dating' ? 'border-rose-500/30 text-rose-300' : coach.category === 'career' ? 'border-blue-500/30 text-blue-300' : 'border-white/10 text-white/60'} text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95`}
+                      className={`whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/5 hover:bg-white/10 border ${coach.category === 'dating' ? 'border-rose-500/30 text-rose-300' : coach.category === 'career' ? 'border-blue-500/30 text-blue-300' : 'border-white/10 text-white/60'} text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] transition-all active:scale-95 min-h-[44px] snap-start`}
                     >
                       {suggestion}
                     </button>
@@ -497,29 +499,29 @@ const LiveSession: React.FC<LiveSessionProps> = ({ coach, onClose, showHeader = 
              </div>
           </div>
 
-          <div className="p-8 pb-0 flex items-center justify-between">
-             <h3 className="text-xl font-bold font-serif uppercase tracking-tight text-white/90">Signal History</h3>
-             {analysisResult && <div className="px-3 py-1 bg-blue-500/20 border border-blue-500/40 rounded-full text-[8px] font-black uppercase tracking-widest text-blue-300">Resume Parsed</div>}
+          <div className="p-4 sm:p-8 pb-0 flex items-center justify-between">
+             <h3 className="text-base sm:text-xl font-bold font-serif uppercase tracking-tight text-white/90">Signal History</h3>
+             {analysisResult && <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-500/20 border border-blue-500/40 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-blue-300">Resume Parsed</div>}
           </div>
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 scrollbar-hide">
              {transcriptions.map((t, idx) => (
                 <div key={idx} className={`flex flex-col ${t.role === 'user' ? 'items-end' : 'items-start'} animate-in fade-in duration-500`}>
-                    <span className="text-[8px] text-white/20 uppercase tracking-[0.5em] font-black mb-2">{t.role === 'user' ? 'Signal' : coach.name}</span>
-                    <div className={`max-w-[85%] px-5 py-3 rounded-2xl text-sm ${t.role === 'user' ? 'bg-white/5 text-white/40 border border-white/5' : 'bg-white/10 text-white border border-white/10 font-serif'}`}>
+                    <span className="text-[7px] sm:text-[8px] text-white/20 uppercase tracking-[0.4em] sm:tracking-[0.5em] font-black mb-1 sm:mb-2">{t.role === 'user' ? 'Signal' : coach.name}</span>
+                    <div className={`max-w-[90%] sm:max-w-[85%] px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm ${t.role === 'user' ? 'bg-white/5 text-white/40 border border-white/5' : 'bg-white/10 text-white border border-white/10 font-serif'}`}>
                         {t.text}
                     </div>
                 </div>
              ))}
              {sessionState.inputTranscription && (
-                <div className="flex flex-col items-end opacity-20 text-[10px] italic text-white animate-pulse px-4">
+                <div className="flex flex-col items-end opacity-20 text-[9px] sm:text-[10px] italic text-white animate-pulse px-2 sm:px-4">
                     {sessionState.inputTranscription}...
                 </div>
              )}
           </div>
 
-          <div className="p-6 bg-black/95 border-t border-white/5">
-             <button onClick={onClose} className="w-full py-5 rounded-3xl bg-red-600/5 hover:bg-red-600/10 border border-red-600/20 text-red-500 text-[10px] font-black tracking-[0.5em] uppercase transition-all">
+          <div className="p-4 sm:p-6 bg-black/95 border-t border-white/5">
+             <button onClick={onClose} className="w-full py-4 sm:py-5 rounded-2xl sm:rounded-3xl bg-red-600/5 hover:bg-red-600/10 border border-red-600/20 text-red-500 text-[9px] sm:text-[10px] font-black tracking-[0.3em] sm:tracking-[0.5em] uppercase transition-all min-h-[44px] active:scale-95">
                TERMINATE UPLINK
              </button>
           </div>

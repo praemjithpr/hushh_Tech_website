@@ -91,46 +91,48 @@ const ResumeNodeIntro: React.FC<ResumeNodeIntroProps> = ({ onConnect }) => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-16">
-        
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 py-12 sm:py-16">
+
         {/* Neural Status */}
-        <div className="mb-12 flex items-center gap-3 px-6 py-3 rounded-full glass border border-white/5">
+        <div className="mb-8 sm:mb-12 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full glass border border-white/5">
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></div>
-          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-black">
-            {NEURAL_READOUTS[readoutIndex]}
+          <span className="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] text-white/40 font-black">
+            <span className="hidden sm:inline">{NEURAL_READOUTS[readoutIndex]}</span>
+            <span className="sm:hidden">CAREER NODE READY</span>
           </span>
         </div>
 
         {/* Main Title */}
-        <div className="text-center mb-16 max-w-4xl">
-          <div className="inline-flex items-center gap-3 mb-8 px-6 py-2 rounded-full bg-blue-500/10 border border-blue-500/20">
-            <i className="fas fa-file-alt text-blue-400"></i>
-            <span className="text-[11px] uppercase tracking-[0.3em] text-blue-300 font-black">
-              Resume Node • Career Architect
+        <div className="text-center mb-12 sm:mb-16 max-w-4xl">
+          <div className="inline-flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-blue-500/10 border border-blue-500/20">
+            <i className="fas fa-file-alt text-sm sm:text-base text-blue-400"></i>
+            <span className="text-[9px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.3em] text-blue-300 font-black">
+              <span className="hidden sm:inline">Resume Node • Career Architect</span>
+              <span className="sm:hidden">Resume Node</span>
             </span>
           </div>
 
-          <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/20 leading-[1.1]">
+          <h1 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 sm:mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/20 leading-[1.1] px-2">
             Your AI Career Agent
           </h1>
 
-          <p className="text-xl md:text-2xl text-white/40 leading-relaxed max-w-3xl mx-auto">
+          <p className="text-base sm:text-xl md:text-2xl text-white/40 leading-relaxed max-w-3xl mx-auto px-2">
             Resume Node doesn't just review your resume —{' '}
             <span className="text-white/70 font-semibold">it gets you the job</span>.
-            Neural-powered analysis, real-time emotional detection, and autonomous job applications.
+            <span className="hidden sm:inline"> Neural-powered analysis, real-time emotional detection, and autonomous job applications.</span>
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl w-full mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-4 md:gap-6 max-w-5xl w-full mb-12 sm:mb-16">
           {FEATURES.map((feature, index) => (
             <div
               key={feature.title}
-              className="group p-6 md:p-8 rounded-3xl glass border border-white/5 hover:border-white/20 transition-all duration-500 hover:scale-[1.02]"
+              className="group p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl glass border border-white/5 hover:border-white/20 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98]"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className={`
-                w-14 h-14 rounded-2xl flex items-center justify-center mb-5
+                w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5
                 ${feature.color === 'blue' ? 'bg-blue-500/10 text-blue-400' : ''}
                 ${feature.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400' : ''}
                 ${feature.color === 'purple' ? 'bg-purple-500/10 text-purple-400' : ''}
@@ -139,22 +141,22 @@ const ResumeNodeIntro: React.FC<ResumeNodeIntroProps> = ({ onConnect }) => {
                 ${feature.color === 'cyan' ? 'bg-cyan-500/10 text-cyan-400' : ''}
                 group-hover:scale-110 transition-transform
               `}>
-                <i className={`fas ${feature.icon} text-xl`}></i>
+                <i className={`fas ${feature.icon} text-lg sm:text-xl`}></i>
               </div>
-              
-              <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-              <p className="text-sm text-white/40 leading-relaxed">{feature.description}</p>
+
+              <h3 className="text-base sm:text-lg font-bold text-white mb-2">{feature.title}</h3>
+              <p className="text-xs sm:text-sm text-white/40 leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>
 
         {/* How It Works */}
-        <div className="max-w-4xl w-full mb-16">
-          <h2 className="text-center text-[10px] uppercase tracking-[0.5em] text-white/30 font-black mb-10">
+        <div className="max-w-4xl w-full mb-12 sm:mb-16">
+          <h2 className="text-center text-[9px] sm:text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.5em] text-white/30 font-black mb-8 sm:mb-10">
             How It Works
           </h2>
-          
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
             {[
               { step: '01', label: 'Connect', icon: 'fa-link' },
               { step: '02', label: 'Upload Resume', icon: 'fa-upload' },
@@ -163,17 +165,17 @@ const ResumeNodeIntro: React.FC<ResumeNodeIntroProps> = ({ onConnect }) => {
               { step: '05', label: 'Auto Apply', icon: 'fa-paper-plane' }
             ].map((item, index, arr) => (
               <React.Fragment key={item.step}>
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <div className="w-16 h-16 rounded-full glass border border-white/10 flex items-center justify-center">
-                    <i className={`fas ${item.icon} text-white/50`}></i>
+                <div className="flex flex-col items-center gap-2 sm:gap-3 text-center">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full glass border border-white/10 flex items-center justify-center">
+                    <i className={`fas ${item.icon} text-sm sm:text-base text-white/50`}></i>
                   </div>
                   <div>
-                    <span className="text-[10px] text-blue-400 font-black">{item.step}</span>
-                    <p className="text-sm text-white/60 font-medium">{item.label}</p>
+                    <span className="text-[9px] sm:text-[10px] text-blue-400 font-black">{item.step}</span>
+                    <p className="text-xs sm:text-sm text-white/60 font-medium">{item.label}</p>
                   </div>
                 </div>
                 {index < arr.length - 1 && (
-                  <div className="hidden md:block w-12 h-px bg-gradient-to-r from-white/10 to-white/5"></div>
+                  <div className="hidden sm:block w-8 md:w-12 h-px bg-gradient-to-r from-white/10 to-white/5"></div>
                 )}
               </React.Fragment>
             ))}
@@ -181,54 +183,56 @@ const ResumeNodeIntro: React.FC<ResumeNodeIntroProps> = ({ onConnect }) => {
         </div>
 
         {/* Connect Button */}
-        <div className="text-center">
+        <div className="text-center px-4">
           <button
             onClick={onConnect}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             className={`
-              relative group px-16 py-6 rounded-full font-black text-lg uppercase tracking-[0.3em]
+              relative group px-8 sm:px-12 md:px-16 py-4 sm:py-5 md:py-6 rounded-full font-black text-sm sm:text-base md:text-lg uppercase tracking-[0.2em] sm:tracking-[0.3em]
               bg-gradient-to-r from-blue-600 to-blue-500 text-white
               hover:from-blue-500 hover:to-blue-400
-              transition-all duration-500 transform hover:scale-105
+              transition-all duration-500 transform hover:scale-105 active:scale-95
               shadow-[0_0_60px_rgba(59,130,246,0.4)]
               hover:shadow-[0_0_80px_rgba(59,130,246,0.6)]
+              min-h-[52px] w-full sm:w-auto
             `}
           >
-            <span className="relative z-10 flex items-center gap-4">
-              <i className={`fas fa-link ${isHovering ? 'animate-pulse' : ''}`}></i>
+            <span className="relative z-10 flex items-center justify-center gap-3 sm:gap-4">
+              <i className={`fas fa-link text-sm sm:text-base ${isHovering ? 'animate-pulse' : ''}`}></i>
               Connect Now
             </span>
-            
+
             {/* Pulse ring */}
             <span className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping"></span>
           </button>
 
-          <p className="mt-6 text-sm text-white/30">
+          <p className="mt-4 sm:mt-6 text-xs sm:text-sm text-white/30">
             <i className="fas fa-camera mr-2"></i>
-            Camera + Microphone required for neural connection
+            <span className="hidden sm:inline">Camera + Microphone required for neural connection</span>
+            <span className="sm:hidden">Camera + Mic required</span>
           </p>
         </div>
 
         {/* Neural Emotional Preview */}
-        <div className="mt-20 max-w-3xl w-full">
-          <div className="p-8 rounded-3xl glass border border-white/5">
-            <div className="flex items-start gap-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/10">
-                <i className="fas fa-brain text-2xl text-white/50"></i>
+        <div className="mt-12 sm:mt-20 max-w-3xl w-full">
+          <div className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl glass border border-white/5">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/10">
+                <i className="fas fa-brain text-xl sm:text-2xl text-white/50"></i>
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-white mb-2">Neural Emotional Detection</h3>
-                <p className="text-sm text-white/40 leading-relaxed mb-4">
-                  Your AI agent will analyze your facial expressions in real-time. 
-                  If you look confused, it will explain differently. If you look excited about a job, 
+                <h3 className="text-base sm:text-lg font-bold text-white mb-2">Neural Emotional Detection</h3>
+                <p className="text-xs sm:text-sm text-white/40 leading-relaxed mb-4">
+                  Your AI agent will analyze your facial expressions in real-time.
+                  If you look confused, it will explain differently. If you look excited about a job,
                   it will prioritize similar opportunities. The agent sees you and adapts.
                 </p>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {['😊 Happy', '🤔 Thinking', '😟 Worried', '🎯 Focused'].map(emotion => (
-                    <span 
+                    <span
                       key={emotion}
-                      className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-white/50"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs text-white/50"
                     >
                       {emotion}
                     </span>
@@ -240,9 +244,10 @@ const ResumeNodeIntro: React.FC<ResumeNodeIntroProps> = ({ onConnect }) => {
         </div>
 
         {/* Footer */}
-        <div className="mt-20 text-center">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-black">
-            hushh Resume Node • Career Architect v2.0 • Neural Sovereign
+        <div className="mt-12 sm:mt-20 text-center px-4">
+          <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] text-white/20 font-black">
+            <span className="hidden sm:inline">hushh Resume Node • Career Architect v2.0 • Neural Sovereign</span>
+            <span className="sm:hidden">Resume Node v2.0</span>
           </p>
         </div>
       </div>

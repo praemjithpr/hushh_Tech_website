@@ -77,32 +77,32 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
         <div className="absolute inset-0 portal-bg opacity-40"></div>
       </div>
 
-      <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-16 md:py-24">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-24">
         {/* Header with Home button */}
-        <div className="fixed top-6 left-6 right-6 z-50 flex items-center justify-between">
+        <div className="fixed top-4 sm:top-6 left-4 sm:left-6 right-4 sm:right-6 z-50 flex items-center justify-between">
           {/* Home Button */}
           <button
             onClick={handleHomeClick}
-            className="flex items-center gap-3 px-6 py-3 rounded-full glass border border-white/10 hover:bg-white/10 hover:border-purple-500/50 transition-all group"
+            className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full glass border border-white/10 hover:bg-white/10 hover:border-purple-500/50 transition-all group min-h-[44px]"
           >
-            <i className="fas fa-home text-purple-400 group-hover:text-purple-300"></i>
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/50 group-hover:text-white/70 font-bold">
+            <i className="fas fa-home text-sm sm:text-base text-purple-400 group-hover:text-purple-300"></i>
+            <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/50 group-hover:text-white/70 font-bold">
               Home
             </span>
           </button>
 
           {/* User Status */}
-          <div className="glass rounded-full px-6 py-3 border border-white/10 flex items-center gap-4">
-            <div className="flex items-center gap-3">
+          <div className="glass rounded-full px-3 sm:px-6 py-2 sm:py-3 border border-white/10 flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-white/50 font-black">
+              <span className="text-[8px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/50 font-black max-w-[80px] sm:max-w-none truncate">
                 {userEmail || 'Connected'}
               </span>
             </div>
-            <div className="w-px h-4 bg-white/10"></div>
+            <div className="w-px h-3 sm:h-4 bg-white/10"></div>
             <button
               onClick={onSignOut}
-              className="text-[10px] uppercase tracking-[0.2em] text-white/30 hover:text-red-400 transition-colors font-black"
+              className="text-[8px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/30 hover:text-red-400 transition-colors font-black"
             >
               Disconnect
             </button>
@@ -110,7 +110,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
         </div>
 
         {/* Category Header */}
-        <header className="mt-20 mb-16 text-center animate-in fade-in slide-in-from-top-4 duration-700">
+        <header className="mt-16 sm:mt-20 mb-12 sm:mb-16 text-center animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="flex flex-col items-center gap-6 mb-8">
             <div className={`w-20 h-20 rounded-full bg-${categoryInfo.color}-500/20 border border-${categoryInfo.color}-500/30 flex items-center justify-center`}>
               <i className={`fas ${categoryInfo.icon} text-3xl text-${categoryInfo.color}-400`}></i>

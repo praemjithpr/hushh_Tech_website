@@ -159,21 +159,22 @@ export const EmailLoginModal: React.FC<EmailLoginModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       isCentered
-      size="md"
+      size={{ base: 'sm', md: 'md' }}
       motionPreset="slideInBottom"
     >
       <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(10px)" />
       <ModalContent
         bg="linear-gradient(145deg, #1a1a2e 0%, #16213e 100%)"
-        borderRadius="24px"
+        borderRadius={{ base: '20px', sm: '24px' }}
         border="1px solid"
         borderColor="whiteAlpha.200"
         overflow="hidden"
-        mx={4}
+        mx={{ base: 4, sm: 4 }}
+        my={{ base: 4, sm: 0 }}
       >
-        <ModalCloseButton color="white" zIndex={10} />
-        
-        <ModalBody py={8} px={6}>
+        <ModalCloseButton color="white" zIndex={10} size={{ base: 'sm', md: 'md' }} />
+
+        <ModalBody py={{ base: 6, sm: 8 }} px={{ base: 4, sm: 6 }}>
           <AnimatePresence mode="wait">
             {step === 'success' ? (
               /* Success Screen */
@@ -394,11 +395,11 @@ export const EmailLoginModal: React.FC<EmailLoginModalProps> = ({
                   </VStack>
 
                   {/* OTP Input */}
-                  <HStack justify="center" spacing={2}>
+                  <HStack justify="center" spacing={{ base: 1.5, sm: 2 }}>
                     <PinInput
                       value={otp}
                       onChange={handleOtpChange}
-                      size="lg"
+                      size={{ base: 'md', sm: 'lg' }}
                       otp
                       isDisabled={isVerifying}
                       autoFocus
@@ -410,16 +411,16 @@ export const EmailLoginModal: React.FC<EmailLoginModalProps> = ({
                           border="2px solid"
                           borderColor="whiteAlpha.200"
                           color="white"
-                          fontSize="xl"
+                          fontSize={{ base: 'lg', sm: 'xl' }}
                           fontWeight="bold"
                           _hover={{ borderColor: 'whiteAlpha.400' }}
                           _focus={{
                             borderColor: '#38ef7d',
                             boxShadow: '0 0 0 1px #38ef7d',
                           }}
-                          borderRadius="12px"
-                          w="48px"
-                          h="56px"
+                          borderRadius={{ base: '10px', sm: '12px' }}
+                          w={{ base: '40px', sm: '48px' }}
+                          h={{ base: '48px', sm: '56px' }}
                         />
                       ))}
                     </PinInput>

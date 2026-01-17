@@ -88,8 +88,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       left={0}
       right={0}
       zIndex={1000}
-      h="60px"
-      px={4}
+      h={{ base: '56px', md: '60px' }}
+      px={{ base: 3, sm: 4 }}
       bg="rgba(10, 10, 26, 0.85)"
       backdropFilter="blur(20px)"
       borderBottom="1px solid"
@@ -98,10 +98,10 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       justify="space-between"
     >
       {/* Left Section - Home + Title */}
-      <HStack spacing={4}>
+      <HStack spacing={{ base: 2, sm: 4 }}>
         {/* Home Button */}
-        <Tooltip 
-          label="Back to Agents" 
+        <Tooltip
+          label="Back to Agents"
           placement="bottom"
           hasArrow
           bg="gray.800"
@@ -111,11 +111,13 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
             aria-label="Home"
             icon={<FiHome />}
             variant="ghost"
-            size="md"
+            size={{ base: 'sm', md: 'md' }}
+            minW={{ base: '44px', md: '40px' }}
+            minH={{ base: '44px', md: '40px' }}
             color={isHome ? 'purple.400' : 'gray.400'}
             bg={isHome ? 'whiteAlpha.100' : 'transparent'}
-            _hover={{ 
-              color: 'white', 
+            _hover={{
+              color: 'white',
               bg: 'whiteAlpha.100',
               transform: 'scale(1.05)',
             }}
@@ -126,15 +128,16 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
         </Tooltip>
 
         {/* Divider */}
-        <Box h="24px" w="1px" bg="whiteAlpha.200" />
+        <Box h={{ base: '20px', md: '24px' }} w="1px" bg="whiteAlpha.200" display={{ base: 'none', sm: 'block' }} />
 
         {/* Current View Title */}
-        <HStack spacing={2}>
+        <HStack spacing={{ base: 1.5, sm: 2 }}>
           {!isHome && (
             <Box
               bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-              p={1.5}
+              p={{ base: 1, sm: 1.5 }}
               borderRadius="lg"
+              display={{ base: 'none', sm: 'block' }}
             >
               <NodeIcon size={14} color="white" />
             </Box>
@@ -143,16 +146,18 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
             <Text
               color="white"
               fontWeight="600"
-              fontSize="sm"
+              fontSize={{ base: 'xs', sm: 'sm' }}
               letterSpacing="tight"
+              noOfLines={1}
             >
               {nodeTitle}
             </Text>
             {!isHome && (
               <Text
                 color="gray.500"
-                fontSize="xs"
+                fontSize={{ base: '2xs', sm: 'xs' }}
                 fontWeight="medium"
+                display={{ base: 'none', sm: 'block' }}
               >
                 hushh Sovereign
               </Text>
@@ -166,29 +171,30 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
         <MenuButton
           as={Button}
           variant="ghost"
-          size="sm"
-          px={3}
-          py={2}
+          size={{ base: 'xs', sm: 'sm' }}
+          px={{ base: 2, sm: 3 }}
+          py={{ base: 1.5, sm: 2 }}
           borderRadius="full"
           bg="whiteAlpha.50"
           _hover={{ bg: 'whiteAlpha.100' }}
           _active={{ bg: 'whiteAlpha.150' }}
           rightIcon={<FiChevronDown size={12} />}
+          minH={{ base: '36px', sm: '32px' }}
         >
-          <HStack spacing={2}>
+          <HStack spacing={{ base: 1.5, sm: 2 }}>
             {/* Online Indicator */}
             <Box
-              w="6px"
-              h="6px"
+              w={{ base: '5px', sm: '6px' }}
+              h={{ base: '5px', sm: '6px' }}
               borderRadius="full"
               bg="green.400"
               boxShadow="0 0 8px rgba(72, 187, 120, 0.6)"
             />
             <Text
               color="gray.300"
-              fontSize="xs"
+              fontSize={{ base: '2xs', sm: 'xs' }}
               fontWeight="medium"
-              maxW="120px"
+              maxW={{ base: '60px', sm: '100px', md: '140px' }}
               isTruncated
             >
               {userEmail || 'Connected'}
@@ -200,7 +206,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           bg="gray.900"
           borderColor="whiteAlpha.100"
           py={2}
-          minW="180px"
+          minW={{ base: '160px', sm: '180px' }}
         >
           <MenuItem
             icon={<FiUser size={14} />}
