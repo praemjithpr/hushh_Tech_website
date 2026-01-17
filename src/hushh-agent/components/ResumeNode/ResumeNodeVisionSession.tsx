@@ -26,10 +26,13 @@ import EmotionalStateHUD from './EmotionalStateHUD';
 import ResumeUploadDialog from './ResumeUploadDialog';
 import { decode, decodeAudioData, createPcmBlob } from '../../services/audioUtils';
 import { prepareResumeForLiveSession } from '../../services/geminiFileService';
+import { triggerResumeAnalysisAsync } from '../../services/resumeAnalysisService';
 
 interface ResumeNodeVisionSessionProps {
   onClose: () => void;
   onProceedToLiveSession: (coach: Coach) => void;
+  userEmail?: string;
+  userId?: string;
 }
 
 type SessionPhase = 'coach-select' | 'welcome' | 'calibrating' | 'neural-greeting' | 'resume-upload' | 'vision-active';
@@ -91,6 +94,8 @@ const blobToBase64 = (blob: globalThis.Blob): Promise<string> => {
 const ResumeNodeVisionSession: React.FC<ResumeNodeVisionSessionProps> = ({
   onClose,
   onProceedToLiveSession,
+  userEmail,
+  userId,
 }) => {
   // State
   const [phase, setPhase] = useState<SessionPhase>('coach-select');
@@ -365,6 +370,20 @@ This is Phase 0 - Neural Calibration before resume analysis.`
       // Store resume data for UI
       setResumeData({ fileName: result.fileName, fileSize: result.fileSize });
       setUploadComplete(true); // Trigger success state in dialog
+      
+      // Trigger background resume analysis agent (sends email report)
+      // This runs asynchronously and doesn't block the UI
+      if (userEmail && userId) {
+        console.log('[Vision] Triggering background resume analysis for:', userEmail);
+        triggerResumeAnalysisAsync({
+          resumeBase64: result.base64Data,
+          mimeType: result.mimeType,
+          userEmail: userEmail,
+          userId: userId,
+          coachId: selectedCoach?.id,
+          fileName: result.fileName,
+        });
+      }
       
       // Send the resume directly to Gemini Live session as inline data
       if (sessionRef.current) {

@@ -149,6 +149,8 @@ const App: React.FC = () => {
           onProceedToLiveSession={(coach) => {
             setSelectedCoach(coach);
           }}
+          userEmail={user?.email}
+          userId={user?.id}
         />
       ) : !selectedCoach ? (
         <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-16 md:py-32">

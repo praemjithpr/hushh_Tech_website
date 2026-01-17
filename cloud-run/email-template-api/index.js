@@ -17,6 +17,7 @@ import express from 'express';
 import cors from 'cors';
 import { generatePRNotificationEmail } from './emails/PRNotification.js';
 import { SalesNotification } from './emails/SalesNotification.js';
+import { ResumeAnalysisReport } from './emails/ResumeAnalysisReport.js';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -30,9 +31,9 @@ app.get('/', (req, res) => {
   res.json({ 
     status: 'healthy',
     service: 'Hushh Email Template API',
-    version: '2.2.0',
+    version: '2.3.0',
     engine: 'Gmail-Safe Pure JS',
-    endpoints: ['/pr-notification', '/sales-notification']
+    endpoints: ['/pr-notification', '/sales-notification', '/resume-analysis']
   });
 });
 
@@ -91,6 +92,38 @@ app.post('/sales-notification', async (req, res) => {
     console.error('Error generating sales email template:', error);
     return res.status(500).json({
       error: 'Failed to generate sales email template',
+      message: error.message,
+    });
+  }
+});
+
+// Resume Analysis Email Template Endpoint
+app.post('/resume-analysis', async (req, res) => {
+  try {
+    const { recipientName, analysis } = req.body;
+
+    if (!analysis) {
+      return res.status(400).json({ error: 'Missing analysis in request body' });
+    }
+
+    // Generate Gmail-safe HTML email using the resume analysis template
+    const result = ResumeAnalysisReport({
+      recipientName: recipientName || 'Career Seeker',
+      analysis: analysis,
+    });
+
+    console.log(`Generated resume analysis email template for recipient: ${recipientName || 'Unknown'}`);
+
+    return res.status(200).json({
+      success: true,
+      subject: result.subject,
+      html: result.html,
+      text: result.text,
+    });
+  } catch (error) {
+    console.error('Error generating resume analysis email template:', error);
+    return res.status(500).json({
+      error: 'Failed to generate resume analysis email template',
       message: error.message,
     });
   }
