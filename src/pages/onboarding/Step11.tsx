@@ -117,16 +117,34 @@ function OnboardingStep11() {
         .eq('user_id', user.id)
         .single();
 
-      // If DOB already exists, use it (user-entered takes priority)
-      if (data?.date_of_birth) {
-        setDob(formatIsoToDisplay(data.date_of_birth) || '');
-        return; // Don't infer if already set
-      }
-
-      // If we have name, try to infer DOB in real-time using Gemini + Google Search
+      // ALWAYS call API fresh - no caching, real-time only
+      // If we have name, infer DOB in real-time using Gemini + Google Search
       if (data?.legal_first_name && data?.legal_last_name) {
         const fullName = `${data.legal_first_name} ${data.legal_last_name}`;
-        console.log('[Step11] Starting real-time DOB inference for:', fullName);
+        
+        // Build API parameters (all dynamic, no hard-coding)
+        const apiParams = {
+          name: fullName,
+          email: user.email || '',
+          address: {
+            city: data.city || '',
+            state: data.state || '',
+            country: data.address_country || data.residence_country || '',
+          },
+          residenceCountry: data.residence_country || '',
+          phone: data.phone_country_code && data.phone_number 
+            ? `${data.phone_country_code}${data.phone_number}` 
+            : '',
+        };
+        
+        // Log exactly what we're sending to the API
+        console.log('[Step11] 🚀 REAL-TIME DOB Inference - API Parameters:');
+        console.log('  📛 Name:', apiParams.name);
+        console.log('  📧 Email:', apiParams.email);
+        console.log('  🏠 City:', apiParams.address.city);
+        console.log('  🏛️ State:', apiParams.address.state);
+        console.log('  🌍 Country:', apiParams.address.country);
+        console.log('  📱 Phone:', apiParams.phone);
         
         setIsInferringDob(true);
         setInferenceMessage('🔍 Searching for your date of birth...');
@@ -141,54 +159,45 @@ function OnboardingStep11() {
               'apikey': config.SUPABASE_ANON_KEY,
               'Authorization': `Bearer ${config.SUPABASE_ANON_KEY}`,
             },
-            body: JSON.stringify({
-              name: fullName,
-              email: user.email || '',
-              address: {
-                city: data.city || '',
-                state: data.state || '',
-                country: data.address_country || data.residence_country || '',
-              },
-              residenceCountry: data.residence_country || '',
-              phone: data.phone_country_code && data.phone_number 
-                ? `${data.phone_country_code}${data.phone_number}` 
-                : '',
-            }),
+            body: JSON.stringify(apiParams),
             signal: dobAbortController.current.signal,
           });
 
           const result = await response.json();
+          console.log('[Step11] 📅 DOB API Response:', result);
 
           if (result.success && result.data?.dobDisplay) {
-            console.log('[Step11] DOB inference success:', result.data);
-            
+            // ALWAYS overwrite with fresh API result - no caching
             setDob(result.data.dobDisplay);
             setDobConfidence(result.data.confidence || 0);
             
-            // Show success message with confidence
+            // Show success message with confidence and method
             const confidenceText = result.data.confidence >= 70 ? '✅' : result.data.confidence >= 40 ? '🔶' : '🔍';
-            setInferenceMessage(`${confidenceText} Found: ${result.data.dobDisplay} (${result.data.confidence}% confidence)`);
+            const reasoning = result.data.reasoning ? ` - ${result.data.reasoning.slice(0, 50)}...` : '';
+            setInferenceMessage(`${confidenceText} Found: ${result.data.dobDisplay} (${result.data.confidence}% confidence)${reasoning}`);
             
-            // Note: Caching to DB is optional - the main value is real-time pre-fill
-            // The user can edit the DOB before continuing anyway
-            console.log('[Step11] DOB pre-filled successfully (not cached - columns pending)');
+            console.log('[Step11] ✅ DOB pre-filled:', result.data.dobDisplay, 'Confidence:', result.data.confidence);
             
-            // Clear message after 3 seconds
-            setTimeout(() => setInferenceMessage(null), 3000);
+            // Keep message visible longer for user to see reasoning
+            setTimeout(() => setInferenceMessage(null), 5000);
           } else {
-            console.log('[Step11] DOB inference returned no data');
-            setInferenceMessage(null);
+            console.log('[Step11] ❌ DOB inference returned no data:', result);
+            setInferenceMessage('Could not find DOB - please enter manually');
+            setTimeout(() => setInferenceMessage(null), 3000);
           }
         } catch (err) {
           if ((err as Error).name === 'AbortError') {
             console.log('[Step11] DOB inference aborted');
           } else {
-            console.error('[Step11] DOB inference error:', err);
+            console.error('[Step11] ❌ DOB inference error:', err);
+            setInferenceMessage('Search failed - please enter manually');
+            setTimeout(() => setInferenceMessage(null), 3000);
           }
-          setInferenceMessage(null);
         } finally {
           setIsInferringDob(false);
         }
+      } else {
+        console.log('[Step11] ⚠️ Missing name data - cannot infer DOB');
       }
     };
 
