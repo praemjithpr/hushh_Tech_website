@@ -43,7 +43,16 @@ const DeleteAccountModal = ({
     setIsDeleting(true);
 
     try {
-      // Get the current session token
+      // First, validate and refresh the session if needed
+      // getUser() validates the token and triggers an automatic refresh if expired
+      const { data: { user }, error: userError } = await config.supabaseClient.auth.getUser();
+      
+      if (userError || !user) {
+        console.error("Session validation failed:", userError);
+        throw new Error("Session expired. Please log in again.");
+      }
+
+      // Now get the refreshed session token
       const {
         data: { session },
       } = await config.supabaseClient.auth.getSession();
