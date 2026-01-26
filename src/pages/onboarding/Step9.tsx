@@ -33,16 +33,32 @@ export default function OnboardingStep9() {
         return;
       }
 
+      // Extract name from OAuth provider metadata (Google, Apple, etc.)
+      const userMeta = user.user_metadata || {};
+      
+      // Try different name field patterns from various OAuth providers
+      // Google provides: given_name, family_name, full_name, name
+      // Apple provides: name (first_name, last_name), full_name
+      const oauthFirstName = userMeta.given_name || 
+                             userMeta.first_name || 
+                             (userMeta.full_name?.split(' ')[0]) || 
+                             (userMeta.name?.split(' ')[0]) || '';
+      const oauthLastName = userMeta.family_name || 
+                            userMeta.last_name || 
+                            (userMeta.full_name?.split(' ').slice(1).join(' ')) || 
+                            (userMeta.name?.split(' ').slice(1).join(' ')) || '';
+
+      // Check if user already has saved data in onboarding_data
       const { data } = await config.supabaseClient
         .from('onboarding_data')
         .select('legal_first_name, legal_last_name')
         .eq('user_id', user.id)
         .single();
 
-      if (data) {
-        setFirstName(data.legal_first_name || '');
-        setLastName(data.legal_last_name || '');
-      }
+      // Priority: Database data > OAuth provider data
+      // This allows users to keep their edits if they go back and forth
+      setFirstName(data?.legal_first_name || oauthFirstName);
+      setLastName(data?.legal_last_name || oauthLastName);
     };
 
     loadData();
