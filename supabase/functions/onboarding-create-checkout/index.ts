@@ -1,8 +1,7 @@
 // Create Stripe Checkout Session for CEO Meeting Access
 // $1 payment for booking meeting with CEO Manish Sainani + 100 Hushh Coins
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import Stripe from "https://esm.sh/stripe@14.5.0?target=deno";
 
 const corsHeaders = {
@@ -11,10 +10,13 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-serve(async (req) => {
-  // Handle CORS preflight
+Deno.serve(async (req) => {
+  // Handle CORS preflight - MUST return 200 with headers
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
@@ -27,27 +29,48 @@ serve(async (req) => {
       );
     }
 
+    // Check for required environment variables
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!stripeSecretKey) {
+      console.error('STRIPE_SECRET_KEY not configured');
+      return new Response(
+        JSON.stringify({ error: 'Payment system not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase environment variables not configured');
+      return new Response(
+        JSON.stringify({ error: 'Database not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2023-10-16',
     });
 
     // Get Supabase client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get user from token
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
+      console.error('Auth error:', authError?.message);
       return new Response(
         JSON.stringify({ error: 'Invalid or expired token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('[OnboardingCheckout] User authenticated:', user.id);
 
     // Check if user already has a completed payment
     const { data: existingPayment } = await supabase
@@ -72,7 +95,7 @@ serve(async (req) => {
     const successUrl = `${origin}/onboarding/meet-ceo?payment=success&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${origin}/onboarding/meet-ceo?payment=cancel`;
 
-    // Create Stripe Checkout Session - email is optional (handle edge case where user has no email)
+    // Create Stripe Checkout Session - email is optional
     const checkoutConfig: any = {
       payment_method_types: ['card'],
       line_items: [
@@ -98,12 +121,14 @@ serve(async (req) => {
       },
     };
 
-    // Only prepopulate email if user has one (handle edge case where user has no email)
+    // Only prepopulate email if user has one
     if (user.email) {
       checkoutConfig.customer_email = user.email;
     }
 
+    console.log('[OnboardingCheckout] Creating Stripe session...');
     const session = await stripe.checkout.sessions.create(checkoutConfig);
+    console.log('[OnboardingCheckout] Stripe session created:', session.id);
 
     // Upsert payment record with pending status
     const { error: upsertError } = await supabase
