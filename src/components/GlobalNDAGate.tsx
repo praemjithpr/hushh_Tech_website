@@ -1,11 +1,15 @@
 /**
  * GlobalNDAGate Component
  * 
- * Wrapper component that enforces NDA signing for authenticated users.
- * - Checks if user is authenticated
- * - If authenticated, verifies NDA status
- * - Redirects to /sign-nda if NDA not signed
- * - Renders children if NDA is signed or user is not authenticated
+ * GLOBAL NDA ENFORCEMENT - Acts as a universal key for the entire website.
+ * 
+ * How it works:
+ * - If user is NOT authenticated → Allow access (they'll see public marketing pages)
+ * - If user IS authenticated → Check NDA status
+ *   - If NDA signed → Allow access to all routes
+ *   - If NDA NOT signed → Redirect to /sign-nda (only allow minimal auth routes)
+ * 
+ * This ensures NO authenticated user can access ANY content without signing the NDA first.
  */
 
 import React, { useEffect, useState, ReactNode } from 'react';
@@ -19,12 +23,19 @@ interface GlobalNDAGateProps {
   session: Session | null;
 }
 
-// Routes that don't require NDA check (public routes)
-const PUBLIC_ROUTES = [
-  '/',
+// MINIMAL routes that bypass NDA check for authenticated users
+// These are ONLY the routes needed for authentication and NDA signing itself
+const AUTH_ROUTES = [
   '/Login',
   '/Signup',
   '/auth/callback',
+  '/sign-nda',
+];
+
+// Public routes accessible WITHOUT authentication
+// These are marketing/info pages visible to non-logged-in users
+const UNAUTHENTICATED_PUBLIC_ROUTES = [
+  '/',
   '/privacy-policy',
   '/faq',
   '/carrer-privacy-policy',
@@ -32,24 +43,28 @@ const PUBLIC_ROUTES = [
   '/eu-uk-jobs-privacy-policy',
   '/delete-account',
   '/investor-guide',
-  '/hushhid',
-  '/investor',
-  '/sign-nda',
-  '/hushh-ai',
-  '/hushh-agent',
-  '/kai',
-  '/kai-india',
-  '/studio',
+  '/about',
+  '/services',
+  '/career',
+  '/community',
+  '/Contact',
+  '/benefits',
 ];
 
-// Check if a path matches any public route pattern
-const isPublicRoute = (pathname: string): boolean => {
-  return PUBLIC_ROUTES.some(route => {
-    // Exact match for home route
-    if (route === '/') {
-      return pathname === '/';
-    }
-    // For other routes, check exact match or sub-routes
+// Check if path is an auth-related route
+const isAuthRoute = (pathname: string): boolean => {
+  return AUTH_ROUTES.some(route => 
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
+};
+
+// Check if path is a public route (for unauthenticated users)
+const isUnauthenticatedPublicRoute = (pathname: string): boolean => {
+  // Home page exact match
+  if (pathname === '/') return true;
+  
+  return UNAUTHENTICATED_PUBLIC_ROUTES.some(route => {
+    if (route === '/') return false; // Already handled above
     return pathname === route || pathname.startsWith(`${route}/`);
   });
 };
@@ -62,34 +77,39 @@ const GlobalNDAGate: React.FC<GlobalNDAGateProps> = ({ children, session }) => {
 
   useEffect(() => {
     const checkNDA = async () => {
-      // Skip check for public routes
-      if (isPublicRoute(location.pathname)) {
-        setIsChecking(false);
-        setHasSignedNDA(true); // Allow access to public routes
-        return;
-      }
-
-      // If no session, allow access (they'll hit login page if needed)
-      if (!session?.user?.id) {
+      const pathname = location.pathname;
+      
+      // Always allow auth-related routes (login, signup, sign-nda, callback)
+      if (isAuthRoute(pathname)) {
         setIsChecking(false);
         setHasSignedNDA(true);
         return;
       }
 
+      // If no session (not logged in), allow access to public pages
+      if (!session?.user?.id) {
+        // Allow public marketing pages for non-authenticated users
+        setIsChecking(false);
+        setHasSignedNDA(true);
+        return;
+      }
+
+      // USER IS AUTHENTICATED - Check NDA status
       try {
         const status = await checkNDAStatus(session.user.id);
         setHasSignedNDA(status.hasSignedNda);
         
-        // Redirect to NDA page if not signed
+        // If NDA not signed, redirect to NDA page
         if (!status.hasSignedNda) {
-          // Store the intended destination
-          sessionStorage.setItem('nda_redirect_after', location.pathname);
+          // Store the intended destination for redirect after signing
+          sessionStorage.setItem('nda_redirect_after', pathname);
           navigate('/sign-nda', { replace: true });
         }
       } catch (error) {
         console.error('Error checking NDA status:', error);
-        // On error, allow access but log the issue
-        setHasSignedNDA(true);
+        // On error, redirect to NDA page to be safe
+        sessionStorage.setItem('nda_redirect_after', pathname);
+        navigate('/sign-nda', { replace: true });
       } finally {
         setIsChecking(false);
       }
@@ -98,14 +118,15 @@ const GlobalNDAGate: React.FC<GlobalNDAGateProps> = ({ children, session }) => {
     checkNDA();
   }, [session, location.pathname, navigate]);
 
-  // Re-check when session changes
+  // Re-check when session changes (user logs in/out)
   useEffect(() => {
     if (session?.user?.id) {
       setIsChecking(true);
+      setHasSignedNDA(null);
     }
   }, [session?.user?.id]);
 
-  // Show loading state while checking
+  // Show loading state while checking - Apple-style black/white design
   if (isChecking) {
     return (
       <Box
@@ -113,17 +134,17 @@ const GlobalNDAGate: React.FC<GlobalNDAGateProps> = ({ children, session }) => {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        bg="linear-gradient(180deg, #0a0a0f 0%, #1a1a2e 100%)"
+        bg="white"
       >
         <VStack spacing={4}>
           <Spinner
-            thickness="4px"
+            thickness="3px"
             speed="0.65s"
-            emptyColor="gray.700"
-            color="cyan.400"
+            emptyColor="gray.200"
+            color="black"
             size="xl"
           />
-          <Text color="gray.400" fontSize="sm">
+          <Text color="gray.600" fontSize="sm">
             Verifying access...
           </Text>
         </VStack>
@@ -131,7 +152,7 @@ const GlobalNDAGate: React.FC<GlobalNDAGateProps> = ({ children, session }) => {
     );
   }
 
-  // Render children if NDA is signed or access is allowed
+  // Render children if access is allowed
   return <>{children}</>;
 };
 
