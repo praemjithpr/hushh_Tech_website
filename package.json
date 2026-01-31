@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "dev:vercel": "vercel dev --listen 3000",
-    "build": "vite build && node scripts/generate-sitemap.js && node scripts/generate-robots.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "build": "vitest run && vite build && node scripts/generate-sitemap.js && node scripts/generate-robots.js",
     "preview": "vite preview",
     "ios:sync": "npx cap sync ios",
     "ios:open": "npx cap open ios",

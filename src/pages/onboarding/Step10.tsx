@@ -75,6 +75,10 @@ function OnboardingStep10() {
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
+  
+  // Track if initial data loading is complete (for disabling continue button)
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [locationReady, setLocationReady] = useState(false);
 
   // Scroll to top on component mount
   useEffect(() => {
