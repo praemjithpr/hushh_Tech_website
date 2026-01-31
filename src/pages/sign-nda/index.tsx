@@ -27,7 +27,7 @@ import {
 import { motion } from 'framer-motion';
 import { FaFileSignature, FaShieldAlt, FaCheckCircle, FaLock } from 'react-icons/fa';
 import config from '../../resources/config/config';
-import { signNDA, sendNDANotification } from '../../services/nda/ndaService';
+import { signNDA, sendNDANotification, generateNDAPdf, uploadSignedNDA } from '../../services/nda/ndaService';
 
 const MotionBox = motion(Box);
 
@@ -113,8 +113,55 @@ const SignNDAPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Sign the NDA
-      const result = await signNDA(signerName.trim(), 'v1.0', pdfUrl || undefined);
+      // Get access token for PDF generation
+      let accessToken = '';
+      let generatedPdfUrl: string | undefined;
+      let pdfBlob: Blob | undefined;
+      
+      try {
+        if (config.supabaseClient) {
+          const { data: { session } } = await config.supabaseClient.auth.getSession();
+          accessToken = session?.access_token || '';
+        }
+        
+        // Generate personalized NDA PDF using Cloud Run service
+        if (accessToken) {
+          console.log('Generating NDA PDF...');
+          const pdfResult = await generateNDAPdf(
+            {
+              signerName: signerName.trim(),
+              signerEmail: userEmail || 'unknown@email.com',
+              signedAt: new Date().toISOString(),
+              ndaVersion: 'v1.0',
+              userId: userId,
+            },
+            accessToken
+          );
+          
+          if (pdfResult.success && pdfResult.blob) {
+            pdfBlob = pdfResult.blob;
+            console.log('PDF generated successfully, uploading to storage...');
+            
+            // Upload to Supabase Storage
+            const uploadResult = await uploadSignedNDA(userId, pdfResult.blob);
+            if (uploadResult.success && uploadResult.url) {
+              generatedPdfUrl = uploadResult.url;
+              setPdfUrl(generatedPdfUrl);
+              console.log('PDF uploaded successfully:', generatedPdfUrl);
+            } else {
+              console.warn('Failed to upload PDF:', uploadResult.error);
+            }
+          } else {
+            console.warn('Failed to generate PDF:', pdfResult.error);
+          }
+        }
+      } catch (pdfError) {
+        console.warn('PDF generation/upload failed, continuing without PDF:', pdfError);
+        // Continue signing even if PDF generation fails
+      }
+      
+      // Sign the NDA (store in database with PDF URL if available)
+      const result = await signNDA(signerName.trim(), 'v1.0', generatedPdfUrl);
       
       if (result.success) {
         // Send notification email to manish@hushh.ai and ankit@hushh.ai
@@ -124,8 +171,8 @@ const SignNDAPage: React.FC = () => {
             userEmail || 'unknown@email.com',
             result.signedAt || new Date().toISOString(),
             result.ndaVersion || 'v1.0',
-            pdfUrl || undefined,
-            undefined,
+            generatedPdfUrl,
+            pdfBlob,
             userId
           );
         } catch (notificationError) {

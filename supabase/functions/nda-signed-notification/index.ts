@@ -442,7 +442,7 @@ serve(async (req) => {
                           <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
                             <tr>
                               <td style="padding: 8px;">
-                                <a href="https://hushh.ai/nda-admin" 
+                                <a href="https://hushhtech.com/nda-admin" 
                                    style="display: inline-block; background-color: #000000; color: #ffffff; 
                                           padding: 14px 28px; text-decoration: none; font-weight: 600; 
                                           font-size: 13px; min-width: 180px; text-align: center;">
@@ -453,7 +453,7 @@ serve(async (req) => {
                             ${userId ? `
                             <tr>
                               <td style="padding: 8px;">
-                                <a href="https://hushh.ai/nda-admin?highlight=${userId}" 
+                                <a href="https://hushhtech.com/nda-admin?highlight=${userId}" 
                                    style="display: inline-block; background-color: #ffffff; color: #000000; 
                                           padding: 12px 28px; text-decoration: none; font-weight: 600; 
                                           font-size: 13px; border: 2px solid #000000; min-width: 180px; text-align: center;">

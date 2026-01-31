@@ -18,6 +18,7 @@ interface NDARecord {
   nda_version: string;
   nda_signer_ip: string;
   nda_signer_name: string;
+  nda_pdf_url: string | null;
 }
 
 const ADMIN_PASSWORD = '123456';
@@ -73,11 +74,11 @@ const NDAAdminPage: React.FC = () => {
         throw new Error('Supabase client not initialized');
       }
 
-      // Fetch all records where NDA has been signed
+      // Fetch all records where NDA has been signed from onboarding_data table
       const { data, error: fetchError } = await config.supabaseClient
-        .from('investor_profiles')
-        .select('user_id, full_name, email, nda_signed_at, nda_version, nda_signer_ip, nda_signer_name')
-        .eq('has_signed_nda', true)
+        .from('onboarding_data')
+        .select('user_id, full_name, email, nda_signed_at, nda_version, nda_signer_ip, nda_signer_name, nda_pdf_url')
+        .not('nda_signed_at', 'is', null)
         .order('nda_signed_at', { ascending: false });
 
       if (fetchError) {
@@ -174,13 +175,14 @@ const NDAAdminPage: React.FC = () => {
               <th style={styles.th}>Signed At</th>
               <th style={styles.th}>Version</th>
               <th style={styles.th}>IP Address</th>
+              <th style={styles.th}>PDF</th>
               <th style={styles.th}>User ID</th>
             </tr>
           </thead>
           <tbody>
             {ndaRecords.length === 0 ? (
               <tr>
-                <td colSpan={6} style={styles.noData}>No NDA records found</td>
+                <td colSpan={7} style={styles.noData}>No NDA records found</td>
               </tr>
             ) : (
               ndaRecords.map((record) => (
@@ -196,6 +198,20 @@ const NDAAdminPage: React.FC = () => {
                   <td style={styles.td}>{formatDate(record.nda_signed_at)}</td>
                   <td style={styles.td}>{record.nda_version || 'v1.0'}</td>
                   <td style={styles.td}>{record.nda_signer_ip || 'N/A'}</td>
+                  <td style={styles.td}>
+                    {record.nda_pdf_url ? (
+                      <a 
+                        href={record.nda_pdf_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={styles.pdfLink}
+                      >
+                        📄 View PDF
+                      </a>
+                    ) : (
+                      <span style={styles.noPdf}>No PDF</span>
+                    )}
+                  </td>
                   <td style={styles.tdMono}>{record.user_id}</td>
                 </tr>
               ))
@@ -338,6 +354,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: '1px solid black',
     borderRadius: '4px',
     cursor: 'pointer',
+  },
+  pdfLink: {
+    color: 'black',
+    textDecoration: 'underline',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    fontSize: '13px',
+  },
+  noPdf: {
+    color: '#999',
+    fontSize: '12px',
+    fontStyle: 'italic',
   },
 };
 
