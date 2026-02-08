@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import { useToast, useClipboard, Spinner } from "@chakra-ui/react";
 import { 
   ArrowLeft, Share2, Link, Copy, Check, ExternalLink, 
-  Home, MessageCircle, Code, User, TrendingUp, 
+  Home, MessageCircle, User, TrendingUp, 
   Target, Clock, Gauge, Droplets, Briefcase, Layers, Zap, Activity,
   Brain, ChevronDown, ChevronUp, Search, Globe, Coffee, Heart, Users, Newspaper
 } from "lucide-react";
@@ -13,14 +13,13 @@ import { FaXTwitter } from "react-icons/fa6";
 import { SiGooglepay } from "react-icons/si";
 import { HiMail } from "react-icons/hi";
 import { InvestorChatWidget } from "../../components/InvestorChatWidget";
-import DeveloperSettings from "../../components/DeveloperSettings";
 import { fetchPublicInvestorProfileBySlug } from "../../services/investorProfile";
 import { maskProfileData, maskOnboardingField } from "../../utils/maskSensitiveData";
 import { InvestorProfile, FIELD_LABELS, VALUE_LABELS, ONBOARDING_FIELD_LABELS } from "../../types/investorProfile";
 import { OnboardingData } from "../../types/onboarding";
 import { ShadowProfile } from "../../services/shadowInvestigator";
 
-type TabType = 'home' | 'chat' | 'developer';
+type TabType = 'home' | 'chat';
 
 const PublicInvestorProfilePage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -647,12 +646,6 @@ const PublicInvestorProfilePage: React.FC = () => {
               </div>
             )}
 
-            {/* DEVELOPER TAB CONTENT */}
-            {activeTab === 'developer' && (
-              <div className="flex-1">
-                <DeveloperSettings investorSlug={slug!} />
-              </div>
-            )}
           </div>
 
           {/* Bottom Navigation Bar - Black */}
@@ -679,17 +672,6 @@ const PublicInvestorProfilePage: React.FC = () => {
               >
                 <MessageCircle className="w-5 h-5" />
                 <span className="text-xs font-medium">Chat</span>
-              </button>
-              <button
-                onClick={() => handleTabChange('developer')}
-                className={`flex flex-col items-center gap-1 py-2 px-4 rounded-lg transition-colors ${
-                  activeTab === 'developer' 
-                    ? 'text-[#2B8CEE]' 
-                    : 'text-gray-400 hover:text-gray-300'
-                }`}
-              >
-                <Code className="w-5 h-5" />
-                <span className="text-xs font-medium">Developer</span>
               </button>
             </div>
           </nav>
