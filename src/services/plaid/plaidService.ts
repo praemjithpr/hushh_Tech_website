@@ -68,10 +68,24 @@ const getAnonKey = (): string => {
   }
 };
 
+/** Get the user's auth session token (required by Edge Functions that verify JWT) */
+const getUserAccessToken = async (): Promise<string> => {
+  try {
+    const config = (await import('../../resources/config/config')).default;
+    const supabase = config.supabaseClient;
+    if (!supabase) return getAnonKey();
+
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || getAnonKey();
+  } catch {
+    return getAnonKey();
+  }
+};
+
 /** Standard headers for all Supabase Edge Function calls */
-const getHeaders = (): Record<string, string> => ({
+const getHeaders = (accessToken?: string): Record<string, string> => ({
   'Content-Type': 'application/json',
-  'Authorization': `Bearer ${getAnonKey()}`,
+  'Authorization': `Bearer ${accessToken || getAnonKey()}`,
 });
 
 // =====================================================
@@ -86,9 +100,10 @@ export const createLinkToken = async (
   userId: string,
   userEmail?: string,
 ): Promise<PlaidLinkTokenResponse> => {
+  const token = await getUserAccessToken();
   const response = await fetch(`${SUPABASE_URL}/create-link-token`, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: getHeaders(token),
     body: JSON.stringify({ userId, userEmail }),
   });
 
@@ -110,9 +125,10 @@ export const exchangeToken = async (
   institutionName?: string,
   institutionId?: string,
 ): Promise<PlaidExchangeResponse> => {
+  const token = await getUserAccessToken();
   const response = await fetch(`${SUPABASE_URL}/exchange-public-token`, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: getHeaders(token),
     body: JSON.stringify({
       publicToken,
       userId,
@@ -138,9 +154,10 @@ export const fetchBalance = async (
   userId: string,
 ): Promise<ProductResult> => {
   try {
+    const userToken = await getUserAccessToken();
     const response = await fetch(`${SUPABASE_URL}/get-balance`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: getHeaders(userToken),
       body: JSON.stringify({ accessToken, userId }),
     });
 
@@ -169,9 +186,10 @@ export const fetchAssets = async (
   userId: string,
 ): Promise<ProductResult> => {
   try {
+    const userToken = await getUserAccessToken();
     const response = await fetch(`${SUPABASE_URL}/asset-report-create`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: getHeaders(userToken),
       body: JSON.stringify({ accessToken, userId }),
     });
 
@@ -205,9 +223,10 @@ export const fetchInvestments = async (
   userId: string,
 ): Promise<ProductResult> => {
   try {
+    const userToken = await getUserAccessToken();
     const response = await fetch(`${SUPABASE_URL}/investments-holdings`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: getHeaders(userToken),
       body: JSON.stringify({ accessToken, userId }),
     });
 
@@ -277,9 +296,10 @@ export const checkAssetReport = async (
   assetReportToken: string,
   userId: string,
 ): Promise<AssetReportPollResponse> => {
+  const userToken = await getUserAccessToken();
   const response = await fetch(`${SUPABASE_URL}/asset-report-create`, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: getHeaders(userToken),
     body: JSON.stringify({ assetReportToken, userId, action: 'get' }),
   });
 
