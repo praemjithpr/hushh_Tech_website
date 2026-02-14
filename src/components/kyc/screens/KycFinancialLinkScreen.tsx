@@ -338,6 +338,7 @@ const KycFinancialLinkScreen: React.FC<KycFinancialLinkScreenProps> = ({
   }, [plaid.step, plaid.institution]);
 
   const isProcessing = ['creating_token', 'exchanging', 'fetching'].includes(plaid.step);
+  const isInitializing = plaid.step === 'idle' || plaid.step === 'creating_token';
 
   // Info message after results
   const infoMessage = useMemo(() => {
@@ -351,6 +352,7 @@ const KycFinancialLinkScreen: React.FC<KycFinancialLinkScreenProps> = ({
 
   // Button text
   const buttonText = useMemo(() => {
+    if (plaid.step === 'idle') return 'Preparing...';
     if (plaid.step === 'creating_token') return 'Preparing...';
     if (plaid.step === 'linking') return 'Connecting...';
     if (plaid.step === 'exchanging') return 'Securing connection...';
@@ -572,8 +574,8 @@ const KycFinancialLinkScreen: React.FC<KycFinancialLinkScreenProps> = ({
           h="52px"
           fontSize="16px"
           fontWeight="600"
-          isDisabled={isProcessing || plaid.step === 'creating_token'}
-          isLoading={isProcessing}
+          isDisabled={isInitializing || isProcessing}
+          isLoading={isInitializing || isProcessing}
           loadingText={buttonText}
           _hover={{
             bg: buttonHoverBg,
