@@ -135,12 +135,11 @@ export const usePlaidLinkHook = (userId: string, userEmail?: string): UsePlaidLi
     setState((prev) => ({ ...prev, step: 'creating_token', error: null }));
 
     try {
-      // NOTE: We do NOT pass redirect_uri here. This means OAuth banks
-      // will use Plaid's popup-based OAuth flow (no page redirect).
-      // To enable redirect-based OAuth, register a redirect URI in
-      // Plaid Dashboard → API → Allowed redirect URIs, then pass it here.
-      console.log('[Plaid] Creating link token (no redirect_uri — popup OAuth mode)');
-      const response = await createLinkToken(userId, userEmail);
+      // Pass redirect_uri for OAuth banks (Chase, Wells Fargo, etc.)
+      // Registered in Plaid Dashboard → Developers → API → Allowed redirect URIs
+      const redirectUri = 'https://www.hushhtech.com/onboarding/financial-link';
+      console.log('[Plaid] Creating link token with redirectUri:', redirectUri);
+      const response = await createLinkToken(userId, userEmail, redirectUri);
 
       // Store link token for OAuth redirect recovery (just in case)
       sessionStorage.setItem('plaid_link_token', response.link_token);
