@@ -121,17 +121,17 @@ export const usePlaidLinkHook = (userId: string, userEmail?: string): UsePlaidLi
       receivedRedirectUri.current = window.location.href;
       localStorage.removeItem('plaid_oauth_pending');
     } else if (hasOAuthPending) {
-      // Check if the flag is fresh (set within last 10 seconds) or stale
+      // Check if OAuth is still in progress (within 2 min) or stale
       const flagAge = Date.now() - Number(oauthPendingTimestamp);
-      const isFreshFlag = flagAge < 10_000; // Less than 10 seconds old
+      const isOAuthInProgress = flagAge < 120_000; // 2 minutes — enough for OAuth flow
 
-      if (isFreshFlag) {
-        // OAuth is CURRENTLY opening — do NOT clear the flag or link token!
-        // The browser will navigate away shortly to the bank's OAuth page.
-        console.log('[Plaid] 🔑 OAuth is currently opening (flag age:', Math.round(flagAge / 1000), 's). Keeping flag for redirect.');
+      if (isOAuthInProgress) {
+        // OAuth is in progress — do NOT clear the flag or link token!
+        // The user may be on the bank's OAuth page or completing the flow.
+        console.log('[Plaid] 🔑 OAuth in progress (flag age:', Math.round(flagAge / 1000), 's). Preserving state for redirect.');
       } else {
-        // Stale flag (>10s old) — user came back without completing OAuth
-        console.log('[Plaid] ⚠️ Stale OAuth pending flag found (', Math.round(flagAge / 1000), 's old, no oauth_state_id). Clearing and starting fresh.');
+        // Stale flag (>2 min old) — user abandoned OAuth
+        console.log('[Plaid] ⚠️ Stale OAuth flag (', Math.round(flagAge / 1000), 's old). Clearing and starting fresh.');
         localStorage.removeItem('plaid_oauth_pending');
         localStorage.removeItem('plaid_link_token');
       }
@@ -145,10 +145,10 @@ export const usePlaidLinkHook = (userId: string, userEmail?: string): UsePlaidLi
   const initializeLinkToken = useCallback(async () => {
     if (!userId) return;
 
-    // If OAuth is currently opening (fresh flag), don't create a new token
+    // If OAuth is in progress, don't create a new token — preserve the existing one
     const pendingTimestamp = localStorage.getItem('plaid_oauth_pending');
-    if (pendingTimestamp && (Date.now() - Number(pendingTimestamp)) < 10_000) {
-      console.log('[Plaid] ⏳ OAuth is currently opening. Skipping link token creation.');
+    if (pendingTimestamp && (Date.now() - Number(pendingTimestamp)) < 120_000) {
+      console.log('[Plaid] ⏳ OAuth in progress. Skipping link token creation.');
       return;
     }
 
@@ -311,6 +311,18 @@ export const usePlaidLinkHook = (userId: string, userEmail?: string): UsePlaidLi
       institution: metadata?.institution,
       linkSessionId: metadata?.link_session_id,
     });
+
+    // OAuth Guard: If OAuth is in progress, the Plaid SDK fires onExit
+    // because its iframe crashes during the OAuth redirect. This is NOT
+    // a user-initiated exit — ignore it to prevent state corruption.
+    const oauthTimestamp = localStorage.getItem('plaid_oauth_pending');
+    if (oauthTimestamp) {
+      const flagAge = Date.now() - Number(oauthTimestamp);
+      if (flagAge < 120_000) { // Within 2 minutes
+        console.log('[Plaid] 🔑 OAuth is in progress — ignoring onExit (SDK crash during redirect)');
+        return; // Do NOT reset state
+      }
+    }
 
     if (err) {
       setState((prev) => ({

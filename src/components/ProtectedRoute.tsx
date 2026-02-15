@@ -16,7 +16,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   const checkAuthAndOnboarding = async () => {
     let timeout: ReturnType<typeof setTimeout> | null = null;
-    let subscription: { unsubscribe: () => void } | null = null;
+    let subscription: any = null;
     try {
       if (!config.supabaseClient) {
         console.error("Supabase client is not initialized");
@@ -82,6 +82,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   };
 
   useEffect(() => {
+    // OAuth Guard: When Plaid OAuth is in progress, the SDK manipulates browser
+    // history which triggers location changes. Skip auth re-check to prevent
+    // interfering with the OAuth flow (which crashes the Plaid SDK iframe).
+    const oauthTimestamp = localStorage.getItem('plaid_oauth_pending');
+    if (oauthTimestamp && isAuthorized) {
+      const flagAge = Date.now() - Number(oauthTimestamp);
+      if (flagAge < 120_000) { // Within 2 minutes — OAuth is in progress
+        console.log('[ProtectedRoute] OAuth in progress — skipping auth re-check');
+        return;
+      }
+    }
+
     checkAuthAndOnboarding();
   }, [navigate, location.pathname]);
 
