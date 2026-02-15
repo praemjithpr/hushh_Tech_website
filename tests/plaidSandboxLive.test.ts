@@ -24,16 +24,19 @@ const PLAID_SECRET = process.env.PLAID_SECRET || '';
 const BASE_URL = 'https://sandbox.plaid.com';
 const INSTITUTION_ID = 'ins_109508'; // First Platypus Bank
 
+// Skip entire suite if no credentials (e.g., in CI)
+const HAS_CREDENTIALS = PLAID_CLIENT_ID.length > 0 && PLAID_SECRET.length > 0;
+
 // Shared state across tests
 let publicToken: string;
 let accessToken: string;
 let itemId: string;
 
 // =====================================================
-// Tests
+// Tests — skipped automatically in CI (no credentials)
 // =====================================================
 
-describe('Plaid Sandbox — LIVE API Tests', () => {
+describe.skipIf(!HAS_CREDENTIALS)('Plaid Sandbox — LIVE API Tests', () => {
   // Increase timeout for real API calls
   const TIMEOUT = 30_000;
 
