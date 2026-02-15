@@ -1,12 +1,8 @@
 /**
- * usePlaidLink — Custom React hook for Plaid Link integration
+ * usePlaidLink — Clean Plaid Link hook
  * 
- * Manages the full flow:
- * 1. Create link token
- * 2. Open Plaid Link
- * 3. Exchange token on success
- * 4. Fetch financial data (Balance, Assets, Investments)
- * 5. Track status of each product independently
+ * Simple flow: Create token → Open Link → Exchange → Fetch data
+ * No OAuth complexity. Works with non-OAuth banks (First Platypus, etc.)
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { usePlaidLink as usePlaidLinkSDK, PlaidLinkOnSuccess, PlaidLinkOnExit, PlaidLinkOnEvent } from 'react-plaid-link';
@@ -26,47 +22,22 @@ import {
 // =====================================================
 
 export interface PlaidLinkState {
-  /** Current step in the flow */
   step: 'idle' | 'creating_token' | 'ready' | 'linking' | 'exchanging' | 'fetching' | 'done' | 'error';
-
-  /** Link token for Plaid Link SDK */
   linkToken: string | null;
-
-  /** Error message if something went wrong */
   error: string | null;
-
-  /** Institution info from Plaid Link */
-  institution: {
-    name: string;
-    id: string;
-  } | null;
-
-  /** Status of each product fetch */
+  institution: { name: string; id: string } | null;
   balanceStatus: ProductFetchStatus;
   assetsStatus: ProductFetchStatus;
   investmentsStatus: ProductFetchStatus;
-
-  /** Full financial data response */
   financialData: FinancialDataResponse | null;
-
-  /** Whether user can proceed to KYC */
   canProceed: boolean;
-
-  /** Number of products successfully fetched */
   productsAvailable: number;
 }
 
 export interface UsePlaidLinkReturn extends PlaidLinkState {
-  /** Initialize and open Plaid Link */
   openPlaidLink: () => void;
-
-  /** Retry the entire flow */
   retry: () => void;
-
-  /** Whether Plaid Link is ready to open */
   isReady: boolean;
-
-  /** Open the Plaid Link modal */
   open: () => void;
 }
 
@@ -88,390 +59,160 @@ export const usePlaidLinkHook = (userId: string, userEmail?: string): UsePlaidLi
     productsAvailable: 0,
   });
 
-  // Store access token in ref (not in state — it's sensitive)
   const accessTokenRef = useRef<string | null>(null);
-  const assetPollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const hasInitializedRef = useRef(false);
+  const assetPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initializedRef = useRef(false);
 
-  // =====================================================
-  // OAuth Redirect Detection
-  // When banks like Chase use OAuth, the browser redirects away and back.
-  // We use localStorage (NOT sessionStorage) because OAuth banks may
-  // open in a NEW TAB — sessionStorage is per-tab and wouldn't persist.
-  // We ONLY treat it as an OAuth redirect if oauth_state_id is in the URL.
-  // =====================================================
-
-  const isOAuthRedirect = useRef(false);
-  const receivedRedirectUri = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    console.log('[Plaid] 🔍 Mount URL:', window.location.href);
-
-    const params = new URLSearchParams(window.location.search);
-    const hasOAuthStateId = !!params.get('oauth_state_id');
-    const oauthPendingTimestamp = localStorage.getItem('plaid_oauth_pending');
-    const hasOAuthPending = !!oauthPendingTimestamp;
-
-    if (hasOAuthStateId) {
-      // Valid OAuth redirect — oauth_state_id present in URL
-      console.log('[Plaid] 🔄 OAuth redirect detected!', {
-        oauth_state_id: params.get('oauth_state_id'),
-      });
-      isOAuthRedirect.current = true;
-      receivedRedirectUri.current = window.location.href;
-      localStorage.removeItem('plaid_oauth_pending');
-    } else if (hasOAuthPending) {
-      // Check if OAuth is still in progress (within 2 min) or stale
-      const flagAge = Date.now() - Number(oauthPendingTimestamp);
-      const isOAuthInProgress = flagAge < 120_000; // 2 minutes — enough for OAuth flow
-
-      if (isOAuthInProgress) {
-        // OAuth is in progress — do NOT clear the flag or link token!
-        // The user may be on the bank's OAuth page or completing the flow.
-        console.log('[Plaid] 🔑 OAuth in progress (flag age:', Math.round(flagAge / 1000), 's). Preserving state for redirect.');
-      } else {
-        // Stale flag (>2 min old) — user abandoned OAuth
-        console.log('[Plaid] ⚠️ Stale OAuth flag (', Math.round(flagAge / 1000), 's old). Clearing and starting fresh.');
-        localStorage.removeItem('plaid_oauth_pending');
-        localStorage.removeItem('plaid_link_token');
-      }
-    }
-  }, []);
-
-  // =====================================================
-  // Step 1: Create Link Token
-  // =====================================================
-
-  const initializeLinkToken = useCallback(async () => {
+  // Step 1: Create link token
+  const initToken = useCallback(async () => {
     if (!userId) return;
-
-    // If OAuth is in progress, don't create a new token — preserve the existing one
-    const pendingTimestamp = localStorage.getItem('plaid_oauth_pending');
-    if (pendingTimestamp && (Date.now() - Number(pendingTimestamp)) < 120_000) {
-      console.log('[Plaid] ⏳ OAuth in progress. Skipping link token creation.');
-      return;
-    }
-
-    // If returning from OAuth redirect, restore the stored link token
-    if (isOAuthRedirect.current) {
-      const storedToken = localStorage.getItem('plaid_link_token');
-      if (storedToken) {
-        console.log('[Plaid] 🔄 Restoring link token from localStorage for OAuth completion');
-        setState((prev) => ({
-          ...prev,
-          step: 'ready',
-          linkToken: storedToken,
-        }));
-        return;
-      }
-    }
-
-    setState((prev) => ({ ...prev, step: 'creating_token', error: null }));
+    setState(s => ({ ...s, step: 'creating_token', error: null }));
 
     try {
-      // Pass redirect_uri for OAuth banks (Chase, Wells Fargo, etc.)
-      // Registered in Plaid Dashboard → Developers → API → Allowed redirect URIs
-      const redirectUri = 'https://www.hushhtech.com/onboarding/financial-link';
-      console.log('[Plaid] Creating link token with redirectUri:', redirectUri);
-      const response = await createLinkToken(userId, userEmail, redirectUri);
-
-      // Store link token in localStorage for cross-tab OAuth redirect recovery
-      localStorage.setItem('plaid_link_token', response.link_token);
-
-      setState((prev) => ({
-        ...prev,
-        step: 'ready',
-        linkToken: response.link_token,
-      }));
+      console.log('[Plaid] Creating link token...');
+      const { link_token } = await createLinkToken(userId, userEmail);
+      setState(s => ({ ...s, step: 'ready', linkToken: link_token }));
     } catch (err: any) {
-      setState((prev) => ({
-        ...prev,
-        step: 'error',
-        error: err.message || 'Failed to initialize bank connection',
-      }));
+      setState(s => ({ ...s, step: 'error', error: err.message || 'Failed to initialize' }));
     }
   }, [userId, userEmail]);
 
-  // Auto-initialize on mount — only once per hook instance
+  // Auto-init once
   useEffect(() => {
-    if (userId && !hasInitializedRef.current) {
-      hasInitializedRef.current = true;
-      initializeLinkToken();
+    if (userId && !initializedRef.current) {
+      initializedRef.current = true;
+      initToken();
     }
-  }, [userId, initializeLinkToken]);
+  }, [userId, initToken]);
 
-  // =====================================================
-  // Step 2 & 3: Plaid Link Success Handler
-  // =====================================================
+  // Step 2: Handle Plaid Link success
+  const handleSuccess: PlaidLinkOnSuccess = useCallback(async (publicToken, metadata) => {
+    console.log('[Plaid] ✅ onSuccess', { token: publicToken?.slice(0, 20), institution: metadata?.institution?.name });
 
-  const handlePlaidSuccess: PlaidLinkOnSuccess = useCallback(async (publicToken, metadata) => {
-    console.log('[Plaid] ✅ onSuccess called', { publicToken: publicToken?.substring(0, 20), metadata: metadata?.institution });
-
-    // Clean up OAuth storage after successful connection
-    localStorage.removeItem('plaid_oauth_pending');
-    localStorage.removeItem('plaid_link_token');
-
-    const institutionInfo = {
+    const inst = {
       name: metadata.institution?.name || 'Unknown',
       id: metadata.institution?.institution_id || '',
     };
 
-    setState((prev) => ({
-      ...prev,
-      step: 'exchanging',
-      institution: institutionInfo,
-      balanceStatus: 'loading',
-      assetsStatus: 'loading',
-      investmentsStatus: 'loading',
+    setState(s => ({
+      ...s, step: 'exchanging', institution: inst,
+      balanceStatus: 'loading', assetsStatus: 'loading', investmentsStatus: 'loading',
     }));
 
     try {
       // Exchange token
       console.log('[Plaid] Exchanging token...');
-      const exchangeResult = await exchangeToken(
-        publicToken,
-        userId,
-        institutionInfo.name,
-        institutionInfo.id,
-      );
-      console.log('[Plaid] ✅ Exchange success:', { item_id: exchangeResult.item_id, hasAccessToken: !!exchangeResult.access_token });
+      const exchange = await exchangeToken(publicToken, userId, inst.name, inst.id);
+      console.log('[Plaid] ✅ Exchange done:', { item_id: exchange.item_id });
+      accessTokenRef.current = exchange.access_token;
 
-      accessTokenRef.current = exchangeResult.access_token;
+      setState(s => ({ ...s, step: 'fetching' }));
 
-      setState((prev) => ({ ...prev, step: 'fetching' }));
-
-      // Fetch all financial data in parallel (Balance, Assets, Investments)
+      // Fetch financial data
       console.log('[Plaid] Fetching financial data...');
-      const financialResult = await fetchAllFinancialData(
-        exchangeResult.access_token,
-        userId,
-      );
-      console.log('[Plaid] ✅ Financial data result:', {
-        status: financialResult.status,
-        balance: financialResult.balance.available,
-        assets: financialResult.assets.available,
-        investments: financialResult.investments.available,
-        errors: {
-          balance: financialResult.balance.error,
-          assets: financialResult.assets.error,
-          investments: financialResult.investments.error,
-        },
+      const result = await fetchAllFinancialData(exchange.access_token, userId);
+      console.log('[Plaid] ✅ Result:', {
+        status: result.status,
+        balance: result.balance.available,
+        assets: result.assets.available,
+        investments: result.investments.available,
       });
 
-      // Determine individual statuses
-      const balanceStatus = getProductStatus(financialResult.balance);
-      const assetsStatus = getProductStatus(financialResult.assets);
-      const investmentsStatus = getProductStatus(financialResult.investments);
-
-      setState((prev) => ({
-        ...prev,
-        step: 'done',
-        financialData: financialResult,
-        balanceStatus,
-        assetsStatus,
-        investmentsStatus,
-        canProceed: financialResult.summary.can_proceed,
-        productsAvailable: financialResult.summary.products_available,
+      setState(s => ({
+        ...s, step: 'done', financialData: result,
+        balanceStatus: getProductStatus(result.balance),
+        assetsStatus: getProductStatus(result.assets),
+        investmentsStatus: getProductStatus(result.investments),
+        canProceed: result.summary.can_proceed,
+        productsAvailable: result.summary.products_available,
       }));
 
-      // Save financial data to Supabase (fire-and-forget, non-blocking)
-      saveFinancialDataToSupabase(
-        userId,
-        financialResult,
-        institutionInfo.name,
-        institutionInfo.id,
-        exchangeResult.item_id,
-      ).catch((err) => console.warn('[Plaid] Background save failed:', err));
+      // Save to Supabase (background)
+      saveFinancialDataToSupabase(userId, result, inst.name, inst.id, exchange.item_id)
+        .catch(e => console.warn('[Plaid] Save failed:', e));
 
-      // If assets are pending, start polling
-      if (assetsStatus === 'pending' && financialResult.assets.data?.asset_report_token) {
-        startAssetPolling(financialResult.assets.data.asset_report_token);
+      // Poll assets if pending
+      if (getProductStatus(result.assets) === 'pending' && result.assets.data?.asset_report_token) {
+        pollAssets(result.assets.data.asset_report_token);
       }
     } catch (err: any) {
-      console.error('[Plaid] ❌ Error in handlePlaidSuccess:', err);
-      setState((prev) => ({
-        ...prev,
-        step: 'error',
-        error: err.message || 'Failed to connect to your bank',
-        balanceStatus: 'error',
-        assetsStatus: 'error',
-        investmentsStatus: 'error',
+      console.error('[Plaid] ❌ Error:', err);
+      setState(s => ({
+        ...s, step: 'error', error: err.message || 'Failed to connect',
+        balanceStatus: 'error', assetsStatus: 'error', investmentsStatus: 'error',
       }));
     }
   }, [userId]);
 
-  // =====================================================
-  // Plaid Link Exit Handler
-  // =====================================================
-
-  const handlePlaidExit: PlaidLinkOnExit = useCallback((err, metadata) => {
-    console.log('[Plaid] 🚪 onExit called', {
-      error: err,
-      status: metadata?.status,
-      institution: metadata?.institution,
-      linkSessionId: metadata?.link_session_id,
-    });
-
-    // OAuth Guard: If OAuth is in progress, the Plaid SDK fires onExit
-    // because its iframe crashes during the OAuth redirect. This is NOT
-    // a user-initiated exit — ignore it to prevent state corruption.
-    const oauthTimestamp = localStorage.getItem('plaid_oauth_pending');
-    if (oauthTimestamp) {
-      const flagAge = Date.now() - Number(oauthTimestamp);
-      if (flagAge < 120_000) { // Within 2 minutes
-        console.log('[Plaid] 🔑 OAuth is in progress — ignoring onExit (SDK crash during redirect)');
-        return; // Do NOT reset state
-      }
-    }
-
+  // Handle exit
+  const handleExit: PlaidLinkOnExit = useCallback((err, metadata) => {
+    console.log('[Plaid] 🚪 onExit', { error: err, status: metadata?.status });
     if (err) {
-      setState((prev) => ({
-        ...prev,
-        step: 'error',
-        error: `Bank connection was interrupted: ${err.display_message || err.error_message || 'Unknown error'}`,
+      setState(s => ({
+        ...s, step: 'error',
+        error: `Connection interrupted: ${err.display_message || err.error_message || 'Unknown error'}`,
       }));
-    } else {
-      console.log('[Plaid] User closed Plaid Link without error. Status:', metadata?.status);
     }
-    // If user just closed, stay in 'ready' state
   }, []);
 
-  // =====================================================
-  // Asset Report Polling
-  // =====================================================
+  // Log events
+  const handleEvent: PlaidLinkOnEvent = useCallback((eventName, metadata) => {
+    console.log(`[Plaid] 📡 ${eventName}`, metadata);
+  }, []);
 
-  const startAssetPolling = useCallback((assetReportToken: string) => {
-    // Clear any existing interval
-    if (assetPollIntervalRef.current) {
-      clearInterval(assetPollIntervalRef.current);
-    }
-
+  // Asset polling
+  const pollAssets = useCallback((token: string) => {
+    if (assetPollRef.current) clearInterval(assetPollRef.current);
     let attempts = 0;
-    const maxAttempts = 10; // Max ~50 seconds of polling
 
-    assetPollIntervalRef.current = setInterval(async () => {
-      attempts++;
-
-      if (attempts > maxAttempts) {
-        clearInterval(assetPollIntervalRef.current!);
-        assetPollIntervalRef.current = null;
-        return;
-      }
-
+    assetPollRef.current = setInterval(async () => {
+      if (++attempts > 10) { clearInterval(assetPollRef.current!); return; }
       try {
-        const result = await checkAssetReport(assetReportToken, userId);
-
+        const result = await checkAssetReport(token, userId);
         if (result.status === 'complete') {
-          clearInterval(assetPollIntervalRef.current!);
-          assetPollIntervalRef.current = null;
-
-          setState((prev) => ({
-            ...prev,
-            assetsStatus: 'success',
-            financialData: prev.financialData
-              ? {
-                  ...prev.financialData,
-                  assets: { available: true, data: result.data, error: null, reason: null },
-                  summary: {
-                    ...prev.financialData.summary,
-                    products_available: prev.financialData.summary.products_available + 1,
-                  },
-                }
-              : prev.financialData,
-            productsAvailable: (prev.productsAvailable || 0) + 1,
+          clearInterval(assetPollRef.current!);
+          setState(s => ({
+            ...s, assetsStatus: 'success',
+            productsAvailable: (s.productsAvailable || 0) + 1,
+            financialData: s.financialData ? {
+              ...s.financialData,
+              assets: { available: true, data: result.data, error: null, reason: null },
+            } : s.financialData,
           }));
         }
-      } catch {
-        // Silent fail on poll — don't disrupt user
-      }
-    }, 5000); // Poll every 5 seconds
+      } catch { /* silent */ }
+    }, 5000);
   }, [userId]);
 
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => {
-      if (assetPollIntervalRef.current) {
-        clearInterval(assetPollIntervalRef.current);
-      }
-    };
-  }, []);
+  // Cleanup
+  useEffect(() => () => { if (assetPollRef.current) clearInterval(assetPollRef.current); }, []);
 
-  // =====================================================
-  // Plaid Link Event Handler — logs ALL events
-  // =====================================================
-
-  const handlePlaidEvent: PlaidLinkOnEvent = useCallback((eventName, metadata) => {
-    console.log(`[Plaid] 📡 Event: ${eventName}`, metadata);
-
-    // When OAuth opens, set a flag WITH TIMESTAMP so we can detect the redirect back
-    // The timestamp prevents the stale-flag detection from clearing it during
-    // the same render cycle (before the browser actually navigates away)
-    if (eventName === 'OPEN_OAUTH') {
-      console.log('[Plaid] 🔑 Setting OAuth pending flag in localStorage (cross-tab)');
-      localStorage.setItem('plaid_oauth_pending', Date.now().toString());
-    }
-  }, []);
-
-  // =====================================================
-  // Plaid Link SDK
-  // =====================================================
-
+  // Plaid SDK
   const { open, ready } = usePlaidLinkSDK({
     token: state.linkToken,
-    onSuccess: handlePlaidSuccess,
-    onExit: handlePlaidExit,
-    onEvent: handlePlaidEvent,
-    // Pass receivedRedirectUri when returning from OAuth redirect
-    // This tells the SDK to complete the OAuth flow
-    receivedRedirectUri: receivedRedirectUri.current,
+    onSuccess: handleSuccess,
+    onExit: handleExit,
+    onEvent: handleEvent,
   });
 
-  // Auto-open Plaid Link when returning from OAuth redirect
-  useEffect(() => {
-    if (isOAuthRedirect.current && ready && state.linkToken) {
-      console.log('[Plaid] 🔄 Auto-opening Plaid Link to complete OAuth flow');
-      setState((prev) => ({ ...prev, step: 'linking' }));
-      open();
-      // Clean up the URL to remove oauth_state_id
-      const cleanUrl = new URL(window.location.href);
-      cleanUrl.searchParams.delete('oauth_state_id');
-      window.history.replaceState({}, '', cleanUrl.toString());
-    }
-  }, [ready, state.linkToken, open]);
-
-  // =====================================================
-  // Public Methods
-  // =====================================================
-
+  // Public API
   const openPlaidLink = useCallback(() => {
-    if (ready) {
-      setState((prev) => ({ ...prev, step: 'linking' }));
-      open();
-    }
+    if (ready) { setState(s => ({ ...s, step: 'linking' })); open(); }
   }, [ready, open]);
 
   const retry = useCallback(() => {
     setState({
-      step: 'idle',
-      linkToken: null,
-      error: null,
-      institution: null,
-      balanceStatus: 'idle',
-      assetsStatus: 'idle',
-      investmentsStatus: 'idle',
-      financialData: null,
-      canProceed: false,
-      productsAvailable: 0,
+      step: 'idle', linkToken: null, error: null, institution: null,
+      balanceStatus: 'idle', assetsStatus: 'idle', investmentsStatus: 'idle',
+      financialData: null, canProceed: false, productsAvailable: 0,
     });
     accessTokenRef.current = null;
-    hasInitializedRef.current = false;
-    initializeLinkToken();
-  }, [initializeLinkToken]);
+    initializedRef.current = false;
+    initToken();
+  }, [initToken]);
 
   return {
-    ...state,
-    openPlaidLink,
-    retry,
+    ...state, openPlaidLink, retry,
     isReady: ready && state.step === 'ready',
     open: openPlaidLink,
   };

@@ -6,9 +6,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children
-}) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
@@ -19,17 +17,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     let subscription: any = null;
     try {
       if (!config.supabaseClient) {
-        console.error("Supabase client is not initialized");
         navigate("/login", { replace: true });
         return;
       }
 
       const supabase = config.supabaseClient;
-
-      // 1. Session Check
       let { data: { session } } = await supabase.auth.getSession();
 
-      // Wait for session logic (same as before)
       if (!session?.user) {
         await new Promise<void>((resolve) => {
           const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
@@ -53,7 +47,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return;
       }
 
-      // 2. Onboarding Check
       const { data: onboardingData } = await supabase
         .from('onboarding_data')
         .select('is_completed, current_step')
@@ -69,9 +62,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         }
       }
 
-      // 2FA/MFA check has been removed - users can proceed directly
-      console.log('[ProtectedRoute] Authorization check passed (2FA disabled)');
-
+      console.log('[ProtectedRoute] Authorization check passed');
       setIsAuthorized(true);
     } catch (error) {
       console.error("Error checking auth:", error);
@@ -82,18 +73,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   };
 
   useEffect(() => {
-    // OAuth Guard: When Plaid OAuth is in progress, the SDK manipulates browser
-    // history which triggers location changes. Skip auth re-check to prevent
-    // interfering with the OAuth flow (which crashes the Plaid SDK iframe).
-    const oauthTimestamp = localStorage.getItem('plaid_oauth_pending');
-    if (oauthTimestamp && isAuthorized) {
-      const flagAge = Date.now() - Number(oauthTimestamp);
-      if (flagAge < 120_000) { // Within 2 minutes — OAuth is in progress
-        console.log('[ProtectedRoute] OAuth in progress — skipping auth re-check');
-        return;
-      }
-    }
-
     checkAuthAndOnboarding();
   }, [navigate, location.pathname]);
 
@@ -108,9 +87,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (!isAuthorized) {
-    return null;
-  }
+  if (!isAuthorized) return null;
 
   return <>{children}</>;
 };

@@ -1,30 +1,15 @@
 /**
- * Plaid Service — Client-side API calls to Supabase Edge Functions
+ * Plaid Service — Clean API calls to Supabase Edge Functions
  * 
- * Calls production Supabase Edge Functions for Plaid operations.
- * All sensitive operations happen server-side in Edge Functions.
- * This service only sends requests with proper auth headers.
+ * Simple, no-frills service. All sensitive operations happen server-side.
  */
 
 // =====================================================
 // Types
 // =====================================================
 
-export interface PlaidLinkTokenResponse {
-  link_token: string;
-  expiration: string;
-}
-
-export interface PlaidExchangeResponse {
-  access_token: string;
-  item_id: string;
-  record_id?: string | null;
-}
-
-/** Status of a single financial product fetch */
 export type ProductFetchStatus = 'idle' | 'loading' | 'success' | 'unavailable' | 'error' | 'pending';
 
-/** Result for a single product */
 export interface ProductResult {
   available: boolean;
   data: any | null;
@@ -32,7 +17,6 @@ export interface ProductResult {
   reason: 'not_supported' | 'error' | null;
 }
 
-/** Full financial data response */
 export interface FinancialDataResponse {
   status: 'complete' | 'partial' | 'failed';
   balance: ProductResult;
@@ -45,306 +29,181 @@ export interface FinancialDataResponse {
   };
 }
 
-/** Asset report poll response */
-export interface AssetReportPollResponse {
-  status: 'complete' | 'pending';
-  data?: any;
-  message?: string;
-}
-
 // =====================================================
-// Supabase Edge Function Base URL + Auth
+// Config
 // =====================================================
 
 const SUPABASE_URL = 'https://ibsisfnjxeowvdtvgzff.supabase.co/functions/v1';
 
-/** Get the Supabase anon key from env */
 const getAnonKey = (): string => {
   try {
-    // @ts-ignore - Vite env
+    // @ts-ignore
     return import.meta.env?.VITE_SUPABASE_ANON_KEY || '';
-  } catch {
-    return '';
-  }
+  } catch { return ''; }
 };
 
-/** Get the user's auth session token (required by Edge Functions that verify JWT) */
 const getUserAccessToken = async (): Promise<string> => {
   try {
     const config = (await import('../../resources/config/config')).default;
     const supabase = config.supabaseClient;
     if (!supabase) return getAnonKey();
-
     const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token || getAnonKey();
-  } catch {
-    return getAnonKey();
-  }
+  } catch { return getAnonKey(); }
 };
 
-/** Standard headers for all Supabase Edge Function calls */
-const getHeaders = (accessToken?: string): Record<string, string> => ({
+const getHeaders = (token?: string) => ({
   'Content-Type': 'application/json',
-  'Authorization': `Bearer ${accessToken || getAnonKey()}`,
+  'Authorization': `Bearer ${token || getAnonKey()}`,
 });
 
 // =====================================================
-// Service Functions
+// API Calls
 // =====================================================
 
-/**
- * Create a Plaid Link token for initializing Plaid Link
- * Calls: Supabase Edge Function `create-link-token`
- */
-export const createLinkToken = async (
-  userId: string,
-  userEmail?: string,
-  redirectUri?: string,
-): Promise<PlaidLinkTokenResponse> => {
+/** Create a Plaid Link token */
+export const createLinkToken = async (userId: string, userEmail?: string) => {
   const token = await getUserAccessToken();
-  const response = await fetch(`${SUPABASE_URL}/create-link-token`, {
+  const res = await fetch(`${SUPABASE_URL}/create-link-token`, {
     method: 'POST',
     headers: getHeaders(token),
-    body: JSON.stringify({ userId, userEmail, redirectUri }),
+    body: JSON.stringify({ userId, userEmail }),
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to create link token' }));
-    throw new Error(error.details || error.error || 'Failed to create link token');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to create link token');
   }
-
-  return response.json();
+  return res.json() as Promise<{ link_token: string; expiration: string }>;
 };
 
-/**
- * Exchange public_token for access_token after Plaid Link success
- * Calls: Supabase Edge Function `exchange-public-token`
- */
+/** Exchange public token for access token */
 export const exchangeToken = async (
-  publicToken: string,
-  userId: string,
-  institutionName?: string,
-  institutionId?: string,
-): Promise<PlaidExchangeResponse> => {
+  publicToken: string, userId: string,
+  institutionName?: string, institutionId?: string,
+) => {
   const token = await getUserAccessToken();
-  const response = await fetch(`${SUPABASE_URL}/exchange-public-token`, {
+  const res = await fetch(`${SUPABASE_URL}/exchange-public-token`, {
     method: 'POST',
     headers: getHeaders(token),
-    body: JSON.stringify({
-      publicToken,
-      userId,
-      institutionName,
-      institutionId,
-    }),
+    body: JSON.stringify({ publicToken, userId, institutionName, institutionId }),
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to exchange token' }));
-    throw new Error(error.details || error.error || 'Failed to exchange token');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to exchange token');
   }
-
-  return response.json();
+  return res.json() as Promise<{ access_token: string; item_id: string }>;
 };
 
-/**
- * Fetch account balances
- * Calls: Supabase Edge Function `get-balance`
- */
-export const fetchBalance = async (
-  accessToken: string,
-  userId: string,
-): Promise<ProductResult> => {
+/** Fetch balance */
+const fetchBalance = async (accessToken: string, userId: string): Promise<ProductResult> => {
   try {
-    const userToken = await getUserAccessToken();
-    const response = await fetch(`${SUPABASE_URL}/get-balance`, {
-      method: 'POST',
-      headers: getHeaders(userToken),
+    const token = await getUserAccessToken();
+    const res = await fetch(`${SUPABASE_URL}/get-balance`, {
+      method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken, userId }),
     });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      // Check if product not supported
-      if (err.error_code === 'PRODUCTS_NOT_SUPPORTED' || response.status === 400) {
-        return { available: false, data: null, error: null, reason: 'not_supported' };
-      }
-      return { available: false, data: null, error: err.error || 'Failed to fetch balance', reason: 'error' };
+    if (!res.ok) {
+      if (res.status === 400) return { available: false, data: null, error: null, reason: 'not_supported' };
+      const err = await res.json().catch(() => ({}));
+      return { available: false, data: null, error: err.error || 'Failed', reason: 'error' };
     }
-
-    const data = await response.json();
-    return { available: true, data, error: null, reason: null };
-  } catch (err: any) {
-    return { available: false, data: null, error: err.message, reason: 'error' };
+    return { available: true, data: await res.json(), error: null, reason: null };
+  } catch (e: any) {
+    return { available: false, data: null, error: e.message, reason: 'error' };
   }
 };
 
-/**
- * Create an asset report
- * Calls: Supabase Edge Function `asset-report-create`
- */
-export const fetchAssets = async (
-  accessToken: string,
-  userId: string,
-): Promise<ProductResult> => {
+/** Fetch assets */
+const fetchAssets = async (accessToken: string, userId: string): Promise<ProductResult> => {
   try {
-    const userToken = await getUserAccessToken();
-    const response = await fetch(`${SUPABASE_URL}/asset-report-create`, {
-      method: 'POST',
-      headers: getHeaders(userToken),
+    const token = await getUserAccessToken();
+    const res = await fetch(`${SUPABASE_URL}/asset-report-create`, {
+      method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken, userId }),
     });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      if (err.error_code === 'PRODUCTS_NOT_SUPPORTED' || response.status === 400) {
-        return { available: false, data: null, error: null, reason: 'not_supported' };
-      }
-      return { available: false, data: null, error: err.error || 'Failed to fetch assets', reason: 'error' };
+    if (!res.ok) {
+      if (res.status === 400) return { available: false, data: null, error: null, reason: 'not_supported' };
+      const err = await res.json().catch(() => ({}));
+      return { available: false, data: null, error: err.error || 'Failed', reason: 'error' };
     }
-
-    const data = await response.json();
-
-    // Asset reports can be async (pending)
-    if (data.status === 'pending') {
-      return { available: false, data, error: null, reason: null };
-    }
-
+    const data = await res.json();
+    if (data.status === 'pending') return { available: false, data, error: null, reason: null };
     return { available: true, data, error: null, reason: null };
-  } catch (err: any) {
-    return { available: false, data: null, error: err.message, reason: 'error' };
+  } catch (e: any) {
+    return { available: false, data: null, error: e.message, reason: 'error' };
   }
 };
 
-/**
- * Fetch investment holdings
- * Calls: Supabase Edge Function `investments-holdings`
- */
-export const fetchInvestments = async (
-  accessToken: string,
-  userId: string,
-): Promise<ProductResult> => {
+/** Fetch investments */
+const fetchInvestments = async (accessToken: string, userId: string): Promise<ProductResult> => {
   try {
-    const userToken = await getUserAccessToken();
-    const response = await fetch(`${SUPABASE_URL}/investments-holdings`, {
-      method: 'POST',
-      headers: getHeaders(userToken),
+    const token = await getUserAccessToken();
+    const res = await fetch(`${SUPABASE_URL}/investments-holdings`, {
+      method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken, userId }),
     });
-
-    if (!response.ok) {
-      // Handle 404 (function not deployed) gracefully
-      if (response.status === 404) {
-        console.warn('[Plaid] investments-holdings function not found (404). May need deployment.');
-        return { available: false, data: null, error: 'Investment service temporarily unavailable', reason: 'error' };
-      }
-
-      const err = await response.json().catch(() => ({}));
-      if (err.error_code === 'PRODUCTS_NOT_SUPPORTED' || response.status === 400) {
-        return { available: false, data: null, error: null, reason: 'not_supported' };
-      }
-      return { available: false, data: null, error: err.error || err.error_message || 'Failed to fetch investments', reason: 'error' };
+    if (!res.ok) {
+      if (res.status === 404) return { available: false, data: null, error: 'Service unavailable', reason: 'error' };
+      if (res.status === 400) return { available: false, data: null, error: null, reason: 'not_supported' };
+      const err = await res.json().catch(() => ({}));
+      return { available: false, data: null, error: err.error || 'Failed', reason: 'error' };
     }
-
-    const data = await response.json();
-    return { available: true, data, error: null, reason: null };
-  } catch (err: any) {
-    console.error('[Plaid] fetchInvestments error:', err.message);
-    return { available: false, data: null, error: err.message, reason: 'error' };
+    return { available: true, data: await res.json(), error: null, reason: null };
+  } catch (e: any) {
+    return { available: false, data: null, error: e.message, reason: 'error' };
   }
 };
 
-/**
- * Fetch all 3 financial products in parallel
- * Calls get-balance, asset-report-create, investments-holdings simultaneously
- */
+/** Fetch all 3 products in parallel */
 export const fetchAllFinancialData = async (
-  accessToken: string,
-  userId: string,
+  accessToken: string, userId: string,
 ): Promise<FinancialDataResponse> => {
-  const [balanceResult, assetsResult, investmentsResult] = await Promise.allSettled([
+  const [b, a, i] = await Promise.allSettled([
     fetchBalance(accessToken, userId),
     fetchAssets(accessToken, userId),
     fetchInvestments(accessToken, userId),
   ]);
 
-  // Parse settled results
-  const balance: ProductResult = balanceResult.status === 'fulfilled'
-    ? balanceResult.value
-    : { available: false, data: null, error: 'Network error', reason: 'error' };
+  const balance = b.status === 'fulfilled' ? b.value : { available: false, data: null, error: 'Network error', reason: 'error' as const };
+  const assets = a.status === 'fulfilled' ? a.value : { available: false, data: null, error: 'Network error', reason: 'error' as const };
+  const investments = i.status === 'fulfilled' ? i.value : { available: false, data: null, error: 'Network error', reason: 'error' as const };
 
-  const assets: ProductResult = assetsResult.status === 'fulfilled'
-    ? assetsResult.value
-    : { available: false, data: null, error: 'Network error', reason: 'error' };
-
-  const investments: ProductResult = investmentsResult.status === 'fulfilled'
-    ? investmentsResult.value
-    : { available: false, data: null, error: 'Network error', reason: 'error' };
-
-  // Count available products
-  const productsAvailable = [balance, assets, investments].filter((r) => r.available).length;
+  const count = [balance, assets, investments].filter(r => r.available).length;
 
   return {
-    status: productsAvailable === 3 ? 'complete' : productsAvailable > 0 ? 'partial' : 'failed',
-    balance,
-    assets,
-    investments,
-    summary: {
-      products_available: productsAvailable,
-      products_total: 3,
-      can_proceed: productsAvailable >= 1,
-    },
+    status: count === 3 ? 'complete' : count > 0 ? 'partial' : 'failed',
+    balance, assets, investments,
+    summary: { products_available: count, products_total: 3, can_proceed: count >= 1 },
   };
 };
 
-/**
- * Check asset report status (for async asset reports)
- * Calls: Supabase Edge Function `asset-report-create` with report token
- */
-export const checkAssetReport = async (
-  assetReportToken: string,
-  userId: string,
-): Promise<AssetReportPollResponse> => {
-  const userToken = await getUserAccessToken();
-  const response = await fetch(`${SUPABASE_URL}/asset-report-create`, {
-    method: 'POST',
-    headers: getHeaders(userToken),
+/** Check asset report status */
+export const checkAssetReport = async (assetReportToken: string, userId: string) => {
+  const token = await getUserAccessToken();
+  const res = await fetch(`${SUPABASE_URL}/asset-report-create`, {
+    method: 'POST', headers: getHeaders(token),
     body: JSON.stringify({ assetReportToken, userId, action: 'get' }),
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to check asset report' }));
-    throw new Error(error.details || error.error || 'Failed to check asset report');
-  }
-
-  return response.json();
+  if (!res.ok) throw new Error('Failed to check asset report');
+  return res.json() as Promise<{ status: 'complete' | 'pending'; data?: any }>;
 };
 
-// =====================================================
-// Save to Supabase
-// =====================================================
-
-/**
- * Save financial data (Balance, Assets, Investments) to Supabase
- * Upserts into `user_financial_data` table
- */
+/** Save financial data to Supabase */
 export const saveFinancialDataToSupabase = async (
-  userId: string,
-  data: FinancialDataResponse,
-  institutionName?: string,
-  institutionId?: string,
-  itemId?: string,
-): Promise<{ success: boolean; error?: string }> => {
+  userId: string, data: FinancialDataResponse,
+  institutionName?: string, institutionId?: string, itemId?: string,
+) => {
   try {
-    // Dynamic import to avoid circular deps
     const config = (await import('../../resources/config/config')).default;
     const supabase = config.supabaseClient;
+    if (!supabase) return;
 
-    if (!supabase) {
-      console.warn('[Plaid] Supabase client not available — skipping save');
-      return { success: false, error: 'Supabase client not initialized' };
-    }
+    const errors: Record<string, string> = {};
+    if (data.balance.error) errors.balance = data.balance.error;
+    if (data.assets.error) errors.assets = data.assets.error;
+    if (data.investments.error) errors.investments = data.investments.error;
 
-    const row = {
+    await supabase.from('user_financial_data').upsert({
       user_id: userId,
       plaid_item_id: itemId || null,
       institution_name: institutionName || null,
@@ -359,105 +218,39 @@ export const saveFinancialDataToSupabase = async (
         investments: data.investments.available,
       },
       status: data.status,
-      fetch_errors: buildFetchErrors(data),
+      fetch_errors: Object.keys(errors).length > 0 ? errors : null,
       updated_at: new Date().toISOString(),
-    };
+    }, { onConflict: 'user_id' });
 
-    // Upsert — update if user already has a record, insert otherwise
-    const { error } = await supabase
-      .from('user_financial_data')
-      .upsert(row, { onConflict: 'user_id' });
-
-    if (error) {
-      // If upsert with onConflict fails (no unique constraint), try insert
-      if (error.code === '42P10' || error.message?.includes('unique')) {
-        const { error: insertError } = await supabase
-          .from('user_financial_data')
-          .insert(row);
-
-        if (insertError) {
-          console.error('[Plaid] Failed to save financial data:', insertError);
-          return { success: false, error: insertError.message };
-        }
-      } else {
-        console.error('[Plaid] Failed to save financial data:', error);
-        return { success: false, error: error.message };
-      }
-    }
-
-    console.log('[Plaid] ✅ Financial data saved to Supabase', {
-      userId,
-      institution: institutionName,
-      balance: data.balance.available,
-      assets: data.assets.available,
-      investments: data.investments.available,
-    });
-
-    return { success: true };
-  } catch (err: any) {
-    console.error('[Plaid] Error saving financial data:', err);
-    return { success: false, error: err.message };
+    console.log('[Plaid] ✅ Data saved to Supabase');
+  } catch (err) {
+    console.warn('[Plaid] Save failed:', err);
   }
 };
 
-/**
- * Build fetch_errors JSONB from product results
- */
-const buildFetchErrors = (data: FinancialDataResponse): Record<string, string> | null => {
-  const errors: Record<string, string> = {};
-
-  if (data.balance.error) errors.balance = data.balance.error;
-  if (data.assets.error) errors.assets = data.assets.error;
-  if (data.investments.error) errors.investments = data.investments.error;
-
-  if (data.balance.reason === 'not_supported') errors.balance = 'Product not supported';
-  if (data.assets.reason === 'not_supported') errors.assets = 'Product not supported';
-  if (data.investments.reason === 'not_supported') errors.investments = 'Product not supported';
-
-  return Object.keys(errors).length > 0 ? errors : null;
-};
-
 // =====================================================
-// Utility Functions
+// Utilities
 // =====================================================
 
-/**
- * Format currency amount for display
- */
 export const formatCurrency = (amount: number | null | undefined, currency = 'USD'): string => {
-  if (amount === null || amount === undefined) return '—';
+  if (amount == null) return '—';
   return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
+    style: 'currency', currency,
+    minimumFractionDigits: 0, maximumFractionDigits: 2,
   }).format(amount);
 };
 
-/**
- * Get display-friendly status for a product
- */
-export const getProductStatus = (product: ProductResult): ProductFetchStatus => {
-  if (product.available) {
-    if (product.data?.status === 'pending') return 'pending';
-    return 'success';
-  }
-  if (product.reason === 'not_supported') return 'unavailable';
-  if (product.error) return 'error';
-  // Check if it's a pending asset report
-  if (product.data?.status === 'pending') return 'pending';
-  return 'idle';
+export const getHeaderTitle = (count: number): string => {
+  if (count === 3) return '✨ Complete Financial Profile';
+  if (count === 2) return '📊 Financial Profile Verified';
+  if (count === 1) return '💰 Account Verified';
+  return '⚠️ Unable to Verify';
 };
 
-/**
- * Get the header title based on how many products are available
- */
-export const getHeaderTitle = (availableCount: number): string => {
-  switch (availableCount) {
-    case 3: return '✨ Complete Financial Profile';
-    case 2: return '📊 Financial Profile Verified';
-    case 1: return '💰 Account Verified';
-    case 0: return '⚠️ Unable to Verify';
-    default: return '💰 Financial Verification';
-  }
+export const getProductStatus = (product: ProductResult): ProductFetchStatus => {
+  if (product.available) return product.data?.status === 'pending' ? 'pending' : 'success';
+  if (product.reason === 'not_supported') return 'unavailable';
+  if (product.error) return 'error';
+  if (product.data?.status === 'pending') return 'pending';
+  return 'idle';
 };

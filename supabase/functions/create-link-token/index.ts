@@ -1,4 +1,4 @@
-// create-link-token — Creates a Plaid Link token for initializing Plaid Link
+// create-link-token — Creates a Plaid Link token
 import { corsHeaders } from '../_shared/cors.ts';
 
 Deno.serve(async (req) => {
@@ -22,28 +22,18 @@ Deno.serve(async (req) => {
     const PLAID_ENV = Deno.env.get('PLAID_ENV') || 'sandbox';
     const baseUrl = `https://${PLAID_ENV}.plaid.com`;
 
-    // Support OAuth redirect URI for banks that use OAuth (e.g., Chase)
-    const redirectUri = body.redirectUri || null;
-
-    const linkConfig: Record<string, any> = {
-      client_id: PLAID_CLIENT_ID,
-      secret: PLAID_SECRET,
-      user: { client_user_id: userId, email_address: userEmail },
-      client_name: 'Hushh',
-      products: ['auth', 'transactions', 'investments', 'assets'],
-      country_codes: ['US'],
-      language: 'en',
-    };
-
-    // Add redirect_uri for OAuth flow — required for banks like Chase, Wells Fargo
-    if (redirectUri) {
-      linkConfig.redirect_uri = redirectUri;
-    }
-
     const response = await fetch(`${baseUrl}/link/token/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(linkConfig),
+      body: JSON.stringify({
+        client_id: PLAID_CLIENT_ID,
+        secret: PLAID_SECRET,
+        user: { client_user_id: userId, email_address: userEmail },
+        client_name: 'Hushh',
+        products: ['auth', 'transactions', 'investments', 'assets'],
+        country_codes: ['US'],
+        language: 'en',
+      }),
     });
 
     const data = await response.json();
@@ -51,7 +41,7 @@ Deno.serve(async (req) => {
     if (!response.ok) {
       console.error('[create-link-token] Plaid error:', data);
       return new Response(
-        JSON.stringify({ error: data.error_message || 'Failed to create link token', details: data }),
+        JSON.stringify({ error: data.error_message || 'Failed to create link token' }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
