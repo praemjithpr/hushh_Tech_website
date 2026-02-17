@@ -26,7 +26,7 @@ import CareersPrivacyPolicy from './pages/career-privacy-policy';
 import CaliforniaPrivacyPolicy from './pages/california-privacy-policy';
 import EUUKPrivacyPolicy from './pages/eu-uk-privacy-policy';
 import DeleteAccountPage from './pages/delete-account';
-import { useState, useEffect, ReactNode, Suspense } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import config from './resources/config/config';
 import NDAPopup from './components/NdaForm';
 import Profile from './pages/profile';
@@ -59,7 +59,6 @@ import OnboardingStep6 from './pages/onboarding/Step6';
 import OnboardingStep7 from './pages/onboarding/Step7';
 import OnboardingStep8 from './pages/onboarding/Step8';
 import OnboardingStep9 from './pages/onboarding/Step9';
-const OnboardingStep10 = React.lazy(() => import('./pages/onboarding/Step10'));
 import OnboardingStep11 from './pages/onboarding/Step11';
 import OnboardingStep13 from './pages/onboarding/Step13';
 import VerifyIdentityPage from './pages/onboarding/VerifyIdentity';
@@ -284,9 +283,7 @@ function App() {
             } />
             <Route path="/onboarding/step-10" element={
               <ProtectedRoute>
-                <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>Loading...</div>}>
-                  <OnboardingStep10 />
-                </Suspense>
+                <Navigate to="/onboarding/step-11" replace />
               </ProtectedRoute>
             } />
             <Route path="/onboarding/step-11" element={

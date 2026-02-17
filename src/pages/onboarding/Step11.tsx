@@ -463,7 +463,7 @@ function OnboardingStep11() {
   const isFormValid = hasAnyUnits && totalInvestment >= 1000000 && hasValidRecurringAmount;
 
   const handleBack = () => {
-    navigate('/onboarding/step-10');
+    navigate('/onboarding/step-9');
   };
 
   // Generate units summary text

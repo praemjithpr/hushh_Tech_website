@@ -220,7 +220,7 @@ function OnboardingStep9() {
       return;
     }
 
-    navigate('/onboarding/step-10');
+    navigate('/onboarding/step-11');
   };
 
   const handleSkip = async () => {
@@ -270,7 +270,7 @@ function OnboardingStep9() {
       return;
     }
 
-    navigate('/onboarding/step-10');
+    navigate('/onboarding/step-11');
   };
 
   const handleBack = () => {
