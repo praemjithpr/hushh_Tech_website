@@ -537,7 +537,7 @@ function OnboardingStep8() {
       <div className="onboarding-shell relative flex min-h-screen w-full flex-col bg-white max-w-[500px] mx-auto shadow-xl overflow-hidden border-x border-slate-100">
         
         {/* Sticky Header */}
-        <header className="flex items-center px-4 pt-6 pb-4 bg-white/95 backdrop-blur-sm sticky top-0 z-10">
+        <header className="flex items-center px-4 pt-4 pb-3 bg-white/95 backdrop-blur-sm sticky top-0 z-10">
           <button 
             onClick={handleBack}
             className="flex items-center gap-1 text-slate-900 hover:text-[#2b8cee] transition-colors"
@@ -549,26 +549,26 @@ function OnboardingStep8() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col px-4 sm:px-6 pb-40 sm:pb-48 overflow-y-auto">
+        <main className="flex-1 flex flex-col px-4 sm:px-6 overflow-y-auto">
           {/* Header Section - Center Aligned */}
-          <div className="mb-8 text-center">
-            <h1 className="text-slate-900 text-[22px] font-bold leading-tight tracking-tight mb-3">
+          <div className="mb-4 text-center">
+            <h1 className="text-slate-900 text-[20px] font-bold leading-tight tracking-tight mb-2">
               Enter your address
             </h1>
-            <p className="text-slate-500 text-[14px] font-normal leading-relaxed">
+            <p className="text-slate-500 text-[13px] font-normal leading-relaxed">
               Please provide your primary residence address.
             </p>
             
             {/* Location Detection Status */}
              {(isDetecting || detectionMessage) && (
-               <div className={`mt-4 py-2 px-4 rounded-full inline-flex items-center gap-2 text-sm font-medium transition-all ${
+               <div className={`mt-3 py-1.5 px-3 rounded-full inline-flex items-center gap-1.5 text-xs font-medium transition-all ${
                  isDetecting 
                    ? 'bg-blue-50 text-blue-600 animate-pulse' 
                    : 'bg-green-50 text-green-600'
                }`}>
                 {isDetecting ? (
                   <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -580,12 +580,12 @@ function OnboardingStep8() {
                </div>
              )}
 
-            <div className="mt-4 flex justify-center">
+            <div className="mt-3 flex justify-center">
               <button
                 type="button"
                 onClick={handleDetectLocationClick}
                 disabled={isDetecting}
-                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Use my current location
               </button>
@@ -594,15 +594,15 @@ function OnboardingStep8() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs">
               {error}
             </div>
           )}
 
           {/* Form Card 1: Street Address */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 mb-6 space-y-5">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4 mb-4 space-y-3.5">
             {/* Address Line 1 */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-slate-900" htmlFor="address1">
                 Address line 1
               </label>
@@ -619,7 +619,7 @@ function OnboardingStep8() {
                 }}
                 onBlur={() => handleBlur('addressLine1')}
                 placeholder="Street address"
-                className={`w-full h-12 px-4 rounded-lg border bg-white text-slate-900 placeholder:text-slate-400 text-base focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-10 px-3 rounded-lg border bg-white text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 transition-all ${
                   touched.addressLine1 && fieldErrors.addressLine1
                     ? 'border-red-400 focus:ring-red-200 focus:border-red-400'
                     : 'border-gray-200 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee]'
@@ -631,7 +631,7 @@ function OnboardingStep8() {
                   {fieldErrors.addressLine1}
                 </p>
               ) : (
-                <div className="flex items-start gap-1.5 mt-1.5">
+                <div className="flex items-start gap-1 mt-1">
                   <InfoIcon />
                   <p className="text-slate-400 text-xs font-normal leading-tight">
                     Use your street address, not a P.O. Box.
@@ -641,7 +641,7 @@ function OnboardingStep8() {
             </div>
 
             {/* Address Line 2 */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <div className="flex justify-between items-baseline">
                 <label className="block text-sm font-medium text-slate-900" htmlFor="address2">
                   Address line 2
@@ -654,19 +654,19 @@ function OnboardingStep8() {
                 value={addressLine2}
                 onChange={(e) => setAddressLine2(e.target.value)}
                 placeholder="Apt, suite, unit, etc."
-                className="w-full h-12 px-4 rounded-lg border border-gray-200 bg-white text-slate-900 placeholder:text-slate-400 text-base focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all"
+                className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all"
               />
             </div>
           </div>
 
           {/* Form Card 2: Region Details */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 space-y-5 mb-4">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-4 space-y-3.5 mb-2">
             {/* Country */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-slate-900" htmlFor="country">
                 Country
               </label>
-              <div className="relative">
+              <div className="relative min-w-0">
                 <select
                   id="country"
                   value={country}
@@ -675,7 +675,7 @@ function OnboardingStep8() {
                     setState('');
                     setCity('');
                   }}
-                  className="w-full h-12 px-4 pr-10 rounded-lg border border-gray-200 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all appearance-none"
+                  className="min-w-0 w-full max-w-full h-10 px-3 pr-9 rounded-lg border border-gray-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all appearance-none overflow-hidden text-ellipsis whitespace-nowrap"
                 >
                   <option value="">Select country...</option>
                   {countries.map((c) => (
@@ -691,13 +691,13 @@ function OnboardingStep8() {
             </div>
 
             {/* State & City Row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 min-w-0">
               {/* State */}
-              <div className="space-y-1.5">
+              <div className="space-y-1 min-w-0">
                 <label className="block text-sm font-medium text-slate-900" htmlFor="state">
                   State
                 </label>
-                <div className="relative">
+                <div className="relative min-w-0">
                   <select
                     id="state"
                     value={state}
@@ -706,7 +706,7 @@ function OnboardingStep8() {
                       setCity('');
                     }}
                     disabled={!country || loadingStates}
-                    className="w-full h-12 px-4 pr-10 rounded-lg border border-gray-200 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all appearance-none disabled:bg-slate-50 disabled:text-slate-400"
+                    className="min-w-0 w-full max-w-full h-10 px-3 pr-9 rounded-lg border border-gray-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all appearance-none disabled:bg-slate-50 disabled:text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap"
                   >
                     <option value="">{loadingStates ? 'Loading...' : 'Select'}</option>
                     {states.map((s) => (
@@ -722,17 +722,17 @@ function OnboardingStep8() {
               </div>
 
               {/* City */}
-              <div className="space-y-1.5">
+              <div className="space-y-1 min-w-0">
                 <label className="block text-sm font-medium text-slate-900" htmlFor="city">
                   City
                 </label>
-                <div className="relative">
+                <div className="relative min-w-0">
                   <select
                     id="city"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     disabled={!state || loadingCities}
-                    className="w-full h-12 px-4 pr-10 rounded-lg border border-gray-200 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all appearance-none disabled:bg-slate-50 disabled:text-slate-400"
+                    className="min-w-0 w-full max-w-full h-10 px-3 pr-9 rounded-lg border border-gray-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee] transition-all appearance-none disabled:bg-slate-50 disabled:text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap"
                   >
                     <option value="">{loadingCities ? 'Loading...' : 'Select'}</option>
                     {cities.map((c) => (
@@ -749,7 +749,7 @@ function OnboardingStep8() {
             </div>
 
             {/* ZIP Code */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-slate-900" htmlFor="zip">
                 ZIP code
               </label>
@@ -768,7 +768,7 @@ function OnboardingStep8() {
                 onBlur={() => handleBlur('zipCode')}
                 inputMode="numeric"
                 placeholder="00000"
-                className={`w-full h-12 px-4 rounded-lg border bg-white text-slate-900 placeholder:text-slate-400 text-base focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-10 px-3 rounded-lg border bg-white text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 transition-all ${
                   touched.zipCode && fieldErrors.zipCode
                     ? 'border-red-400 focus:ring-red-200 focus:border-red-400'
                     : 'border-gray-200 focus:ring-[#2b8cee]/20 focus:border-[#2b8cee]'
@@ -813,7 +813,7 @@ function OnboardingStep8() {
             {/* Back Button */}
             <button
               onClick={handleBack}
-              className="flex w-full cursor-pointer items-center justify-center rounded-full bg-transparent py-2 text-slate-500 text-sm font-semibold hover:text-slate-800 transition-colors"
+              className="flex w-full cursor-pointer items-center justify-center rounded-full bg-transparent py-1.5 text-slate-500 text-[13px] font-semibold hover:text-slate-800 transition-colors"
             >
               Back
             </button>

@@ -358,7 +358,7 @@ html {
   overflow: hidden !important;
   overscroll-behavior: none;
   /* Reserved space for fixed onboarding footer; overridden per-step via JS when present. */
-  --onboarding-footer-space: calc(11rem + env(safe-area-inset-bottom, 0px));
+  --onboarding-footer-space: calc(9.75rem + env(safe-area-inset-bottom, 0px));
 }
 
 .onboarding-shell main {
@@ -368,8 +368,30 @@ html {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  padding-bottom: calc(var(--onboarding-footer-space) + 0.75rem) !important;
-  scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.75rem);
+  padding-bottom: calc(var(--onboarding-footer-space) + 0.35rem) !important;
+  scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.35rem);
+}
+
+/* Prevent form controls from forcing horizontal overflow on desktop/mobile. */
+.onboarding-shell main .grid {
+  min-width: 0;
+}
+
+.onboarding-shell main .grid > * {
+  min-width: 0;
+}
+
+.onboarding-shell main select,
+.onboarding-shell main input,
+.onboarding-shell main textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.onboarding-shell main select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .onboarding-shell [data-onboarding-footer] {
@@ -378,17 +400,17 @@ html {
   transform: translateX(-50%);
   width: min(100%, 500px);
   /* Override per-step Tailwind paddings for consistent mobile UX */
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
+  padding-left: 0.875rem !important;
+  padding-right: 0.875rem !important;
   /* Make the fixed CTA footer more compact without reducing tap targets. */
-  padding-top: 0.75rem !important;
-  padding-bottom: calc(0.625rem + env(safe-area-inset-bottom, 0px)) !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .onboarding-shell [data-onboarding-footer] [data-onboarding-cta] {
   box-sizing: border-box;
-  height: 48px !important;
-  min-height: 48px;
+  height: 44px !important;
+  min-height: 44px;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
@@ -396,20 +418,22 @@ html {
 /* Many steps have a secondary "pill" CTA without the data attribute. Keep it compact too. */
 .onboarding-shell [data-onboarding-footer] button.rounded-full:not(.bg-transparent) {
   box-sizing: border-box;
-  height: 48px !important;
-  min-height: 48px;
+  height: 44px !important;
+  min-height: 44px;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
 
 /* Reduce vertical spacing between stacked footer actions (gap-3/gap-4 is too tall on mobile). */
+.onboarding-shell [data-onboarding-footer].flex.flex-col,
 .onboarding-shell [data-onboarding-footer] .flex.flex-col {
-  gap: 0.5rem !important;
+  gap: 0.375rem !important;
 }
 
 @media (min-width: 640px) {
+  .onboarding-shell [data-onboarding-footer].flex.flex-col,
   .onboarding-shell [data-onboarding-footer] .flex.flex-col {
-    gap: 0.75rem !important;
+    gap: 0.5rem !important;
   }
 }
 
@@ -426,25 +450,25 @@ html {
     border-top-right-radius: 16px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 0.625rem !important;
-    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: 0.875rem !important;
+    padding-right: 0.875rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: calc(0.4rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .onboarding-shell [data-onboarding-footer] [data-onboarding-cta] {
-    height: 44px !important;
-    min-height: 44px;
+    height: 42px !important;
+    min-height: 42px;
   }
 
   .onboarding-shell [data-onboarding-footer] button.rounded-full:not(.bg-transparent) {
-    height: 44px !important;
-    min-height: 44px;
+    height: 42px !important;
+    min-height: 42px;
   }
 
   .onboarding-shell main {
-    padding-bottom: calc(var(--onboarding-footer-space) + 0.5rem) !important;
-    scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.5rem);
+    padding-bottom: calc(var(--onboarding-footer-space) + 0.25rem) !important;
+    scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.25rem);
   }
 }
 
