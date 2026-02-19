@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../../resources/config/config';
+import { upsertOnboardingData } from '../../services/onboarding/upsertOnboardingData';
 import type { AccountStructure } from '../../types/onboarding';
 import { useFooterVisibility } from '../../utils/useFooterVisibility';
 import { locationService } from '../../services/location';
@@ -156,16 +157,12 @@ export default function OnboardingStep5() {
 
     setIsLoading(true);
     try {
-      await config.supabaseClient
-        .from('onboarding_data')
-        .update({
-          account_structure: selectedStructure,
-          phone_number: phoneNumber,
-          phone_country_code: countryCode,
-          current_step: 5,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+      await upsertOnboardingData(userId, {
+        account_structure: selectedStructure,
+        phone_number: phoneNumber,
+        phone_country_code: countryCode,
+        current_step: 5,
+      });
 
       navigate('/onboarding/step-7');
     } catch (error) {

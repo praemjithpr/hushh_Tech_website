@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../../resources/config/config';
+import { upsertOnboardingData } from '../../services/onboarding/upsertOnboardingData';
 import type { ReferralSource } from '../../types/onboarding';
 import { useFooterVisibility } from '../../utils/useFooterVisibility';
 
@@ -70,14 +71,10 @@ export default function OnboardingStep2() {
 
     setIsLoading(true);
     try {
-      await config.supabaseClient
-        .from('onboarding_data')
-        .update({
-          referral_source: selectedSource,
-          current_step: 2,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+      await upsertOnboardingData(userId, {
+        referral_source: selectedSource,
+        current_step: 2,
+      });
 
       navigate('/onboarding/step-4');
     } catch (error) {
@@ -88,15 +85,9 @@ export default function OnboardingStep2() {
   };
 
   const handleSkip = async () => {
-    if (userId && config.supabaseClient) {
+    if (userId) {
       try {
-        await config.supabaseClient
-          .from('onboarding_data')
-          .update({
-            current_step: 2,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('user_id', userId);
+        await upsertOnboardingData(userId, { current_step: 2 });
       } catch (error) {
         console.error('Error:', error);
       }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../../resources/config/config';
+import { upsertOnboardingData } from '../../services/onboarding/upsertOnboardingData';
 import { useFooterVisibility } from '../../utils/useFooterVisibility';
 import { locationService, LocationData, COUNTRY_CODE_TO_NAME } from '../../services/location';
 import PermissionHelpModal from '../../components/PermissionHelpModal';
@@ -319,15 +320,11 @@ export default function OnboardingStep4() {
 
     setIsLoading(true);
     try {
-      await config.supabaseClient
-        .from('onboarding_data')
-        .update({
-          citizenship_country: citizenshipCountry,
-          residence_country: residenceCountry,
-          current_step: 4,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+      await upsertOnboardingData(userId, {
+        citizenship_country: citizenshipCountry,
+        residence_country: residenceCountry,
+        current_step: 4,
+      });
 
       navigate('/onboarding/step-5');
     } catch (error) {

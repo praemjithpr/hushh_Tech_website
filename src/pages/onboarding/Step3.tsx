@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import config from '../../resources/config/config';
+import { upsertOnboardingData } from '../../services/onboarding/upsertOnboardingData';
 import { useFooterVisibility } from '../../utils/useFooterVisibility';
 
 // Back arrow icon
@@ -43,13 +44,7 @@ export default function OnboardingStep3() {
     setIsLoading(true);
     try {
       // Update current step in database
-      await config.supabaseClient
-        .from('onboarding_data')
-        .update({
-          current_step: 3,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+      await upsertOnboardingData(userId, { current_step: 3 });
 
       // Navigate to step 4
       navigate('/onboarding/step-4');

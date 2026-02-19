@@ -17,6 +17,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import config from '../../resources/config/config';
+import { upsertOnboardingData } from '../../services/onboarding/upsertOnboardingData';
 
 type VerificationResult = 'verified' | 'processing' | 'requires_input' | 'failed' | 'loading';
 
@@ -68,13 +69,10 @@ function VerifyCompletePage() {
           case 'verified':
             setResult('verified');
             // Update onboarding_data
-            await config.supabaseClient
-              .from('onboarding_data')
-              .update({
-                identity_verified: true,
-                identity_verified_at: new Date().toISOString(),
-              })
-              .eq('user_id', user.id);
+            await upsertOnboardingData(user.id, {
+              identity_verified: true,
+              identity_verified_at: new Date().toISOString(),
+            });
             break;
           case 'processing':
           case 'pending':
