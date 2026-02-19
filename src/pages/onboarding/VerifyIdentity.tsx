@@ -9,7 +9,6 @@ import {
   Icon,
   Spinner,
   useToast,
-  Divider,
   Badge,
   Alert,
   AlertIcon,
@@ -18,13 +17,11 @@ import {
 } from '@chakra-ui/react';
 import { 
   Shield, 
-  CheckCircle, 
   FileText, 
   Camera, 
   Mail, 
   Phone, 
   ArrowRight,
-  AlertCircle,
   RefreshCw,
 } from 'lucide-react';
 import config from '../../resources/config/config';
@@ -194,14 +191,20 @@ function VerifyIdentityPage() {
     navigate('/hushh-user-profile');
   };
 
-  const getStatusColor = (verified: boolean) => verified ? 'green' : 'gray';
-  const getStatusIcon = (verified: boolean) => verified ? CheckCircle : AlertCircle;
-
   if (loading) {
     return (
-      <Box minH="100dvh" bg="white" display="flex" alignItems="center" justifyContent="center">
+      <Box
+        className="onboarding-shell"
+        minH="100dvh"
+        h="100dvh"
+        bg="white"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        mx="auto"
+      >
         <VStack spacing={4}>
-          <Spinner size="xl" color="cyan.500" thickness="4px" />
+          <Spinner size="xl" color="#2b8cee" thickness="4px" />
           <Text color="gray.600">Loading...</Text>
         </VStack>
       </Box>
@@ -209,19 +212,20 @@ function VerifyIdentityPage() {
   }
 
   return (
-    <Box minH="100dvh" bg="white" pt={{ base: 8, md: 10 }} pb={12} px={4}>
-      <Box maxW="640px" mx="auto">
+    <Box className="onboarding-shell" minH="100dvh" h="100dvh" bg="white" display="flex" flexDirection="column" mx="auto">
+      <Box as="main" flex="1" minH={0} overflowY="auto" px={{ base: 4, md: 5 }} pt={{ base: 6, md: 8 }} pb={8}>
+      <Box maxW="500px" mx="auto">
         {/* Header */}
         <VStack spacing={4} textAlign="center" mb={8}>
           <Box
             w="80px"
             h="80px"
             borderRadius="full"
-            bg="linear-gradient(135deg, #00A9E0 0%, #6DD3EF 100%)"
+            bg="linear-gradient(135deg, #2b8cee 0%, #38bdf8 100%)"
             display="flex"
             alignItems="center"
             justifyContent="center"
-            boxShadow="0 10px 40px rgba(0, 169, 224, 0.3)"
+            boxShadow="0 10px 40px rgba(43, 140, 238, 0.3)"
           >
             <Icon as={Shield} boxSize={10} color="white" />
           </Box>
@@ -442,15 +446,15 @@ function VerifyIdentityPage() {
             w="full"
             h="56px"
             borderRadius="full"
-            bgGradient="linear(to-r, #00A9E0, #6DD3EF)"
+            bgGradient="linear(to-r, #2b8cee, #38bdf8)"
             color="white"
-            fontWeight="500"
+            fontWeight="600"
             fontSize="lg"
             rightIcon={<Icon as={ArrowRight} />}
-            boxShadow="0 10px 25px rgba(0, 169, 224, 0.35)"
+            boxShadow="0 10px 25px rgba(43, 140, 238, 0.35)"
             _hover={{
-              bgGradient: 'linear(to-r, #0095C8, #5DC5E5)',
-              boxShadow: '0 12px 30px rgba(0, 169, 224, 0.45)',
+              bgGradient: 'linear(to-r, #2070c0, #2b8cee)',
+              boxShadow: '0 12px 30px rgba(43, 140, 238, 0.45)',
             }}
             _active={{
               transform: 'scale(0.98)',
@@ -489,6 +493,7 @@ function VerifyIdentityPage() {
         >
           Back
         </Button>
+      </Box>
       </Box>
     </Box>
   );

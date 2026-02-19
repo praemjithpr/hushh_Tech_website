@@ -198,7 +198,7 @@ export default function InvestorGuide() {
 
   return (
     <div className="bg-[#f6f7f8] min-h-screen font-['Manrope',sans-serif] antialiased text-[#111418] selection:bg-[#2b8cee]/20 selection:text-[#2b8cee]">
-      <div className="onboarding-shell mx-auto flex h-full min-h-screen w-full max-w-[500px] flex-col bg-white shadow-xl relative overflow-hidden">
+      <div className="onboarding-shell mx-auto flex h-full min-h-screen w-full max-w-[500px] flex-col bg-white shadow-xl relative overflow-hidden border-x border-slate-100">
         
         {/* Top App Bar */}
         <header className="sticky top-0 z-50 flex items-center justify-between bg-white/95 px-4 py-3 backdrop-blur-sm border-b border-gray-100">
@@ -212,12 +212,12 @@ export default function InvestorGuide() {
         </header>
 
         {/* Main Scrollable Content */}
-        <main className="flex-1 flex flex-col pb-32 overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <main className="flex-1 flex flex-col pb-44 sm:pb-52 overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           
           {/* Hero Section */}
           <div className="px-6 pt-6 pb-2 text-center">
             <div className="mb-4 inline-flex items-center justify-center rounded-full bg-[#2b8cee]/10 px-3 py-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#2b8cee]">📘 INVESTOR GUIDE</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#2b8cee]">Investor Guide</span>
             </div>
             <h1 className="mb-3 text-3xl font-extrabold leading-tight tracking-tight text-[#111418]">
               Investor Onboarding Guide
@@ -476,10 +476,11 @@ export default function InvestorGuide() {
         </main>
 
         {/* Sticky Footer */}
-        <footer className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-4 pb-8 backdrop-blur-xl">
+        <footer className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-[500px] mx-auto border-t border-slate-100 bg-white/90 backdrop-blur-md px-4 sm:px-6 pt-4 sm:pt-5 pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-[0_-4px_20px_rgba(0,0,0,0.04)]" data-onboarding-footer>
           <button 
             onClick={handleStartJourney}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2b8cee] py-4 font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 active:scale-[0.98]"
+            data-onboarding-cta
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2b8cee] px-6 py-3.5 text-sm sm:text-base font-semibold text-white shadow-lg shadow-blue-200/70 transition hover:bg-blue-600 active:scale-[0.98]"
           >
             {isLoggedIn ? 'Start Onboarding' : 'Start Onboarding'}
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_forward</span>
@@ -502,3 +503,4 @@ export default function InvestorGuide() {
     </div>
   );
 }
+

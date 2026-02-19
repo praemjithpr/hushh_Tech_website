@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   VStack,
@@ -7,11 +7,10 @@ import {
   Button,
   Icon,
   Spinner,
-  useToast,
 } from '@chakra-ui/react';
-import { 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  CheckCircle,
+  AlertCircle,
   Clock,
   ArrowRight,
   RefreshCw,
@@ -23,8 +22,6 @@ type VerificationResult = 'verified' | 'processing' | 'requires_input' | 'failed
 
 function VerifyCompletePage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const toast = useToast();
   const [result, setResult] = useState<VerificationResult>('loading');
   const [pollingCount, setPollingCount] = useState(0);
 
@@ -33,29 +30,32 @@ function VerifyCompletePage() {
     checkVerificationStatus();
   }, []);
 
-  // Poll for verification status updates
   useEffect(() => {
     if (result === 'processing' && pollingCount < 10) {
       const timer = setTimeout(() => {
         checkVerificationStatus();
-        setPollingCount(prev => prev + 1);
-      }, 3000); // Poll every 3 seconds
+        setPollingCount((prev) => prev + 1);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
   }, [result, pollingCount]);
 
   const checkVerificationStatus = async () => {
-    if (!config.supabaseClient) return;
+    if (!config.supabaseClient) {
+      return;
+    }
 
     try {
-      const { data: { user } } = await config.supabaseClient.auth.getUser();
+      const {
+        data: { user },
+      } = await config.supabaseClient.auth.getUser();
+
       if (!user) {
         navigate('/login');
         return;
       }
 
-      // Check identity_verifications table
       const { data: verification } = await config.supabaseClient
         .from('identity_verifications')
         .select('*')
@@ -68,7 +68,6 @@ function VerifyCompletePage() {
         switch (verification.stripe_status) {
           case 'verified':
             setResult('verified');
-            // Update onboarding_data
             await upsertOnboardingData(user.id, {
               identity_verified: true,
               identity_verified_at: new Date().toISOString(),
@@ -89,7 +88,6 @@ function VerifyCompletePage() {
             setResult('processing');
         }
       } else {
-        // No verification record found - might be processing
         setResult('processing');
       }
     } catch (error) {
@@ -120,9 +118,9 @@ function VerifyCompletePage() {
               alignItems="center"
               justifyContent="center"
             >
-              <Spinner size="xl" color="cyan.500" thickness="4px" />
+              <Spinner size="xl" color="#2b8cee" thickness="4px" />
             </Box>
-            <Text fontSize="2xl" fontWeight="500" color="#0B1120">
+            <Text fontSize="2xl" fontWeight="600" color="#0B1120">
               Checking Status...
             </Text>
             <Text color="gray.600" textAlign="center">
@@ -146,8 +144,8 @@ function VerifyCompletePage() {
             >
               <Icon as={CheckCircle} boxSize={16} color="green.500" />
             </Box>
-            <Text fontSize="2xl" fontWeight="500" color="#0B1120">
-              Verification Complete! 🎉
+            <Text fontSize="2xl" fontWeight="600" color="#0B1120">
+              Verification Complete
             </Text>
             <Text color="gray.600" textAlign="center" maxW="400px">
               Your identity has been verified successfully. You now have full access to all features.
@@ -158,15 +156,15 @@ function VerifyCompletePage() {
               w="full"
               maxW="320px"
               borderRadius="full"
-              bgGradient="linear(to-r, #00A9E0, #6DD3EF)"
+              bgGradient="linear(to-r, #2b8cee, #38bdf8)"
               color="white"
-              fontWeight="500"
+              fontWeight="600"
               fontSize="lg"
               rightIcon={<Icon as={ArrowRight} />}
-              boxShadow="0 10px 25px rgba(0, 169, 224, 0.35)"
+              boxShadow="0 10px 25px rgba(43, 140, 238, 0.35)"
               _hover={{
-                bgGradient: 'linear(to-r, #0095C8, #5DC5E5)',
-                boxShadow: '0 12px 30px rgba(0, 169, 224, 0.45)',
+                bgGradient: 'linear(to-r, #2070c0, #2b8cee)',
+                boxShadow: '0 12px 30px rgba(43, 140, 238, 0.45)',
               }}
             >
               Continue to Profile
@@ -188,7 +186,7 @@ function VerifyCompletePage() {
             >
               <Icon as={Clock} boxSize={16} color="blue.500" />
             </Box>
-            <Text fontSize="2xl" fontWeight="500" color="#0B1120">
+            <Text fontSize="2xl" fontWeight="600" color="#0B1120">
               Verification in Progress
             </Text>
             <Text color="gray.600" textAlign="center" maxW="400px">
@@ -204,7 +202,7 @@ function VerifyCompletePage() {
               >
                 <Box
                   h="full"
-                  bgGradient="linear(to-r, #00A9E0, #6DD3EF)"
+                  bgGradient="linear(to-r, #2b8cee, #38bdf8)"
                   animation="loading 2s ease-in-out infinite"
                   w="60%"
                 />
@@ -247,7 +245,7 @@ function VerifyCompletePage() {
             >
               <Icon as={AlertCircle} boxSize={16} color="yellow.600" />
             </Box>
-            <Text fontSize="2xl" fontWeight="500" color="#0B1120">
+            <Text fontSize="2xl" fontWeight="600" color="#0B1120">
               Additional Info Needed
             </Text>
             <Text color="gray.600" textAlign="center" maxW="400px">
@@ -259,14 +257,14 @@ function VerifyCompletePage() {
               w="full"
               maxW="320px"
               borderRadius="full"
-              bgGradient="linear(to-r, #00A9E0, #6DD3EF)"
+              bgGradient="linear(to-r, #2b8cee, #38bdf8)"
               color="white"
-              fontWeight="500"
+              fontWeight="600"
               fontSize="lg"
               leftIcon={<Icon as={RefreshCw} />}
-              boxShadow="0 10px 25px rgba(0, 169, 224, 0.35)"
+              boxShadow="0 10px 25px rgba(43, 140, 238, 0.35)"
               _hover={{
-                bgGradient: 'linear(to-r, #0095C8, #5DC5E5)',
+                bgGradient: 'linear(to-r, #2070c0, #2b8cee)',
               }}
             >
               Try Again
@@ -296,7 +294,7 @@ function VerifyCompletePage() {
             >
               <Icon as={AlertCircle} boxSize={16} color="red.500" />
             </Box>
-            <Text fontSize="2xl" fontWeight="500" color="#0B1120">
+            <Text fontSize="2xl" fontWeight="600" color="#0B1120">
               Verification Failed
             </Text>
             <Text color="gray.600" textAlign="center" maxW="400px">
@@ -308,14 +306,14 @@ function VerifyCompletePage() {
               w="full"
               maxW="320px"
               borderRadius="full"
-              bgGradient="linear(to-r, #00A9E0, #6DD3EF)"
+              bgGradient="linear(to-r, #2b8cee, #38bdf8)"
               color="white"
-              fontWeight="500"
+              fontWeight="600"
               fontSize="lg"
               leftIcon={<Icon as={RefreshCw} />}
-              boxShadow="0 10px 25px rgba(0, 169, 224, 0.35)"
+              boxShadow="0 10px 25px rgba(43, 140, 238, 0.35)"
               _hover={{
-                bgGradient: 'linear(to-r, #0095C8, #5DC5E5)',
+                bgGradient: 'linear(to-r, #2070c0, #2b8cee)',
               }}
             >
               Try Again
@@ -337,12 +335,13 @@ function VerifyCompletePage() {
   };
 
   return (
-    <Box minH="100dvh" bg="white" pt={{ base: 10, md: 14 }} pb={12} px={4}>
-      <Box maxW="640px" mx="auto" textAlign="center">
-        {renderContent()}
+    <Box className="onboarding-shell" minH="100dvh" h="100dvh" bg="white" display="flex" flexDirection="column" mx="auto">
+      <Box as="main" flex="1" minH={0} overflowY="auto" px={{ base: 4, md: 5 }} pt={{ base: 8, md: 10 }} pb={8}>
+        <Box maxW="500px" mx="auto" textAlign="center">
+          {renderContent()}
+        </Box>
       </Box>
 
-      {/* CSS Animations */}
       <style>
         {`
           @keyframes pulse {

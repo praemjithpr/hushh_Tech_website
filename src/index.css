@@ -351,14 +351,68 @@ html {
    Onboarding Mobile Responsiveness
    =========================================== */
 
+.onboarding-html,
+.onboarding-body {
+  background:
+    radial-gradient(120% 55% at 50% -20%, rgba(43, 140, 238, 0.18), transparent 60%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+}
+
+.onboarding-body {
+  font-family: "Manrope", "DM Sans", "Segoe UI", Tahoma, sans-serif;
+  color: #0f172a;
+}
+
 .onboarding-shell {
+  --onboarding-primary: #2b8cee;
+  --onboarding-primary-deep: #2070c0;
+  --onboarding-footer-space: calc(10rem + env(safe-area-inset-bottom, 0px));
+  --onboarding-border-color: rgba(15, 23, 42, 0.08);
+
+  position: relative;
   min-height: 100dvh !important;
   height: 100dvh;
-  width: 100%;
+  width: min(100%, 500px);
   overflow: hidden !important;
   overscroll-behavior: none;
-  /* Reserved space for fixed onboarding footer; overridden per-step via JS when present. */
-  --onboarding-footer-space: calc(9.75rem + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--onboarding-border-color);
+  border-radius: clamp(0px, 2vw, 24px);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 20px 56px rgba(15, 23, 42, 0.16);
+}
+
+.onboarding-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(65% 40% at 100% 0%, rgba(43, 140, 238, 0.11), transparent 65%),
+    radial-gradient(50% 30% at 0% 100%, rgba(56, 189, 248, 0.08), transparent 72%);
+  z-index: 0;
+}
+
+.onboarding-shell > header,
+.onboarding-shell > main,
+.onboarding-shell > [data-onboarding-footer] {
+  position: relative;
+  z-index: 1;
+}
+
+.onboarding-shell > header {
+  background: rgba(255, 255, 255, 0.86) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.onboarding-shell > header button {
+  color: #0f172a;
+}
+
+.onboarding-shell > header button:hover {
+  background: rgba(43, 140, 238, 0.08);
+  color: var(--onboarding-primary-deep);
 }
 
 .onboarding-shell main {
@@ -368,11 +422,25 @@ html {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  padding-bottom: calc(var(--onboarding-footer-space) + 0.35rem) !important;
-  scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.35rem);
+  scrollbar-width: none;
+  padding-bottom: calc(var(--onboarding-footer-space) + 0.45rem) !important;
+  scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.45rem);
 }
 
-/* Prevent form controls from forcing horizontal overflow on desktop/mobile. */
+.onboarding-shell main::-webkit-scrollbar {
+  display: none;
+}
+
+.onboarding-shell main h1 {
+  font-size: clamp(1.28rem, 1.04rem + 0.95vw, 1.6rem) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.022em;
+}
+
+.onboarding-shell main h2 {
+  letter-spacing: -0.018em;
+}
+
 .onboarding-shell main .grid {
   min-width: 0;
 }
@@ -394,81 +462,103 @@ html {
   white-space: nowrap;
 }
 
+.onboarding-shell main input,
+.onboarding-shell main select,
+.onboarding-shell main textarea {
+  border-radius: 0.85rem;
+}
+
+.onboarding-shell main .rounded-xl,
+.onboarding-shell main .rounded-2xl {
+  border-color: rgba(148, 163, 184, 0.26);
+}
+
 .onboarding-shell [data-onboarding-footer] {
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%);
   width: min(100%, 500px);
-  /* Override per-step Tailwind paddings for consistent mobile UX */
-  padding-left: 0.875rem !important;
-  padding-right: 0.875rem !important;
-  /* Make the fixed CTA footer more compact without reducing tap targets. */
-  padding-top: 0.5rem !important;
-  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 251, 255, 0.98) 100%) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.08) !important;
+  padding-left: 0.95rem !important;
+  padding-right: 0.95rem !important;
+  padding-top: 0.58rem !important;
+  padding-bottom: calc(0.58rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .onboarding-shell [data-onboarding-footer] [data-onboarding-cta] {
   box-sizing: border-box;
-  height: 44px !important;
-  min-height: 44px;
+  border-radius: 9999px !important;
+  height: 46px !important;
+  min-height: 46px;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+  box-shadow: 0 10px 22px rgba(43, 140, 238, 0.24);
 }
 
-/* Many steps have a secondary "pill" CTA without the data attribute. Keep it compact too. */
+.onboarding-shell [data-onboarding-footer] [data-onboarding-cta]:disabled,
+.onboarding-shell [data-onboarding-footer] [data-onboarding-cta][aria-disabled="true"] {
+  box-shadow: none !important;
+}
+
 .onboarding-shell [data-onboarding-footer] button.rounded-full:not(.bg-transparent) {
   box-sizing: border-box;
-  height: 44px !important;
-  min-height: 44px;
+  border-radius: 9999px !important;
+  height: 46px !important;
+  min-height: 46px;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
 
-/* Reduce vertical spacing between stacked footer actions (gap-3/gap-4 is too tall on mobile). */
 .onboarding-shell [data-onboarding-footer].flex.flex-col,
 .onboarding-shell [data-onboarding-footer] .flex.flex-col {
-  gap: 0.375rem !important;
+  gap: 0.45rem !important;
 }
 
 @media (min-width: 640px) {
   .onboarding-shell [data-onboarding-footer].flex.flex-col,
   .onboarding-shell [data-onboarding-footer] .flex.flex-col {
-    gap: 0.5rem !important;
+    gap: 0.55rem !important;
   }
 }
 
 @media (max-width: 640px) {
   .onboarding-shell {
     max-width: 100% !important;
+    width: 100% !important;
     border-left-width: 0 !important;
     border-right-width: 0 !important;
     box-shadow: none !important;
+    border-radius: 0 !important;
   }
 
   .onboarding-shell [data-onboarding-footer] {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    padding-left: 0.875rem !important;
-    padding-right: 0.875rem !important;
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
     padding-top: 0.5rem !important;
-    padding-bottom: calc(0.4rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(0.44rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .onboarding-shell [data-onboarding-footer] [data-onboarding-cta] {
-    height: 42px !important;
-    min-height: 42px;
+    height: 44px !important;
+    min-height: 44px;
   }
 
   .onboarding-shell [data-onboarding-footer] button.rounded-full:not(.bg-transparent) {
-    height: 42px !important;
-    min-height: 42px;
+    height: 44px !important;
+    min-height: 44px;
   }
 
   .onboarding-shell main {
-    padding-bottom: calc(var(--onboarding-footer-space) + 0.25rem) !important;
-    scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.25rem);
+    padding-bottom: calc(var(--onboarding-footer-space) + 0.3rem) !important;
+    scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.3rem);
   }
 }
 

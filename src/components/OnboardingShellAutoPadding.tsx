@@ -11,6 +11,17 @@ import { useLocation } from 'react-router-dom';
  */
 export default function OnboardingShellAutoPadding() {
   const { pathname } = useLocation();
+  const isOnboardingSurface = pathname.startsWith('/onboarding') || pathname === '/investor-guide';
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('onboarding-html', isOnboardingSurface);
+    document.body.classList.toggle('onboarding-body', isOnboardingSurface);
+
+    return () => {
+      document.documentElement.classList.remove('onboarding-html');
+      document.body.classList.remove('onboarding-body');
+    };
+  }, [isOnboardingSurface]);
 
   useEffect(() => {
     let rafId: number | null = null;
