@@ -407,8 +407,7 @@ body.onboarding-step1-scroll {
 }
 
 .onboarding-shell > header,
-.onboarding-shell > main,
-.onboarding-shell > [data-onboarding-footer] {
+.onboarding-shell > main {
   position: relative;
   z-index: 1;
 }
@@ -437,8 +436,8 @@ body.onboarding-step1-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   scrollbar-width: none;
-  padding-bottom: calc(var(--onboarding-footer-space) + 0.45rem) !important;
-  scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.45rem);
+  padding-bottom: calc(var(--onboarding-footer-space) + 0.1rem) !important;
+  scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.1rem);
 }
 
 .onboarding-shell main::-webkit-scrollbar {
@@ -488,9 +487,14 @@ body.onboarding-step1-scroll {
 }
 
 .onboarding-shell [data-onboarding-footer] {
+  position: fixed !important;
+  bottom: 0 !important;
+  top: auto !important;
   left: 50% !important;
   right: auto !important;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(0);
+  margin: 0 !important;
+  z-index: 60 !important;
   width: min(100%, var(--onboarding-shell-max-width));
   max-width: var(--onboarding-shell-max-width) !important;
   border-top: 1px solid rgba(148, 163, 184, 0.24);
@@ -585,8 +589,8 @@ body.onboarding-step1-scroll {
   }
 
   .onboarding-shell main {
-    padding-bottom: calc(var(--onboarding-footer-space) + 0.3rem) !important;
-    scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.3rem);
+    padding-bottom: calc(var(--onboarding-footer-space) + 0.05rem) !important;
+    scroll-padding-bottom: calc(var(--onboarding-footer-space) + 0.05rem);
   }
 }
 

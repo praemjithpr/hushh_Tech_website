@@ -524,17 +524,17 @@ export default function OnboardingStep1() {
 
       {/* Footer */}
       {!isFooterVisible && (
-        <div className="fixed bottom-0 left-0 right-0 pt-4 pb-8 px-6 bg-white/95 backdrop-blur-xl border-t border-slate-200/50 z-50">
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/50 bg-white/95 px-4 pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur-xl sm:px-5 sm:pt-3 sm:pb-4">
           <div className="max-w-md mx-auto w-full">
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em]">Total Investment</span>
-              <span className="text-xl font-bold text-slate-900 tracking-tight">{formatCurrency(totalInvestment)}</span>
+            <div className="mb-2.5 flex items-center justify-between">
+              <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">Total Investment</span>
+              <span className="text-lg font-bold tracking-tight text-slate-900 sm:text-xl">{formatCurrency(totalInvestment)}</span>
             </div>
             
             <button 
               onClick={handleNext}
               disabled={!hasSelection || isLoading || !!customAmountError}
-              className={`w-full h-[52px] font-bold rounded-full transition-all text-sm tracking-wide shadow-none mb-4 ${
+              className={`mb-2.5 h-[46px] w-full rounded-full text-[13px] font-bold tracking-wide shadow-none transition-all sm:h-[48px] sm:text-sm ${
                 !hasSelection || isLoading || !!customAmountError
                   ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                   : 'bg-[#3A63B8] hover:bg-[#2C4A8A] text-white active:scale-[0.99]'
@@ -544,7 +544,7 @@ export default function OnboardingStep1() {
             </button>
             
             <div className="text-center">
-              <p className="text-[9px] text-slate-400 font-medium tracking-wide leading-normal max-w-xs mx-auto">
+              <p className="mx-auto max-w-[240px] text-[8px] font-medium leading-tight tracking-wide text-slate-400 sm:max-w-xs sm:text-[9px]">
                 Minimum investment per unit &bull; Units can be adjusted later
               </p>
             </div>
