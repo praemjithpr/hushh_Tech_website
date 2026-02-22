@@ -312,11 +312,26 @@ export default function Hero() {
               borderTopRadius="22px" pointerEvents="none"
             />
             <Flex
-              w="56px" h="56px" borderRadius="full" bg={IOS.blue}
+              w="56px" h="56px" borderRadius="full"
+              bgGradient="linear(135deg, #007AFF 0%, #5AC8FA 100%)"
               align="center" justify="center" mb={5} zIndex={1}
-              boxShadow="0 4px 12px rgba(0,122,255,0.3)"
+              boxShadow="0 6px 16px rgba(0,122,255,0.35)"
+              position="relative"
             >
-              <SparkIcon />
+              {/* iOS glass highlight */}
+              <Box
+                position="absolute" top="2px" left="6px" right="6px" h="22px"
+                borderRadius="full"
+                bgGradient="linear(to-b, rgba(255,255,255,0.45), rgba(255,255,255,0))"
+                pointerEvents="none"
+              />
+              <Text
+                fontSize="28px" lineHeight="1" color="white"
+                className="material-symbols-outlined"
+                sx={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}
+              >
+                auto_awesome
+              </Text>
             </Flex>
             <Text fontSize="20px" fontWeight="600" color={IOS.text} mb={2} zIndex={1}
               fontFamily={IOS.fontDisplay} letterSpacing="-0.02em"
