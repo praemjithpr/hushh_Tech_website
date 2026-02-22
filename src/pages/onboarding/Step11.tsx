@@ -495,7 +495,7 @@ function OnboardingStep11() {
 
   return (
     <div
-      className="bg-white min-h-[100dvh] flex flex-col"
+      className="bg-white min-h-[100dvh]"
       style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif", WebkitFontSmoothing: 'antialiased' }}
     >
       {/* ═══ iOS Navigation Bar ═══ */}
@@ -511,7 +511,7 @@ function OnboardingStep11() {
         <button onClick={handleSkip} className="text-[17px] text-[#007AFF] font-normal active:opacity-50 transition-opacity">Skip</button>
       </nav>
 
-      <main className="flex-1 overflow-y-auto max-w-lg mx-auto w-full px-4 pt-4 pb-48">
+      <main className="max-w-lg mx-auto w-full px-4 pt-4 pb-48">
         {/* ─── Title ─── */}
         <h1 className="text-[34px] leading-[41px] font-bold text-black tracking-tight mb-4">Investment Summary</h1>
 
