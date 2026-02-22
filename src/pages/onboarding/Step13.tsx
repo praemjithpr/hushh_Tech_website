@@ -4,7 +4,6 @@ import config from '../../resources/config/config';
 import { upsertOnboardingData } from '../../services/onboarding/upsertOnboardingData';
 import { useFooterVisibility } from '../../utils/useFooterVisibility';
 import { fetchAuthNumbers } from '../../services/plaid/plaidService';
-import { OnboardingStepProgress } from '../../components/onboarding/OnboardingStepProgress';
 
 // SVG Icons
 const BackIcon = () => (
@@ -661,41 +660,41 @@ function OnboardingStep13() {
   };
 
   return (
-    <div 
-      className="bg-slate-50 min-h-screen"
-      style={{ fontFamily: "'Manrope', sans-serif" }}
+    <div
+      className="bg-[#F2F2F7] min-h-[100dvh] flex flex-col"
+      style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif", WebkitFontSmoothing: 'antialiased' }}
     >
-      <div className="onboarding-shell relative flex min-h-screen w-full flex-col bg-white max-w-[500px] mx-auto shadow-xl overflow-hidden border-x border-slate-100">
-        
-        {/* Sticky Header */}
-        <header className="flex items-center px-4 pt-4 pb-2 bg-white sticky top-0 z-10">
-          <button 
-            onClick={handleBack}
-            aria-label="Go back"
-            className="flex size-10 shrink-0 items-center justify-center text-slate-900 rounded-full hover:bg-slate-50 transition-colors"
-          >
-            <BackIcon />
-          </button>
-        </header>
+      {/* ═══ iOS Navigation Bar ═══ */}
+      <nav
+        className="sticky top-0 z-30 bg-[#F2F2F7]/95 backdrop-blur-md border-b border-[#C6C6C8]/30 flex items-end justify-between px-4 pb-2"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 12px) + 4px)', minHeight: '48px' }}
+      >
+        <button onClick={handleBack} className="text-[#007AFF] flex items-center -ml-2 active:opacity-50 transition-opacity" aria-label="Go back">
+          <span className="material-symbols-outlined text-3xl -mr-1" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}>chevron_left</span>
+          <span className="text-[17px] leading-none pb-[2px]">Back</span>
+        </button>
+        <span className="font-semibold text-[17px] text-black">Setup</span>
+        <button onClick={handleSkip} className="text-[17px] text-[#007AFF] font-normal active:opacity-50 transition-opacity">Skip</button>
+      </nav>
 
-        <OnboardingStepProgress currentStep={13} />
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto pb-48 sm:pb-64">
-          {/* Header Section - 22px title, 14px subtitle, center aligned */}
-          <div className="px-5 pt-2 pb-6 flex flex-col items-center text-center">
-            {/* Bank Icon */}
-            <div className="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#2b8cee]/10">
-              <BankIcon />
-            </div>
-            
-            <h1 className="text-slate-900 text-[22px] font-extrabold leading-tight tracking-tight mb-2">
-              Wire Transfer Details
-            </h1>
-            <p className="text-slate-500 text-sm font-bold">
-              Provide your banking information for investment transfers
-            </p>
+      <main className="flex-1 overflow-y-auto max-w-lg mx-auto w-full px-4 pt-2 pb-48">
+        {/* ─── Progress ─── */}
+        <div className="mb-6 mt-2">
+          <div className="flex justify-between items-end mb-2 px-1">
+            <span className="text-[13px] font-medium text-[#8E8E93] uppercase tracking-wide">Onboarding Progress</span>
+            <span className="text-[13px] text-[#8E8E93]">Step 12/12</span>
           </div>
+          <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-[#007AFF] w-full rounded-full" />
+          </div>
+          <p className="mt-1.5 px-1 text-[12px] font-medium text-[#007AFF]">100% complete</p>
+        </div>
+
+        {/* ─── Title ─── */}
+        <h1 className="text-[34px] leading-tight font-bold text-black tracking-tight mb-2 px-1">Bank Details</h1>
+        <p className="text-[17px] leading-snug text-[#8E8E93] mb-8 px-1">
+          Provide your banking information for investment transfers securely.
+        </p>
 
           {/* Error Message */}
           {error && (
@@ -807,264 +806,156 @@ function OnboardingStep13() {
             </div>
           )}
 
-          {/* Form Fields */}
-          <div className="px-5 space-y-5">
-            {/* Bank Name */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">Bank Name*</label>
-              <input
-                type="text"
-                value={bankName}
-                onChange={(e) => { userModifiedFields.current.add('bankName'); setBankName(e.target.value); }}
-                onBlur={() => handleBlur('bankName')}
-                placeholder="e.g. Chase Bank"
-                className={`w-full rounded-xl border bg-white px-4 py-3.5 text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 transition-all ${
-                  touched.bankName && bankNameError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                    : touched.bankName && !bankNameError
-                    ? 'border-green-400 focus:border-green-500 focus:ring-green-500'
-                    : 'border-slate-200 focus:border-[#2b8cee] focus:ring-[#2b8cee]'
-                }`}
-              />
-              {touched.bankName && bankNameError && (
-                <p className="text-red-500 text-xs font-medium">{bankNameError}</p>
-              )}
-              {touched.bankName && !bankNameError && bankName && (
-                <p className="text-green-600 text-xs font-medium">* Valid bank name</p>
-              )}
-            </div>
-
-            {/* Account Holder Name */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">Account Holder Name*</label>
-              <input
-                type="text"
-                value={accountHolderName}
-                onChange={(e) => setAccountHolderName(e.target.value)}
-                onBlur={() => handleBlur('accountHolderName')}
-                placeholder="e.g. John Doe"
-                className={`w-full rounded-xl border bg-white px-4 py-3.5 text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 transition-all ${
-                  touched.accountHolderName && accountHolderNameError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                    : touched.accountHolderName && !accountHolderNameError
-                    ? 'border-green-400 focus:border-green-500 focus:ring-green-500'
-                    : 'border-slate-200 focus:border-[#2b8cee] focus:ring-[#2b8cee]'
-                }`}
-              />
-              {touched.accountHolderName && accountHolderNameError && (
-                <p className="text-red-500 text-xs font-medium">{accountHolderNameError}</p>
-              )}
-              {touched.accountHolderName && !accountHolderNameError && accountHolderName && (
-                <p className="text-green-600 text-xs font-medium">* Valid name</p>
-              )}
-            </div>
-
-            {/* Account Type */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">Account Type</label>
-              <input
-                type="text"
-                value={formattedOnboardingAccountType}
-                readOnly
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base font-semibold text-slate-900 focus:outline-none"
-                aria-label="Selected account type from step 5"
-              />
-            </div>
-
-            {/* Account Number */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">Account Number*</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={accountNumber}
-                onChange={(e) => { userModifiedFields.current.add('accountNumber'); setAccountNumber(e.target.value.replace(/\D/g, '')); }}
-                onBlur={() => handleBlur('accountNumber')}
-                placeholder="000000000"
-                className={`w-full rounded-xl border bg-white px-4 py-3.5 text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 transition-all ${
-                  touched.accountNumber && accountNumberError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                    : touched.accountNumber && !accountNumberError
-                    ? 'border-green-400 focus:border-green-500 focus:ring-green-500'
-                    : 'border-slate-200 focus:border-[#2b8cee] focus:ring-[#2b8cee]'
-                }`}
-              />
-              {touched.accountNumber && accountNumberError && (
-                <p className="text-red-500 text-xs font-medium">{accountNumberError}</p>
-              )}
-              {touched.accountNumber && !accountNumberError && accountNumber && (
-                <p className="text-green-600 text-xs font-medium">* Valid account number ({accountNumber.length} digits)</p>
-              )}
-            </div>
-
-            {/* Confirm Account Number */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">Confirm Account Number*</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={confirmAccountNumber}
-                onChange={(e) => { userModifiedFields.current.add('confirmAccountNumber'); setConfirmAccountNumber(e.target.value.replace(/\D/g, '')); }}
-                onBlur={() => handleBlur('confirmAccountNumber')}
-                placeholder="000000000"
-                className={`w-full rounded-xl border bg-white px-4 py-3.5 text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 transition-all ${
-                  touched.confirmAccountNumber && confirmAccountNumberError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                    : touched.confirmAccountNumber && !confirmAccountNumberError
-                    ? 'border-green-400 focus:border-green-500 focus:ring-green-500'
-                    : 'border-slate-200 focus:border-[#2b8cee] focus:ring-[#2b8cee]'
-                }`}
-              />
-              {touched.confirmAccountNumber && confirmAccountNumberError && (
-                <p className="text-red-500 text-xs font-medium">{confirmAccountNumberError}</p>
-              )}
-              {touched.confirmAccountNumber && !confirmAccountNumberError && confirmAccountNumber && (
-                <p className="text-green-600 text-xs font-medium">* Account numbers match</p>
-              )}
-            </div>
-
-            {/* Bank Country */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">Bank Country*</label>
-              <div className="relative">
-                <select
-                  value={bankCountry}
-                  onChange={(e) => {
-                    userModifiedFields.current.add('bankCountry');
-                    setBankCountry(e.target.value);
-                    handleBlur('bankCountry');
-                  }}
-                  onBlur={() => handleBlur('bankCountry')}
-                  className={`w-full appearance-none rounded-xl border bg-white px-4 py-3.5 text-base font-medium text-slate-900 focus:outline-none focus:ring-1 transition-all ${
-                    touched.bankCountry && bankCountryError
-                      ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                      : touched.bankCountry && !bankCountryError
-                      ? 'border-green-400 focus:border-green-500 focus:ring-green-500'
-                      : 'border-slate-200 focus:border-[#2b8cee] focus:ring-[#2b8cee]'
-                  }`}
-                >
-                  {COUNTRIES.map((country) => (
-                    <option key={country.code} value={country.code} disabled={country.code === ''}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                  <ChevronDownIcon />
+          {/* ─── BANKING INFORMATION — iOS Grouped Table ─── */}
+          <div className="mb-8">
+            <div className="uppercase text-[13px] text-[#8E8E93] mb-2 px-4 font-normal">Banking Information</div>
+            <div className="bg-white rounded-[10px] overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.05)] divide-y divide-[#C6C6C8]/50">
+              {/* Bank Name */}
+              <div className="flex items-center min-h-[44px] px-4 active:bg-gray-100 transition-colors">
+                <label className="w-1/3 text-[17px] text-black py-3">Bank Name</label>
+                <input
+                  type="text"
+                  value={bankName}
+                  onChange={(e) => { userModifiedFields.current.add('bankName'); setBankName(e.target.value); }}
+                  onBlur={() => handleBlur('bankName')}
+                  placeholder="Required"
+                  className="w-2/3 bg-transparent border-none text-[17px] text-right text-black placeholder-[#8E8E93] focus:ring-0 p-0"
+                />
+              </div>
+              {/* Holder Name */}
+              <div className="flex items-center min-h-[44px] px-4 active:bg-gray-100 transition-colors">
+                <label className="w-1/3 text-[17px] text-black py-3 whitespace-nowrap">Holder Name</label>
+                <input
+                  type="text"
+                  value={accountHolderName}
+                  onChange={(e) => setAccountHolderName(e.target.value)}
+                  onBlur={() => handleBlur('accountHolderName')}
+                  placeholder="Required"
+                  className="w-2/3 bg-transparent border-none text-[17px] text-right text-black placeholder-[#8E8E93] focus:ring-0 p-0"
+                />
+              </div>
+              {/* Account Type */}
+              <div className="flex items-center justify-between min-h-[44px] px-4 cursor-pointer">
+                <label className="text-[17px] text-black py-3">Account Type</label>
+                <div className="flex items-center">
+                  <span className="text-[17px] text-[#8E8E93] mr-2">{formattedOnboardingAccountType}</span>
+                  <span className="material-symbols-outlined text-gray-400 text-lg">chevron_right</span>
                 </div>
               </div>
-              {touched.bankCountry && bankCountryError && (
-                <p className="text-red-500 text-xs font-medium">{bankCountryError}</p>
-              )}
-              {touched.bankCountry && !bankCountryError && bankCountry && (
-                <p className="text-green-600 text-xs font-medium">* Country selected</p>
-              )}
+              {/* Country */}
+              <div className="flex items-center justify-between min-h-[44px] px-4 cursor-pointer relative">
+                <label className="text-[17px] text-black py-3">Country</label>
+                <div className="flex items-center">
+                  <select
+                    value={bankCountry}
+                    onChange={(e) => { userModifiedFields.current.add('bankCountry'); setBankCountry(e.target.value); handleBlur('bankCountry'); }}
+                    onBlur={() => handleBlur('bankCountry')}
+                    className="appearance-none bg-transparent border-none text-[17px] text-[#8E8E93] text-right focus:ring-0 p-0 pr-6 cursor-pointer"
+                  >
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code} disabled={c.code === ''}>{c.name}</option>
+                    ))}
+                  </select>
+                  <span className="material-symbols-outlined text-gray-400 text-lg absolute right-4 pointer-events-none">chevron_right</span>
+                </div>
+              </div>
             </div>
-
-            {/* Routing Number */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">Routing Number (ABA)*</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={routingNumber}
-                onChange={(e) => { userModifiedFields.current.add('routingNumber'); setRoutingNumber(e.target.value.replace(/\D/g, '').slice(0, bankCountry === 'US' ? 9 : 15)); }}
-                onBlur={() => handleBlur('routingNumber')}
-                placeholder={bankCountry === 'US' ? '000000000' : 'Enter routing number'}
-                maxLength={bankCountry === 'US' ? 9 : 15}
-                className={`w-full rounded-xl border bg-white px-4 py-3.5 text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 transition-all ${
-                  touched.routingNumber && routingNumberError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                    : touched.routingNumber && !routingNumberError
-                    ? 'border-green-400 focus:border-green-500 focus:ring-green-500'
-                    : 'border-slate-200 focus:border-[#2b8cee] focus:ring-[#2b8cee]'
-                }`}
-              />
-              {touched.routingNumber && routingNumberError && (
-                <p className="text-red-500 text-xs font-medium">{routingNumberError}</p>
-              )}
-              {touched.routingNumber && !routingNumberError && routingNumber && (
-                <p className="text-green-600 text-xs font-medium">* Valid routing number ({routingNumber.length} digits)</p>
-              )}
-              {!touched.routingNumber && (
-                <p className="text-xs font-medium text-slate-500 pt-1 pl-1">
-                  {bankCountry === 'US' ? 'Must be exactly 9 digits (bottom left of your check)' : 'Usually 5-15 digits'}
-                </p>
-              )}
-            </div>
-
-            {/* Bank City (Optional) */}
-            <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-900">
-                Bank City <span className="text-slate-400 font-medium">(Optional)</span>
-              </label>
-              <input
-                type="text"
-                value={bankCity}
-                onChange={(e) => setBankCity(e.target.value)}
-                placeholder="e.g. New York"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-base font-medium text-slate-900 placeholder:text-slate-400 focus:border-[#2b8cee] focus:outline-none focus:ring-1 focus:ring-[#2b8cee] transition-all"
-              />
-            </div>
+            <p className="mt-2 px-4 text-[13px] text-[#8E8E93] leading-normal">Ensure the account holder name matches your ID exactly.</p>
+            {touched.bankName && bankNameError && <p className="mt-1 px-4 text-[13px] text-red-500">{bankNameError}</p>}
+            {touched.accountHolderName && accountHolderNameError && <p className="mt-1 px-4 text-[13px] text-red-500">{accountHolderNameError}</p>}
           </div>
 
-          {/* Security Note */}
-          <div className="mx-5 mt-6 mb-8">
-            <div className="flex gap-4 rounded-xl bg-[#F0F7FF] p-4 border border-[#2b8cee]/20">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2b8cee]/10">
-                <LockIcon />
+          {/* ─── ACCOUNT DETAILS — iOS Grouped Table ─── */}
+          <div className="mb-8">
+            <div className="uppercase text-[13px] text-[#8E8E93] mb-2 px-4 font-normal">Account Details</div>
+            <div className="bg-white rounded-[10px] overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.05)] divide-y divide-[#C6C6C8]/50">
+              {/* Routing # */}
+              <div className="flex items-center min-h-[44px] px-4 active:bg-gray-100 transition-colors">
+                <label className="w-1/3 text-[17px] text-black py-3">Routing #</label>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={routingNumber}
+                  onChange={(e) => { userModifiedFields.current.add('routingNumber'); setRoutingNumber(e.target.value.replace(/\D/g, '').slice(0, bankCountry === 'US' ? 9 : 15)); }}
+                  onBlur={() => handleBlur('routingNumber')}
+                  placeholder="9 digits"
+                  maxLength={bankCountry === 'US' ? 9 : 15}
+                  className="w-2/3 bg-transparent border-none text-[17px] text-right text-black placeholder-[#8E8E93] focus:ring-0 p-0 font-mono tracking-tight"
+                />
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 mb-1">Bank-level Security</h3>
-                <p className="text-xs leading-relaxed text-slate-500">
-                  Your data is encrypted with 256-bit SSL security and sent securely to your bank.
-                </p>
+              {/* Account # */}
+              <div className="flex items-center min-h-[44px] px-4 active:bg-gray-100 transition-colors">
+                <label className="w-1/3 text-[17px] text-black py-3">Account #</label>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={accountNumber}
+                  onChange={(e) => { userModifiedFields.current.add('accountNumber'); setAccountNumber(e.target.value.replace(/\D/g, '')); }}
+                  onBlur={() => handleBlur('accountNumber')}
+                  placeholder="Required"
+                  className="w-2/3 bg-transparent border-none text-[17px] text-right text-black placeholder-[#8E8E93] focus:ring-0 p-0 font-mono tracking-tight"
+                />
+              </div>
+              {/* Confirm # */}
+              <div className="flex items-center min-h-[44px] px-4 active:bg-gray-100 transition-colors">
+                <label className="w-1/3 text-[17px] text-black py-3">Confirm #</label>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={confirmAccountNumber}
+                  onChange={(e) => { userModifiedFields.current.add('confirmAccountNumber'); setConfirmAccountNumber(e.target.value.replace(/\D/g, '')); }}
+                  onBlur={() => handleBlur('confirmAccountNumber')}
+                  placeholder="Re-enter number"
+                  className="w-2/3 bg-transparent border-none text-[17px] text-right text-black placeholder-[#8E8E93] focus:ring-0 p-0 font-mono tracking-tight"
+                />
               </div>
             </div>
+            <p className="mt-2 px-4 text-[13px] text-[#8E8E93] leading-normal">Routing number can be found on the bottom left of your check.</p>
+            {touched.routingNumber && routingNumberError && <p className="mt-1 px-4 text-[13px] text-red-500">{routingNumberError}</p>}
+            {touched.accountNumber && accountNumberError && <p className="mt-1 px-4 text-[13px] text-red-500">{accountNumberError}</p>}
+            {touched.confirmAccountNumber && confirmAccountNumberError && <p className="mt-1 px-4 text-[13px] text-red-500">{confirmAccountNumberError}</p>}
+          </div>
+
+          {/* ─── Security Badge ─── */}
+          <div className="flex flex-col items-center justify-center mt-6 mb-8 opacity-80">
+            <div className="flex items-center space-x-1.5 text-[#8E8E93]">
+              <span className="material-symbols-outlined text-[16px]">lock</span>
+              <span className="text-[13px] font-medium">Bank-level Security</span>
+            </div>
+            <p className="text-[11px] text-[#8E8E93] mt-1 text-center max-w-xs">
+              Your data is encrypted with 256-bit SSL security.
+            </p>
           </div>
         </main>
 
-        {/* Fixed Footer - matching Step3 pattern */}
+        {/* ═══ iOS Fixed Footer ═══ */}
         {!isFooterVisible && (
           <div
-            className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-[500px] mx-auto border-t border-slate-100 bg-white/90 backdrop-blur-md px-4 sm:px-6 pt-4 sm:pt-5 pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-[0_-4px_20px_rgba(0,0,0,0.04)]"
+            className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[#C6C6C8]/30 px-4 pt-3 z-50"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}
             data-onboarding-footer
           >
-            <div className="flex flex-col gap-3 sm:gap-4">
-              {/* Continue Button */}
-              <button
-                onClick={handleContinue}
-                disabled={loading || !isFormValid()}
-                data-onboarding-cta
-                className={`w-full h-11 sm:h-12 bg-[#2b8cee] hover:bg-[#2070c0] text-white font-semibold text-sm sm:text-base px-6 rounded-full shadow-md shadow-[#2b8cee]/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
-                  loading || !isFormValid() ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {loading ? 'Saving...' : 'Continue'}
-                {!loading && <ArrowForwardIcon />}
-              </button>
-
-              {/* Skip Button */}
-              <button
-                onClick={handleSkip}
-                disabled={loading}
-                className="w-full text-center text-slate-500 hover:text-slate-900 text-sm font-semibold py-2 transition-colors"
-              >
+            <div className="max-w-lg mx-auto flex flex-col gap-3">
+              <div className="flex gap-4 h-[50px]">
+                <button onClick={handleBack} disabled={loading} className="flex-1 bg-gray-200 text-black font-semibold text-[17px] rounded-xl active:bg-gray-300 transition-colors">Back</button>
+                <button
+                  onClick={handleContinue}
+                  disabled={loading || !isFormValid()}
+                  data-onboarding-cta
+                  className={`flex-1 rounded-xl font-semibold text-[17px] flex items-center justify-center gap-1 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 ${
+                    isFormValid() && !loading ? 'bg-[#007AFF] text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {loading ? 'Saving...' : 'Continue'}
+                  {!loading && <span className="material-symbols-outlined text-xl">arrow_forward</span>}
+                </button>
+              </div>
+              <button onClick={handleSkip} disabled={loading} className="text-[15px] font-medium text-[#8E8E93] active:text-[#007AFF] transition-colors text-center">
                 I'll do this later
-              </button>
-
-              {/* Back Button */}
-              <button
-                onClick={handleBack}
-                disabled={loading}
-                className="w-full text-center text-slate-400 hover:text-slate-900 text-sm font-semibold py-2 transition-colors"
-              >
-                Back
               </button>
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
