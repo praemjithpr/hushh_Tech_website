@@ -26,6 +26,9 @@ export default function OnboardingStep9() {
   const isFooterVisible = useFooterVisibility();
   const [ssn, setSsn] = useState('');
   const [dob, setDob] = useState('');
+  const [dobMonth, setDobMonth] = useState('');
+  const [dobDay, setDobDay] = useState('');
+  const [dobYear, setDobYear] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -71,6 +74,13 @@ export default function OnboardingStep9() {
       if (data?.date_of_birth) {
         const saved = formatIsoToDisplay(data.date_of_birth);
         if (saved) setDob(saved);
+        // Also populate dropdowns from ISO date
+        const parts = data.date_of_birth.split('-');
+        if (parts.length === 3) {
+          setDobYear(parts[0]);
+          setDobMonth(parts[1]);
+          setDobDay(parts[2]);
+        }
       }
       if (data?.ssn_encrypted && data.ssn_encrypted !== '999-99-9999') {
         setSsn(data.ssn_encrypted);
@@ -108,7 +118,32 @@ export default function OnboardingStep9() {
     }
   };
 
-  const isFormValid = dob.length === 10;
+  // Sync dob string from dropdown selections
+  useEffect(() => {
+    if (dobMonth && dobDay && dobYear) {
+      setDob(`${dobMonth}/${dobDay}/${dobYear}`);
+    }
+  }, [dobMonth, dobDay, dobYear]);
+
+  // Generate year options (current year down to 1930)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: currentYear - 1929 }, (_, i) => String(currentYear - i));
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  // Days in selected month/year
+  const daysInMonth = dobMonth && dobYear
+    ? new Date(parseInt(dobYear), parseInt(dobMonth), 0).getDate()
+    : 31;
+  const dayOptions = Array.from({ length: daysInMonth }, (_, i) => String(i + 1).padStart(2, '0'));
+
+  // Correct day if month changed and day is now out of range
+  useEffect(() => {
+    if (dobDay && parseInt(dobDay) > daysInMonth) {
+      setDobDay(String(daysInMonth).padStart(2, '0'));
+    }
+  }, [dobMonth, dobYear, daysInMonth, dobDay]);
+
+  const isFormValid = !!(dobMonth && dobDay && dobYear && dobYear.length === 4);
 
   /* ─── Handlers ─── */
   const handleContinue = async () => {
@@ -241,48 +276,76 @@ export default function OnboardingStep9() {
           </div>
         </div>
 
-        {/* ─── DOB Section ─── */}
+        {/* ─── DOB Section — 3 iOS Dropdown Selectors ─── */}
         <div className="mb-8">
           <h2 className="ml-4 mb-2 text-[13px] uppercase text-[#8E8E93] font-normal">Date of birth</h2>
           <div className="bg-white rounded-xl overflow-hidden ring-1 ring-black/5">
-            <div className="flex items-center px-4 py-3 gap-3">
-              {/* Typeable DOB input with auto-formatting (MM/DD/YYYY) */}
-              <input
-                type="text"
-                value={dob}
-                onChange={handleDobChange}
-                placeholder="MM/DD/YYYY"
-                maxLength={10}
-                inputMode="numeric"
-                aria-label="Date of Birth"
-                className="flex-1 bg-transparent border-none p-0 text-[17px] text-black placeholder-gray-400 focus:ring-0 outline-none tracking-wide"
-              />
-              {/* Calendar icon — opens native date picker as fallback */}
-              <button
-                type="button"
-                onClick={openDatePicker}
-                className="text-[#007AFF] active:opacity-50 transition-opacity p-1 -mr-1"
-                aria-label="Open date picker"
+            {/* Month selector */}
+            <div className="flex items-center px-4 py-3 relative">
+              <span className="text-[15px] text-[#8E8E93] w-16 shrink-0">Month</span>
+              <select
+                value={dobMonth}
+                onChange={(e) => setDobMonth(e.target.value)}
+                aria-label="Birth month"
+                className="flex-1 bg-transparent border-none p-0 text-[17px] text-black focus:ring-0 outline-none appearance-none cursor-pointer"
               >
-                <span
-                  className="material-symbols-outlined text-2xl"
-                  style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}
-                >calendar_today</span>
-              </button>
-              {/* Hidden native date input for calendar picker fallback */}
-              <input
-                ref={dateInputRef}
-                type="date"
-                onChange={handleNativeDateChange}
-                className="sr-only"
-                aria-hidden="true"
-                tabIndex={-1}
-                max={new Date().toISOString().split('T')[0]}
-                min="1900-01-01"
-              />
+                <option value="" disabled>Select month</option>
+                {monthNames.map((name, idx) => (
+                  <option key={name} value={String(idx + 1).padStart(2, '0')}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined text-[#C7C7CC] text-lg" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}>expand_more</span>
+            </div>
+
+            {/* Hairline */}
+            <div className="ml-4 h-[0.5px] bg-[#C6C6C8]/50" />
+
+            {/* Day selector */}
+            <div className="flex items-center px-4 py-3 relative">
+              <span className="text-[15px] text-[#8E8E93] w-16 shrink-0">Day</span>
+              <select
+                value={dobDay}
+                onChange={(e) => setDobDay(e.target.value)}
+                aria-label="Birth day"
+                className="flex-1 bg-transparent border-none p-0 text-[17px] text-black focus:ring-0 outline-none appearance-none cursor-pointer"
+              >
+                <option value="" disabled>Select day</option>
+                {dayOptions.map((d) => (
+                  <option key={d} value={d}>{parseInt(d)}</option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined text-[#C7C7CC] text-lg" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}>expand_more</span>
+            </div>
+
+            {/* Hairline */}
+            <div className="ml-4 h-[0.5px] bg-[#C6C6C8]/50" />
+
+            {/* Year selector */}
+            <div className="flex items-center px-4 py-3 relative">
+              <span className="text-[15px] text-[#8E8E93] w-16 shrink-0">Year</span>
+              <select
+                value={dobYear}
+                onChange={(e) => setDobYear(e.target.value)}
+                aria-label="Birth year"
+                className="flex-1 bg-transparent border-none p-0 text-[17px] text-black focus:ring-0 outline-none appearance-none cursor-pointer"
+              >
+                <option value="" disabled>Select year</option>
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined text-[#C7C7CC] text-lg" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}>expand_more</span>
             </div>
           </div>
-          <p className="ml-4 mt-1.5 text-[13px] text-[#8E8E93]">Type your date as MM/DD/YYYY</p>
+          {/* Confirmation text when all selected */}
+          {isFormValid && (
+            <p className="ml-4 mt-2 text-[13px] text-[#34C759] font-medium flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>check_circle</span>
+              {monthNames[parseInt(dobMonth) - 1]} {parseInt(dobDay)}, {dobYear}
+            </p>
+          )}
         </div>
       </main>
 
