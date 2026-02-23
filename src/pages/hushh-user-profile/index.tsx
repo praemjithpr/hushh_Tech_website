@@ -387,7 +387,7 @@ const HushhUserProfilePage: React.FC = () => {
         try {
           const { data: financialData } = await supabase
             .from('user_financial_data')
-            .select('balances, investments, identity_match_data, nws_score')
+            .select('*')
             .eq('user_id', user.id)
             .maybeSingle();
 
