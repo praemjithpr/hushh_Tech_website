@@ -1,5 +1,10 @@
-import React from 'react';
-import ReactCountryFlag from 'react-country-flag';
+/**
+ * Step 5 — A Few More Details (Account Type + Phone)
+ * Premium Hushh design matching Step 1/2/4.
+ * Logic stays in logic.ts — zero logic changes.
+ * Uses HushhTechBackHeader + HushhTechCta reusable components.
+ */
+import ReactCountryFlag from "react-country-flag";
 import {
   useStep5Logic,
   CURRENT_STEP,
@@ -7,11 +12,21 @@ import {
   PROGRESS_PCT,
   PHONE_DIAL_CODES,
   ACCOUNT_TYPE_OPTIONS,
-} from './logic';
+} from "./logic";
+import HushhTechBackHeader from "../../../components/hushh-tech-back-header/HushhTechBackHeader";
+import HushhTechCta, {
+  HushhTechCtaVariant,
+} from "../../../components/hushh-tech-cta/HushhTechCta";
 
-/* ═══════════════════════════════════════════════
-   COMPONENT
-   ═══════════════════════════════════════════════ */
+/** Material icon for each account type */
+const ACCOUNT_ICONS: Record<string, string> = {
+  individual: "person",
+  joint: "group",
+  trust: "verified_user",
+  entity: "domain",
+  ira: "savings",
+  sdira: "account_balance",
+};
 
 export default function OnboardingStep5() {
   const {
@@ -24,7 +39,6 @@ export default function OnboardingStep5() {
     isLoading,
     showDialPicker,
     setShowDialPicker,
-    isFooterVisible,
     canContinue,
     selectedDialOption,
     formatPhoneNumber,
@@ -35,203 +49,297 @@ export default function OnboardingStep5() {
     handleSelectDialCode,
   } = useStep5Logic();
 
-  /* ═══════════════════════════════════════════════
-     RENDER
-     ═══════════════════════════════════════════════ */
   return (
-    <div
-      className="bg-white min-h-[100dvh] flex flex-col relative"
-      style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif", WebkitFontSmoothing: 'antialiased' }}
-    >
-      {/* ═══ iOS Navigation Bar ═══ */}
-      <nav
-        className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#C6C6C8]/30 flex items-end justify-between px-4 pb-2"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 12px) + 4px)', minHeight: '48px' }}
+    <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-black selection:text-white relative overflow-hidden">
+      {/* ═══ Background layer (blurs when dial picker is open) ═══ */}
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          showDialPicker
+            ? "scale-[0.98] blur-[2px] opacity-40 pointer-events-none select-none"
+            : ""
+        }`}
       >
-        <button onClick={handleBack} className="text-[#007AFF] flex items-center -ml-2 active:opacity-50 transition-opacity" aria-label="Go back">
-          <span className="material-symbols-outlined text-3xl -mr-1" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}>
-            chevron_left
-          </span>
-          <span className="text-[17px] leading-none pb-[2px]">Back</span>
-        </button>
-        <span className="font-semibold text-[17px] text-black">Setup</span>
-        <button onClick={handleSkip} className="text-[#007AFF] font-normal text-[17px] active:opacity-50 transition-opacity">
-          Skip
-        </button>
-      </nav>
+        {/* ═══ Header ═══ */}
+        <HushhTechBackHeader onBackClick={handleBack} rightLabel="FAQs" />
 
-      <main className="flex-1 flex flex-col max-w-md mx-auto w-full px-4 pt-4 pb-48">
-        {/* ─── Progress Bar ─── */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-[13px] font-medium text-[#8E8E93] uppercase tracking-wide">Onboarding Progress</span>
-            <span className="text-[13px] text-[#8E8E93]">Step {CURRENT_STEP}/{TOTAL_STEPS}</span>
-          </div>
-          <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-[#007AFF] rounded-full transition-all duration-500" style={{ width: `${PROGRESS_PCT}%` }} />
-          </div>
-          <p className="mt-2 text-[13px] font-medium text-[#007AFF]">{PROGRESS_PCT}% complete</p>
-        </div>
-
-        {/* ─── Title ─── */}
-        <div className="mb-8">
-          <h1 className="text-[34px] leading-[41px] font-bold text-black tracking-tight mb-2">
-            A few more details
-          </h1>
-          <p className="text-[17px] text-[#8E8E93] leading-relaxed">
-            This helps us personalize your account and keep your profile secure.
-          </p>
-        </div>
-
-        {/* ─── Account Type — iOS Grouped Table ─── */}
-        <div className="mb-8">
-          <h2 className="text-[13px] uppercase text-[#8E8E93] font-medium mb-2 pl-4">
-            Account type
-          </h2>
-          <div className="bg-[#F2F2F7] rounded-[10px] overflow-hidden">
-            {ACCOUNT_TYPE_OPTIONS.map((option, index) => {
-              const isSelected = selectedAccountType === option.value;
-              const isLast = index === ACCOUNT_TYPE_OPTIONS.length - 1;
-              return (
-                <button
-                  key={option.value}
-                  onClick={() => setSelectedAccountType(option.value)}
-                  className={`w-full flex items-center justify-between pl-4 pr-4 py-3.5 bg-white active:bg-gray-100 transition-colors ${
-                    !isLast ? 'border-b border-[#C6C6C8]/40 ml-0' : ''
-                  }`}
-                  role="radio"
-                  aria-checked={isSelected}
-                  aria-label={`Select ${option.label} account`}
-                >
-                  <span className="text-[17px] text-black">{option.label}</span>
-                  {isSelected && (
-                    <span
-                      className="material-symbols-outlined text-[#007AFF] text-xl"
-                      style={{ fontVariationSettings: "'FILL' 0, 'wght' 500" }}
-                    >
-                      check
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ─── Phone Number ─── */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-[22px] leading-[28px] font-bold text-black">Phone number</h2>
-            {isAutoDetectingDialCode && (
-              <span className="text-xs font-medium text-[#8E8E93]">Detecting...</span>
-            )}
-          </div>
-          <p className="text-[13px] text-[#8E8E93] mb-4">
-            We&apos;ll use this to verify your identity when needed.
-          </p>
-
-          {/* iOS-style phone input */}
-          <div className="bg-[#F2F2F7] rounded-[10px] flex items-center overflow-hidden h-[50px] ring-1 ring-transparent focus-within:ring-[#007AFF] transition-all">
-            {/* Country code selector */}
-            <button
-              onClick={() => setShowDialPicker(true)}
-              className="flex items-center pl-4 pr-3 h-full border-r border-[#C6C6C8]/40 bg-white active:bg-gray-100 transition-colors"
-            >
-              <ReactCountryFlag
-                countryCode={selectedDialOption.iso}
-                svg
-                style={{ width: '1.25em', height: '1.25em', borderRadius: 2, flexShrink: 0 }}
-                aria-label={selectedDialOption.country}
-              />
-              <span className="text-[17px] font-medium text-black ml-2">{selectedDialOption.code}</span>
-              <span className="material-symbols-outlined text-[#8E8E93] text-lg ml-1" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}>
-                expand_more
+        <main className="px-6 flex-grow max-w-md mx-auto w-full pb-48">
+          {/* ── Progress Bar ── */}
+          <div className="py-4">
+            <div className="flex justify-between text-[11px] font-semibold tracking-wide text-gray-500 mb-3 lowercase">
+              <span>
+                step {CURRENT_STEP}/{TOTAL_STEPS}
               </span>
-            </button>
-
-            {/* Phone input */}
-            <input
-              type="tel"
-              value={formatPhoneNumber(phoneNumber)}
-              onChange={handlePhoneChange}
-              placeholder="(000) 000-0000"
-              className="flex-1 h-full bg-white border-none focus:ring-0 text-[17px] text-black placeholder-gray-400 px-4 outline-none"
-            />
+              <span>{PROGRESS_PCT}% complete</span>
+            </div>
+            <div className="h-0.5 w-full bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-black transition-all duration-500"
+                style={{ width: `${PROGRESS_PCT}%` }}
+              />
+            </div>
           </div>
 
-          <p className="text-xs text-[#8E8E93] mt-2 ml-4">
-            Standard message and data rates may apply.
-          </p>
-        </div>
-      </main>
-
-      {/* ═══ Fixed Footer — 2-column ═══ */}
-      {!isFooterVisible && (
-        <div
-          className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-[#C6C6C8]/30 z-40"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
-          data-onboarding-footer
-        >
-          <div className="max-w-md mx-auto flex gap-4">
-            <button
-              onClick={handleSkip}
-              className="flex-1 bg-[#E5E5EA] text-[#007AFF] font-semibold text-[17px] py-[14px] rounded-xl active:opacity-70 transition-opacity flex items-center justify-center"
+          {/* ── Title Section ── */}
+          <section className="py-8">
+            <h3 className="text-[11px] tracking-wide text-gray-500 lowercase mb-4 font-semibold">
+              account setup
+            </h3>
+            <h1
+              className="text-[2.75rem] leading-[1.1] font-normal text-black tracking-tight lowercase"
+              style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Skip
-            </button>
-            <button
+              a few more
+              <br />
+              <span className="text-gray-400 italic font-normal">details</span>
+            </h1>
+            <p className="text-sm text-gray-500 mt-4 leading-relaxed lowercase font-medium">
+              this helps us personalize your account and keep your profile
+              secure.
+            </p>
+          </section>
+
+          {/* ── Account Type Selection ── */}
+          <section className="mb-10">
+            <h3 className="text-[11px] tracking-wide text-gray-500 lowercase mb-4 font-semibold">
+              account type
+            </h3>
+            <div className="space-y-0">
+              {ACCOUNT_TYPE_OPTIONS.map((option, index) => {
+                const isSelected = selectedAccountType === option.value;
+                const isLast = index === ACCOUNT_TYPE_OPTIONS.length - 1;
+                const icon =
+                  ACCOUNT_ICONS[option.value] || "account_circle";
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedAccountType(option.value)}
+                    className={`w-full flex items-center gap-4 py-5 text-left transition-colors group ${
+                      !isLast ? "border-b border-gray-200" : ""
+                    }`}
+                    role="radio"
+                    aria-checked={isSelected}
+                    aria-label={`Select ${option.label} account`}
+                  >
+                    {/* Icon circle */}
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected
+                          ? "bg-black"
+                          : "bg-gray-100 group-hover:bg-gray-200"
+                      }`}
+                    >
+                      <span
+                        className={`material-symbols-outlined text-lg ${
+                          isSelected ? "text-white" : "text-gray-700"
+                        }`}
+                        style={{ fontVariationSettings: "'wght' 400" }}
+                      >
+                        {icon}
+                      </span>
+                    </div>
+
+                    {/* Label */}
+                    <span
+                      className={`text-sm lowercase font-semibold flex-1 ${
+                        isSelected ? "text-black" : "text-gray-700"
+                      }`}
+                    >
+                      {option.label.toLowerCase()}
+                    </span>
+
+                    {/* Checkmark */}
+                    {isSelected && (
+                      <span
+                        className="material-symbols-outlined text-black text-lg shrink-0"
+                        style={{
+                          fontVariationSettings: "'FILL' 1, 'wght' 600",
+                        }}
+                      >
+                        check_circle
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* ── Phone Number ── */}
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-[11px] tracking-wide text-gray-500 lowercase font-semibold">
+                phone number
+              </h3>
+              {isAutoDetectingDialCode && (
+                <span className="text-[10px] font-medium text-gray-400 lowercase">
+                  detecting...
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 lowercase font-medium mb-5">
+              we&apos;ll use this to verify your identity when needed.
+            </p>
+
+            {/* Phone input row */}
+            <div className="py-5 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                {/* Dial code selector */}
+                <button
+                  onClick={() => setShowDialPicker(true)}
+                  className="flex items-center gap-2 shrink-0 group"
+                  aria-label="Select country code"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors overflow-hidden">
+                    <ReactCountryFlag
+                      countryCode={selectedDialOption.iso}
+                      svg
+                      style={{
+                        width: "1.5em",
+                        height: "1.5em",
+                        borderRadius: 2,
+                      }}
+                      aria-label={selectedDialOption.country}
+                    />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {selectedDialOption.code}
+                  </span>
+                  <span
+                    className="material-symbols-outlined text-gray-400 text-base"
+                    style={{ fontVariationSettings: "'wght' 400" }}
+                  >
+                    expand_more
+                  </span>
+                </button>
+
+                {/* Phone input */}
+                <input
+                  type="tel"
+                  value={formatPhoneNumber(phoneNumber)}
+                  onChange={handlePhoneChange}
+                  placeholder="(000) 000-0000"
+                  className="flex-1 text-sm font-medium text-gray-900 placeholder-gray-400 bg-transparent border-none outline-none p-0"
+                  aria-label="Phone number"
+                />
+              </div>
+            </div>
+
+            <p className="text-[10px] text-gray-400 mt-2 lowercase font-medium">
+              standard message and data rates may apply.
+            </p>
+          </section>
+
+          {/* ── CTAs — Continue & Skip ── */}
+          <section className="pb-12 space-y-3">
+            <HushhTechCta
+              variant={HushhTechCtaVariant.BLACK}
               onClick={handleContinue}
               disabled={!canContinue || isLoading}
-              data-onboarding-cta
-              className={`flex-1 font-semibold text-[17px] py-[14px] rounded-xl shadow-sm transition-all flex items-center justify-center ${
-                canContinue && !isLoading
-                  ? 'bg-[#007AFF] text-white active:opacity-80'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
             >
-              {isLoading ? 'Saving...' : 'Continue'}
-            </button>
-          </div>
-        </div>
-      )}
+              {isLoading ? "Saving..." : "Continue"}
+            </HushhTechCta>
 
-      {/* ═══ Dial Code Picker Modal ═══ */}
+            <HushhTechCta
+              variant={HushhTechCtaVariant.WHITE}
+              onClick={handleSkip}
+            >
+              Skip
+            </HushhTechCta>
+          </section>
+
+          {/* ── Trust Badges ── */}
+          <section className="flex flex-col items-center justify-center text-center gap-2 pb-8">
+            <div className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px] text-gray-600">
+                lock
+              </span>
+              <span className="text-[10px] text-gray-600 tracking-wide uppercase font-medium">
+                256 bit encryption
+              </span>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      {/* ═══ Dial Code Picker Modal — Premium Design ═══ */}
       {showDialPicker && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShowDialPicker(false)} />
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl max-h-[60vh] flex flex-col"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-[#C6C6C8]/30">
-              <h3 className="text-[17px] font-semibold text-black">Select Country Code</h3>
-              <button onClick={() => setShowDialPicker(false)} className="text-[#007AFF] font-medium text-[17px]">Done</button>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              {PHONE_DIAL_CODES.map((option) => (
-                <button
-                  key={option.iso}
-                  onClick={() => handleSelectDialCode(option)}
-                  className={`w-full flex items-center justify-between px-4 py-3 border-b border-[#C6C6C8]/20 active:bg-gray-100 transition-colors ${
-                    option.code === countryCode && option.iso === selectedDialCountryIso ? 'bg-blue-50' : ''
-                  }`}
+          {/* Glass overlay */}
+          <div
+            className="fixed inset-0 z-40 bg-white/60 backdrop-blur-sm"
+            onClick={() => setShowDialPicker(false)}
+          />
+
+          {/* Modal card */}
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-0 sm:pb-0">
+            <div className="relative w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08),0_0_1px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col max-h-[70vh]">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                <h2
+                  className="text-xl text-black lowercase tracking-tight"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  <div className="flex items-center gap-3">
-                    <ReactCountryFlag
-                      countryCode={option.iso}
-                      svg
-                      style={{ width: '1.25em', height: '1.25em', borderRadius: 2 }}
-                      aria-label={option.country}
-                    />
-                    <span className="text-[17px] text-black">{option.country}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-medium text-[#8E8E93]">{option.code}</span>
-                    {option.code === countryCode && option.iso === selectedDialCountryIso && (
-                      <span className="material-symbols-outlined text-[#007AFF] text-xl" style={{ fontVariationSettings: "'FILL' 0, 'wght' 500" }}>check</span>
-                    )}
-                  </div>
+                  select country code
+                </h2>
+                <button
+                  onClick={() => setShowDialPicker(false)}
+                  className="text-xs font-bold uppercase tracking-widest text-black hover:underline"
+                >
+                  Done
                 </button>
-              ))}
+              </div>
+
+              {/* Scrollable list */}
+              <div className="flex-1 overflow-y-auto">
+                {PHONE_DIAL_CODES.map((option) => {
+                  const isActive =
+                    option.code === countryCode &&
+                    option.iso === selectedDialCountryIso;
+                  return (
+                    <button
+                      key={option.iso}
+                      onClick={() => handleSelectDialCode(option)}
+                      className={`w-full flex items-center justify-between px-6 py-4 border-b border-gray-100 transition-colors ${
+                        isActive
+                          ? "bg-gray-50"
+                          : "hover:bg-gray-50 active:bg-gray-100"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <ReactCountryFlag
+                          countryCode={option.iso}
+                          svg
+                          style={{
+                            width: "1.25em",
+                            height: "1.25em",
+                            borderRadius: 2,
+                          }}
+                          aria-label={option.country}
+                        />
+                        <span className="text-sm font-medium text-gray-900 lowercase">
+                          {option.country.toLowerCase()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-medium text-gray-500">
+                          {option.code}
+                        </span>
+                        {isActive && (
+                          <span
+                            className="material-symbols-outlined text-black text-lg"
+                            style={{
+                              fontVariationSettings:
+                                "'FILL' 1, 'wght' 600",
+                            }}
+                          >
+                            check
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </>
