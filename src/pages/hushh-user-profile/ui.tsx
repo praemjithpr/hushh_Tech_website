@@ -5,11 +5,13 @@
 import React from 'react';
 import { useHushhUserProfileLogic, FIELD_LABELS, VALUE_LABELS, SHADOW_FIELD_LABELS, formatPhoneContact } from './logic';
 import type { FormState } from './logic';
-import { ArrowLeft, User, TrendingUp, Shield, ChevronDown, Calendar, Brain, Target, Clock, Gauge, Droplets, Briefcase, Layers, Zap, Activity, ChevronUp, Edit2, Share2, Link, Copy, Check, ExternalLink, Home, Search, Globe, Coffee, Heart, Users, Newspaper } from 'lucide-react';
+import { User, TrendingUp, Shield, ChevronDown, Calendar, Brain, Target, Clock, Gauge, Droplets, Briefcase, Layers, Zap, Activity, Edit2, Share2, Link, Copy, Check, ExternalLink, Home, Search, Globe, Heart, Users, Newspaper } from 'lucide-react';
 import { FaApple, FaWhatsapp, FaLinkedin } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiGooglepay } from 'react-icons/si';
 import { HiMail } from 'react-icons/hi';
+import HushhTechBackHeader from '../../components/hushh-tech-back-header/HushhTechBackHeader';
+import HushhTechCta, { HushhTechCtaVariant } from '../../components/hushh-tech-cta/HushhTechCta';
 import AIDetectedPreferences from '../../components/profile/AIDetectedPreferences';
 import NWSScoreBadge from '../../components/profile/NWSScoreBadge';
 
@@ -39,42 +41,23 @@ const HushhUserProfilePage: React.FC = () => {
       }}
     >
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col bg-white pb-8 lg:border-x lg:border-slate-100 lg:shadow-[0_16px_60px_rgba(15,23,42,0.08)]">
-        <header className="sticky top-24 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur md:top-28 md:px-6">
-          <button
-            onClick={handleBack}
-            className="-ml-2 rounded-full p-2 text-slate-800 transition-colors hover:bg-slate-100"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <h1 className="text-lg font-bold text-slate-900">Investor Profile</h1>
-          <button
-            onClick={handleSave}
-            className="rounded px-2 py-1 text-base font-semibold text-[#3A63B8] transition-colors hover:bg-blue-50"
-          >
-            Save
-          </button>
-        </header>
+        <HushhTechBackHeader onBackClick={handleBack} />
 
         <form onSubmit={handleSubmit} className="flex-1 space-y-6 px-4 pb-44 pt-4 sm:px-6 lg:px-8 lg:pb-52">
-          <section className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-blue-50 to-indigo-50 px-6 py-6">
-            <div className="pointer-events-none absolute -right-12 -top-14 h-44 w-44 rounded-full bg-[#3A63B8]/10 blur-2xl" />
-            <div className="pointer-events-none absolute -left-10 -bottom-14 h-36 w-36 rounded-full bg-[#1A365D]/10 blur-2xl" />
-            <div className="relative z-10 flex items-start justify-between">
+          <section className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-5">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="mb-3 flex items-center">
-                  <span className="rounded-full border border-[#3A63B8]/20 bg-[#3A63B8]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#3A63B8]">
-                    Premium Member
-                  </span>
-                </div>
-                <h2 className="mb-1.5 text-2xl font-bold tracking-tight text-slate-900">
-                  Welcome back, {form.name?.split(' ')[0] || 'Alex'}
+                <span className="mb-2 inline-block rounded-full border border-black/10 bg-black px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
+                  premium member
+                </span>
+                <h2 className="mb-1 text-xl font-bold lowercase text-gray-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  welcome back, {form.name?.split(' ')[0] || 'investor'}
                 </h2>
-                <p className="max-w-2xl text-sm leading-relaxed text-slate-500">
-                  Complete your profile to unlock personalized investment insights tailored to your financial goals.
+                <p className="text-sm leading-relaxed text-gray-500 lowercase">
+                  complete your profile to unlock personalized investment insights.
                 </p>
               </div>
-              {/* NWS Score Badge */}
-              <div className="ml-4 shrink-0">
+              <div className="ml-3 shrink-0">
                 <NWSScoreBadge result={nwsResult} loading={nwsLoading} size="sm" />
               </div>
             </div>
@@ -82,7 +65,7 @@ const HushhUserProfilePage: React.FC = () => {
 
           {/* Your Investor Profile - Share Section */}
           {profileSlug && (
-            <section className="rounded-2xl bg-gradient-to-br from-[#3A63B8] to-[#1A365D] p-5 shadow-sm">
+            <section className="rounded-2xl bg-black p-5 shadow-sm">
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Share2 className="w-5 h-5 text-white" />
@@ -196,9 +179,9 @@ const HushhUserProfilePage: React.FC = () => {
 
           {/* Section Title */}
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Your Hushh Profile</h2>
-            <p className="text-sm text-slate-500">
-              Review and update your details to keep your investor profile complete.
+            <h2 className="text-xl font-bold lowercase text-gray-900" style={{ fontFamily: "'Playfair Display', serif" }}>your hushh profile</h2>
+            <p className="text-sm text-gray-500 lowercase">
+              review and update your details to keep your investor profile complete.
             </p>
             <div className="h-px w-full bg-slate-200" />
           </div>
@@ -934,45 +917,33 @@ const HushhUserProfilePage: React.FC = () => {
           )}
         </form>
 
-        {/* Fixed Footer - Hidden when main footer is visible */}
+        {/* Fixed Footer with HushhTechCta */}
         {!isFooterVisible && (
           <div 
-            className="fixed bottom-0 left-1/2 z-20 w-full max-w-6xl -translate-x-1/2 border-t border-slate-200 bg-white/95 px-4 pt-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:px-6 sm:pt-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))] lg:px-8"
+            className="fixed bottom-0 left-1/2 z-20 w-full max-w-6xl -translate-x-1/2 border-t border-gray-200 bg-white px-4 pt-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:px-6"
             data-onboarding-footer
           >
-            <button
-              type="submit"
-              onClick={handleSave}
-              disabled={loading}
-              className="w-full rounded-xl bg-[#3A63B8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all duration-200 active:scale-[0.98] hover:bg-[#2f539f] disabled:cursor-not-allowed disabled:opacity-50 sm:px-6 sm:py-3.5 sm:text-base"
-            >
+            <HushhTechCta variant={HushhTechCtaVariant.BLACK} onClick={handleSave} disabled={loading}>
               {loading 
-                ? "Generating..." 
+                ? "generating..." 
                 : investorProfile 
-                  ? "Update Profile" 
+                  ? "update profile" 
                   : hasOnboardingData 
-                    ? "Enhance with AI" 
-                    : "Generate Investor Profile"
+                    ? "enhance with ai" 
+                    : "generate investor profile"
               }
-            </button>
-            <p className="mt-2 px-1 text-center text-[11px] leading-snug text-slate-500 sm:mt-3 sm:px-2 sm:text-xs">
+            </HushhTechCta>
+            <p className="mt-2 text-center text-[11px] text-gray-400 lowercase">
               {investorProfile 
-                ? "Update your AI-generated investor profile."
+                ? "update your ai-generated investor profile."
                 : hasOnboardingData
-                  ? "Generate an AI-powered profile from your data."
-                  : "These details personalise your investor profile."
+                  ? "generate an ai-powered profile from your data."
+                  : "these details personalise your investor profile."
               }
             </p>
-            
-            {/* Go to Home Button */}
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium text-[#3A63B8] transition-colors hover:bg-blue-50 sm:mt-3 sm:py-2.5"
-            >
-              <Home className="w-4 h-4" />
-              Go to Home
-            </button>
+            <HushhTechCta variant={HushhTechCtaVariant.WHITE} onClick={() => navigate('/')}>
+              go to home
+            </HushhTechCta>
           </div>
         )}
       </div>
