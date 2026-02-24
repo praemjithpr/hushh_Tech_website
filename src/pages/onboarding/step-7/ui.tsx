@@ -1,19 +1,19 @@
 /**
- * Step 7 - Legal Name Entry (iOS-native design)
- *
- * Collects user's legal first and last name for verification.
- * Auto-fills from OAuth provider metadata (Google, Apple).
+ * Step 7 — Enter Your Full Legal Name
+ * Premium Hushh design matching Step 1/2/4/5.
+ * Logic stays in logic.ts — zero logic changes.
+ * Uses HushhTechBackHeader + HushhTechCta reusable components.
  */
 import {
   useStep7Logic,
   DISPLAY_STEP,
   TOTAL_STEPS,
   PROGRESS_PCT,
-} from './logic';
-
-/* ═══════════════════════════════════════════════
-   COMPONENT
-   ═══════════════════════════════════════════════ */
+} from "./logic";
+import HushhTechBackHeader from "../../../components/hushh-tech-back-header/HushhTechBackHeader";
+import HushhTechCta, {
+  HushhTechCtaVariant,
+} from "../../../components/hushh-tech-cta/HushhTechCta";
 
 export default function OnboardingStep7() {
   const {
@@ -21,7 +21,6 @@ export default function OnboardingStep7() {
     lastName,
     isLoading,
     error,
-    isFooterVisible,
     isValid,
     handleFirstNameChange,
     handleLastNameChange,
@@ -30,129 +29,165 @@ export default function OnboardingStep7() {
     handleSkip,
   } = useStep7Logic();
 
-  /* ═══════════════════════════════════════════════
-     RENDER
-     ═══════════════════════════════════════════════ */
   return (
-    <div
-      className="bg-white min-h-[100dvh] flex flex-col"
-      style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif", WebkitFontSmoothing: 'antialiased' }}
-    >
-      {/* ═══ iOS Navigation Bar ═══ */}
-      <nav
-        className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#C6C6C8]/30 flex items-end justify-between px-4 pb-2"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 12px) + 4px)', minHeight: '48px' }}
-      >
-        <button onClick={handleBack} className="text-[#007AFF] flex items-center -ml-2 active:opacity-50 transition-opacity" aria-label="Go back">
-          <span className="material-symbols-outlined text-3xl -mr-1" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400" }}>chevron_left</span>
-          <span className="text-[17px] leading-none pb-[2px]">Back</span>
-        </button>
-        <span className="font-semibold text-[17px] text-black">Setup</span>
-        <button onClick={handleSkip} className="text-[17px] text-[#007AFF] font-normal active:opacity-50 transition-opacity">Skip</button>
-      </nav>
+    <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-black selection:text-white">
+      {/* ═══ Header ═══ */}
+      <HushhTechBackHeader onBackClick={handleBack} rightLabel="FAQs" />
 
-      <main className="flex-1 flex flex-col max-w-md mx-auto w-full px-4 pb-48">
-        {/* ─── Progress Bar ─── */}
-        <div className="mt-2 mb-8">
-          <div className="flex justify-between items-end mb-2">
-            <span className="text-[13px] font-semibold text-[#8E8E93] uppercase tracking-wide">Onboarding Progress</span>
-            <span className="text-[13px] text-[#8E8E93]">Step {DISPLAY_STEP}/{TOTAL_STEPS}</span>
+      <main className="px-6 flex-grow max-w-md mx-auto w-full pb-48">
+        {/* ── Progress Bar ── */}
+        <div className="py-4">
+          <div className="flex justify-between text-[11px] font-semibold tracking-wide text-gray-500 mb-3 lowercase">
+            <span>
+              step {DISPLAY_STEP}/{TOTAL_STEPS}
+            </span>
+            <span>{PROGRESS_PCT}% complete</span>
           </div>
-          <div className="h-1 w-full bg-[#F2F2F7] rounded-full overflow-hidden">
-            <div className="h-full bg-[#007AFF] rounded-full transition-all duration-500" style={{ width: `${PROGRESS_PCT}%` }} />
+          <div className="h-0.5 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-black transition-all duration-500"
+              style={{ width: `${PROGRESS_PCT}%` }}
+            />
           </div>
-          <p className="mt-2 text-[13px] font-medium text-[#007AFF]">{PROGRESS_PCT}% complete</p>
         </div>
 
-        {/* ─── Title ─── */}
-        <div className="mb-8 space-y-3">
-          <h1 className="text-[34px] leading-[41px] font-bold text-black tracking-tight">
-            Enter your full legal name
+        {/* ── Title Section ── */}
+        <section className="py-8">
+          <h3 className="text-[11px] tracking-wide text-gray-500 lowercase mb-4 font-semibold">
+            identity verification
+          </h3>
+          <h1
+            className="text-[2.75rem] leading-[1.1] font-normal text-black tracking-tight lowercase"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            enter your full
+            <br />
+            <span className="text-gray-400 italic font-normal">
+              legal name
+            </span>
           </h1>
-          <p className="text-[17px] leading-[22px] text-[#8E8E93]">
-            We are required to collect this info for verification purposes.
+          <p className="text-sm text-gray-500 mt-4 leading-relaxed lowercase font-medium">
+            we are required to collect this info for verification purposes.
           </p>
-        </div>
+        </section>
 
-        {/* ─── Error ─── */}
+        {/* ── Error ── */}
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">{error}</div>
+          <div className="mb-6 flex items-center gap-3 py-4 px-1 border-b border-red-100">
+            <div className="w-10 h-10 rounded-full bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
+              <span
+                className="material-symbols-outlined text-red-500 text-lg"
+                style={{ fontVariationSettings: "'FILL' 1, 'wght' 600" }}
+              >
+                error
+              </span>
+            </div>
+            <p className="text-sm font-medium text-red-700 lowercase">
+              {error}
+            </p>
+          </div>
         )}
 
-        {/* ─── Name Fields — iOS Grouped Table ─── */}
-        <div className="bg-[#F2F2F7]/30 rounded-xl overflow-hidden border border-[#C6C6C8]/30">
+        {/* ── Name Fields ── */}
+        <section className="space-y-0 mb-8">
           {/* First Name */}
-          <div className="flex items-center pl-4 bg-white active:bg-gray-50 transition-colors">
-            <label htmlFor="firstName" className="w-[100px] py-3.5 text-[17px] text-black font-normal shrink-0">
-              First Name
-            </label>
-            <div className="flex-1 border-b border-[#C6C6C8]/40 py-3.5 pr-4 flex items-center">
-              <input
-                id="firstName"
-                type="text"
-                value={firstName}
-                onChange={(e) => handleFirstNameChange(e.target.value)}
-                placeholder="Required"
-                className="w-full bg-transparent border-0 p-0 text-[17px] text-black placeholder-[#8E8E93] focus:ring-0 outline-none"
-                autoComplete="given-name"
-              />
+          <div className="py-5 border-b border-gray-200">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                <span
+                  className="material-symbols-outlined text-gray-700 text-lg"
+                  style={{ fontVariationSettings: "'wght' 400" }}
+                >
+                  person
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <label
+                  htmlFor="firstName"
+                  className="text-sm font-semibold text-gray-900 lowercase block mb-1"
+                >
+                  first name
+                </label>
+                <input
+                  id="firstName"
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => handleFirstNameChange(e.target.value)}
+                  placeholder="required"
+                  className="w-full text-xs text-gray-500 font-medium lowercase bg-transparent border-none outline-none p-0 placeholder-gray-400 focus:ring-0"
+                  autoComplete="given-name"
+                />
+              </div>
             </div>
           </div>
 
           {/* Last Name */}
-          <div className="flex items-center pl-4 bg-white active:bg-gray-50 transition-colors">
-            <label htmlFor="lastName" className="w-[100px] py-3.5 text-[17px] text-black font-normal shrink-0">
-              Last Name
-            </label>
-            <div className="flex-1 py-3.5 pr-4 flex items-center">
-              <input
-                id="lastName"
-                type="text"
-                value={lastName}
-                onChange={(e) => handleLastNameChange(e.target.value)}
-                placeholder="Required"
-                className="w-full bg-transparent border-0 p-0 text-[17px] text-black placeholder-[#8E8E93] focus:ring-0 outline-none"
-                autoComplete="family-name"
-              />
+          <div className="py-5 border-b border-gray-200">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                <span
+                  className="material-symbols-outlined text-gray-700 text-lg"
+                  style={{ fontVariationSettings: "'wght' 400" }}
+                >
+                  badge
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <label
+                  htmlFor="lastName"
+                  className="text-sm font-semibold text-gray-900 lowercase block mb-1"
+                >
+                  last name
+                </label>
+                <input
+                  id="lastName"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => handleLastNameChange(e.target.value)}
+                  placeholder="required"
+                  className="w-full text-xs text-gray-500 font-medium lowercase bg-transparent border-none outline-none p-0 placeholder-gray-400 focus:ring-0"
+                  autoComplete="family-name"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Helper text */}
-        <p className="mt-4 text-[13px] text-[#8E8E93] px-4 text-center">
-          Make sure this matches your government ID.
+        <p className="text-[11px] text-gray-400 text-center lowercase font-medium mb-8">
+          make sure this matches your government id.
         </p>
-      </main>
 
-      {/* ═══ Fixed Footer — Skip + Continue ═══ */}
-      {!isFooterVisible && (
-        <div
-          className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-[#C6C6C8]/30 px-4 pt-4 z-40"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
-          data-onboarding-footer
-        >
-          <div className="flex gap-3 max-w-md mx-auto">
-            <button
-              onClick={handleSkip}
-              className="flex-1 h-[50px] rounded-xl bg-[#F2F2F7] text-[#007AFF] font-semibold text-[17px] active:scale-[0.98] transition-transform flex items-center justify-center"
-            >
-              Skip
-            </button>
-            <button
-              onClick={handleContinue}
-              disabled={!isValid || isLoading}
-              data-onboarding-cta
-              className={`flex-[2] h-[50px] rounded-xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center ${
-                isValid && !isLoading
-                  ? 'bg-[#007AFF] text-white shadow-lg shadow-blue-500/30'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {isLoading ? 'Saving...' : 'Continue'}
-            </button>
+        {/* ── CTAs — Continue & Skip ── */}
+        <section className="pb-12 space-y-3">
+          <HushhTechCta
+            variant={HushhTechCtaVariant.BLACK}
+            onClick={handleContinue}
+            disabled={!isValid || isLoading}
+          >
+            {isLoading ? "Saving..." : "Continue"}
+          </HushhTechCta>
+
+          <HushhTechCta
+            variant={HushhTechCtaVariant.WHITE}
+            onClick={handleSkip}
+          >
+            Skip
+          </HushhTechCta>
+        </section>
+
+        {/* ── Trust Badges ── */}
+        <section className="flex flex-col items-center justify-center text-center gap-2 pb-8">
+          <div className="flex items-center gap-1">
+            <span className="material-symbols-outlined text-[12px] text-gray-600">
+              lock
+            </span>
+            <span className="text-[10px] text-gray-600 tracking-wide uppercase font-medium">
+              256 bit encryption
+            </span>
           </div>
-        </div>
-      )}
+        </section>
+      </main>
     </div>
   );
 }
