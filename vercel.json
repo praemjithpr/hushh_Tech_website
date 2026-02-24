@@ -40,7 +40,7 @@
       "destination": "/.well-known/:path*"
     },
     {
-      "source": "/((?!api/|.well-known/).*)",
+      "source": "/((?!api/|assets/|.well-known/).*)",
       "destination": "/index.html"
     }
   ],
