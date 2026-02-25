@@ -17,9 +17,12 @@ import Business from './pages/services/business';
 import SignupPage from './pages/signup/ui';
 import Faq from './pages/faq';
 import Career from './pages/career';
-// import Community from './pages/community';
-import CommunityList from './pages/community/communityList';
-import CommunityPost from './pages/community/communityPost';
+// import Community from './pages/community'; // OLD monolithic
+// Old monolithic community (kept as backup):
+// import CommunityList from './pages/community/communityList';
+// import CommunityPost from './pages/community/communityPost';
+import CommunityPage from './pages/community/ui';
+import CommunityPostPage from './pages/community/post-ui';
 import ReportDetailPage from './pages/reports/reportDetail';
 import BenefitsPage from './pages/benefits';
 import PrivacyPolicy from './pages/privacy-policy';
@@ -104,9 +107,10 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isSignNda = location.pathname.startsWith('/sign-nda');
   const isInvestorProfile = location.pathname.startsWith('/investor-profile');
   const isDiscoverFundA = location.pathname === '/discover-fund-a';
+  const isCommunity = location.pathname.startsWith('/community');
 
   return (
-    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent || isKai || isStudio || isHushhUserProfile || isSignNda || isInvestorProfile || isDiscoverFundA ? '' : 'mt-20'}`}>
+    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent || isKai || isStudio || isHushhUserProfile || isSignNda || isInvestorProfile || isDiscoverFundA || isCommunity ? '' : 'mt-20'}`}>
       {children}
     </div>
   );
@@ -123,12 +127,14 @@ const useLayoutVisibility = () => {
   const isOnboarding = location.pathname.startsWith('/onboarding');
   const isProfile = location.pathname === '/profile';
   const isFundA = location.pathname === '/discover-fund-a';
+  const isCommunity = location.pathname.startsWith('/community');
 
-  // Home + Onboarding + Profile + Fund A use HushhTechHeader/Footer — hide old global nav/footer
+  // Home + Onboarding + Profile + Fund A + Community use HushhTechHeader/Footer — hide old global nav/footer
+  const hideOld = isHushhAI || isHushhAgent || isKai || isStudio || isHomePage || isOnboarding || isProfile || isFundA || isCommunity;
   return {
-    showNavbar: !isHushhAI && !isHushhAgent && !isKai && !isStudio && !isHomePage && !isOnboarding && !isProfile && !isFundA,
-    showFooter: !isHushhAI && !isHushhAgent && !isKai && !isStudio && !isOnboarding && !isHomePage && !isProfile && !isFundA,
-    showMobileNav: !isHushhAI && !isHushhAgent && !isKai && !isStudio && !isOnboarding && !isHomePage && !isProfile && !isFundA,
+    showNavbar: !hideOld,
+    showFooter: !hideOld,
+    showMobileNav: !hideOld,
   };
 };
 
@@ -221,15 +227,13 @@ function App() {
             <Route path='/privacy-policy' element={<PrivacyPolicy />} />
             <Route path='/carrer-privacy-policy' element={<CareersPrivacyPolicy />} />
             <Route path="/community" element={
-              <CommunityList />
+              <CommunityPage />
             } />
             <Route path='/california-privacy-policy' element={<CaliforniaPrivacyPolicy />} />
             <Route path='/eu-uk-jobs-privacy-policy' element={<EUUKPrivacyPolicy />} />
             <Route path='/delete-account' element={<DeleteAccountPage />} />
             <Route path="/community/*" element={
-
-              <CommunityPost />
-
+              <CommunityPostPage />
             } />
             <Route path="/reports/:id" element={
 
