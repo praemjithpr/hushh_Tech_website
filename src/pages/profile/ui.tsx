@@ -9,6 +9,7 @@ import HushhTechFooter from '../../components/hushh-tech-footer/HushhTechFooter'
 import HushhTechCta, { HushhTechCtaVariant } from '../../components/hushh-tech-cta/HushhTechCta';
 import HushhLogo from '../../components/images/Hushhogo.png';
 import { HushhFooterTab } from '../../components/hushh-tech-footer/HushhTechFooter';
+import { useNavigate } from 'react-router-dom';
 import { useProfileLogic } from './logic';
 
 /* ── section label (reusable) ── */
@@ -19,19 +20,28 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 const ProfilePage: React.FC = () => {
+  const navigate = useNavigate();
   const {
     onboardingStatus,
     primaryCTA,
     handleDiscoverFundA,
   } = useProfileLogic();
 
+  /* footer tab navigation */
+  const handleTabChange = (tab: HushhFooterTab) => {
+    if (tab === HushhFooterTab.HOME) navigate('/');
+    else if (tab === HushhFooterTab.FUND_A) navigate('/discover-fund-a');
+    else if (tab === HushhFooterTab.COMMUNITY) navigate('/community');
+    else if (tab === HushhFooterTab.PROFILE) navigate('/profile');
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* header */}
-      <HushhTechHeader />
+      <HushhTechHeader className="!py-2" />
 
       {/* scrollable content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-5 py-4 sm:px-6 md:px-8">
+      <main className="flex-1 flex flex-col items-center justify-center px-5 py-2 sm:px-6 md:px-8">
         <div className="w-full max-w-[440px] flex flex-col items-center gap-8">
 
           {/* pill badge */}
@@ -99,7 +109,11 @@ const ProfilePage: React.FC = () => {
       </main>
 
       {/* footer */}
-      <HushhTechFooter activeTab={HushhFooterTab.PROFILE} />
+      <HushhTechFooter
+        activeTab={HushhFooterTab.PROFILE}
+        onTabChange={handleTabChange}
+        onLogoClick={() => navigate('/')}
+      />
     </div>
   );
 };
