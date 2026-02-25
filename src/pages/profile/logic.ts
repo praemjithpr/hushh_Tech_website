@@ -1,23 +1,21 @@
+/**
+ * Profile Page — Logic / ViewModel
+ * Session, onboarding status, NDA check (once, no polling).
+ * UI stays in ui.tsx.
+ */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@chakra-ui/react';
 import axios from 'axios';
 import config from '../../resources/config/config';
 
 export function useProfileLogic() {
-  const toast = useToast();
   const navigate = useNavigate();
 
   const [session, setSession] = useState<any>(null);
-  const [ndaStatus, setNdaStatus] = useState<string>('Not Applied');
-  const [ndaMetadata, setNdaMetadata] = useState<any>(null);
-  const [showNdaModal, setShowNdaModal] = useState(false);
-  const [showNdaDocModal, setShowNdaDocModal] = useState(false);
   const [ndaApproved, setNdaApproved] = useState(false);
-  const [isMetadataLoading, setIsMetadataLoading] = useState(false);
-  const metadataFetchedRef = useRef<boolean>(false);
+  const ndaCheckedRef = useRef(false);
 
-  // Onboarding status state
+  /* onboarding status */
   const [onboardingStatus, setOnboardingStatus] = useState<{
     hasProfile: boolean;
     isCompleted: boolean;
@@ -30,41 +28,38 @@ export function useProfileLogic() {
     loading: true,
   });
 
+  /* session setup */
   useEffect(() => {
-    config.supabaseClient?.auth.getSession().then(({ data: { session } }: any) => {
-      setSession(session);
-    });
-    const {
-      data: { subscription },
-    } = config.supabaseClient?.auth.onAuthStateChange((_event: any, session: any) => {
-      setSession(session);
-    }) ?? { data: { subscription: null } };
-    return () => {
-      if (subscription && typeof subscription.unsubscribe === 'function') {
-        subscription.unsubscribe();
-      }
-    };
+    config.supabaseClient?.auth
+      .getSession()
+      .then(({ data: { session } }: any) => setSession(session));
+
+    const { data: { subscription } } =
+      config.supabaseClient?.auth.onAuthStateChange((_event: any, s: any) => {
+        setSession(s);
+      }) ?? { data: { subscription: null } };
+
+    return () => subscription?.unsubscribe?.();
   }, []);
 
-  // Check user's onboarding status
+  /* check onboarding status (once when session loads) */
   useEffect(() => {
-    async function checkUserStatus() {
-      if (!session?.user?.id || !config.supabaseClient) {
-        setOnboardingStatus((prev) => ({ ...prev, loading: false }));
-        return;
-      }
+    if (!session?.user?.id || !config.supabaseClient) {
+      setOnboardingStatus((prev) => ({ ...prev, loading: false }));
+      return;
+    }
 
+    const checkUserStatus = async () => {
       try {
-        // Check if investor_profile exists
-        const { data: profile, error: profileError } = await config.supabaseClient
-          .from('investor_profiles')
-          .select('id, user_confirmed')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+        const { data: profile, error: profileError } =
+          await config.supabaseClient!
+            .from('investor_profiles')
+            .select('id, user_confirmed')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
 
-        // Check onboarding_data status
-        const { data: onboarding } = await config.supabaseClient
-          .from('onboarding_data')
+        const { data: onboarding } = await config.supabaseClient!
+            .from('onboarding_data')
           .select('is_completed, current_step')
           .eq('user_id', session.user.id)
           .maybeSingle();
@@ -79,161 +74,72 @@ export function useProfileLogic() {
         console.error('Error checking user status:', error);
         setOnboardingStatus((prev) => ({ ...prev, loading: false }));
       }
-    }
+    };
 
-    if (session?.user?.id) {
-      checkUserStatus();
-    }
+    checkUserStatus();
   }, [session?.user?.id]);
 
-  const fetchNdaMetadata = useCallback(async () => {
-    if (
-      isMetadataLoading ||
-      (ndaMetadata && Object.keys(ndaMetadata).length > 0) ||
-      metadataFetchedRef.current
-    ) {
-      return;
-    }
-
-    setIsMetadataLoading(true);
-    try {
-      const ndaResponse = await axios.post(
-        'https://gsqmwxqgqrgzhlhmbscg.supabase.co/rest/v1/rpc/get_nda_metadata',
-        {},
-        {
-          headers: {
-            apikey: config.SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (ndaResponse.data.status === 'success') {
-        const metadata = ndaResponse.data.metadata;
-        setNdaMetadata(metadata);
-
-        if (metadata && Object.keys(metadata).length > 0) {
-          metadataFetchedRef.current = true;
-        }
-
-        if (metadata && ndaStatus === 'Pending: Waiting for NDA Process') {
-          setShowNdaDocModal(true);
-        }
-      }
-    } catch (error) {
-      metadataFetchedRef.current = false;
-    } finally {
-      setIsMetadataLoading(false);
-    }
-  }, [session, ndaMetadata, isMetadataLoading, ndaStatus]);
-
-  const checkNdaStatus = useCallback(async () => {
-    if (!session) return;
-    try {
-      const response = await axios.post(
-        'https://gsqmwxqgqrgzhlhmbscg.supabase.co/rest/v1/rpc/check_access_status',
-        {},
-        {
-          headers: {
-            apikey: config.SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      const newStatus = response.data;
-      setNdaStatus(newStatus);
-
-      if (newStatus === 'Approved') {
-        setNdaApproved(true);
-      }
-
-      if (newStatus === 'Pending: Waiting for NDA Process' && !metadataFetchedRef.current) {
-        fetchNdaMetadata();
-      }
-    } catch (error) {
-      metadataFetchedRef.current = false;
-      console.warn('Failed to check NDA access status', error);
-    }
-  }, [session, fetchNdaMetadata]);
-
+  /* check NDA status ONCE (no polling) */
   useEffect(() => {
-    if (session) {
-      checkNdaStatus();
-      const intervalId = setInterval(() => {
-        checkNdaStatus();
-      }, 5000);
-      return () => clearInterval(intervalId);
-    }
-  }, [session, checkNdaStatus]);
+    if (!session?.access_token || ndaCheckedRef.current) return;
+    ndaCheckedRef.current = true;
 
-  useEffect(() => {
-    if (ndaStatus !== 'Pending: Waiting for NDA Process') {
-      metadataFetchedRef.current = false;
-    }
-  }, [ndaStatus]);
+    const checkNda = async () => {
+      try {
+        const { data } = await axios.post(
+          'https://gsqmwxqgqrgzhlhmbscg.supabase.co/rest/v1/rpc/check_access_status',
+          {},
+          {
+            headers: {
+              apikey: config.SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        if (data === 'Approved') setNdaApproved(true);
+      } catch (err: any) {
+        /* 401 = expired/invalid token — silently ignore, don't retry */
+        if (err?.response?.status === 401) return;
+        console.warn('NDA check failed:', err?.message);
+      }
+    };
 
-  // Get primary CTA text and action
+    checkNda();
+  }, [session?.access_token]);
+
+  /* primary CTA content based on onboarding status */
   const getPrimaryCTAContent = () => {
     if (onboardingStatus.loading) {
-      return { text: 'Loading...', action: () => {} };
+      return { text: 'loading...', action: () => {} };
     }
     if (onboardingStatus.hasProfile || onboardingStatus.isCompleted) {
       return {
-        text: 'View Your Profile',
+        text: 'view your profile',
         action: () => navigate('/hushh-user-profile'),
       };
     }
     if (onboardingStatus.currentStep > 1) {
       return {
-        text: `Continue Onboarding (Step ${onboardingStatus.currentStep})`,
-        action: () => navigate(`/onboarding/step-${onboardingStatus.currentStep}`),
+        text: `continue onboarding (step ${onboardingStatus.currentStep})`,
+        action: () =>
+          navigate(`/onboarding/step-${onboardingStatus.currentStep}`),
       };
     }
     return {
-      text: 'Complete Your Hushh Profile',
+      text: 'complete your hushh profile',
       action: () => navigate('/onboarding/financial-link'),
     };
   };
 
   const primaryCTA = getPrimaryCTAContent();
-
   const handleDiscoverFundA = () => navigate('/discover-fund-a');
-
-  const handleNdaModalClose = () => setShowNdaModal(false);
-
-  const handleNdaSubmit = (result: string) => {
-    setNdaStatus(result);
-    setShowNdaModal(false);
-
-    if (result === 'Pending: Waiting for NDA Process') {
-      fetchNdaMetadata();
-    }
-  };
-
-  const handleNdaDocModalClose = () => setShowNdaDocModal(false);
-
-  const handleNdaAccept = () => {
-    setNdaApproved(true);
-    setShowNdaDocModal(false);
-    setNdaStatus('Approved');
-    localStorage.setItem('communityFilter', 'nda');
-  };
 
   return {
     session,
-    ndaMetadata,
-    showNdaModal,
-    showNdaDocModal,
     ndaApproved,
     onboardingStatus,
     primaryCTA,
     handleDiscoverFundA,
-    handleNdaModalClose,
-    handleNdaSubmit,
-    handleNdaDocModalClose,
-    handleNdaAccept,
   };
 }
