@@ -51,7 +51,7 @@ export default function HomePage() {
             </span>
           </div>
           <h1
-            className="text-[2.75rem] leading-[1.1] font-normal text-black tracking-tight"
+            className="text-[2.75rem] leading-[1.1] font-normal text-black tracking-tight font-serif"
             style={playfair}
           >
             Investing in <br /> the{" "}
@@ -71,7 +71,7 @@ export default function HomePage() {
             </span>
             <div>
               <h3
-                className="text-lg font-medium mb-1"
+                className="text-lg font-medium mb-1 font-serif"
                 style={playfair}
               >
                 AI-Powered
@@ -87,7 +87,7 @@ export default function HomePage() {
             </span>
             <div>
               <h3
-                className="text-lg font-medium mb-1"
+                className="text-lg font-medium mb-1 font-serif"
                 style={playfair}
               >
                 Human-Led
@@ -142,7 +142,7 @@ export default function HomePage() {
         <section>
           <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-2 font-medium">Why Hushh</p>
           <h2
-            className="text-2xl font-medium mb-8 tracking-tight"
+            className="text-2xl font-medium mb-8 tracking-tight font-serif"
             style={playfair}
           >
             The Hushh Advantage
@@ -183,7 +183,7 @@ export default function HomePage() {
                     Flagship Product
                   </span>
                   <h2
-                    className="text-3xl font-medium"
+                    className="text-3xl font-medium font-serif"
                     style={playfair}
                   >
                     Fund A
@@ -268,7 +268,7 @@ export default function HomePage() {
         {/* ── Disclaimer ── */}
         <footer className="mb-8">
           <p
-            className="text-[10px] text-gray-400 text-center leading-relaxed italic max-w-xs mx-auto"
+            className="text-[10px] text-gray-400 text-center leading-relaxed italic max-w-xs mx-auto font-serif"
             style={playfair}
           >
             Investing involves risk, including possible loss of principal. Past
