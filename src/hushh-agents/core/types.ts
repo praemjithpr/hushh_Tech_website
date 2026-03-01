@@ -99,6 +99,8 @@ export interface ChatRequest {
   language?: SupportedLanguage;
   systemPrompt?: string;
   image?: string; // Base64 encoded image
+  userId?: string;     // For usage tracking in Supabase
+  sessionId?: string;  // For session tracking
 }
 
 // Simple message type for service

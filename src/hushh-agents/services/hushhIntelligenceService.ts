@@ -203,7 +203,7 @@ const API_ENDPOINT = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/ge
  * The API key is stored securely on the server - never exposed to frontend.
  */
 export async function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
-  const { message, history = [], agentId, language = 'en-US', systemPrompt } = request;
+  const { message, history = [], agentId, language = 'en-US', systemPrompt, userId, sessionId } = request;
   
   console.log('[Hushh Intelligence] Sending message via secure edge function...');
   
