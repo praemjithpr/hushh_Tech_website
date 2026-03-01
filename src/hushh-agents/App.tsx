@@ -12,7 +12,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { FaApple } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
-import { FiMessageSquare, FiMic, FiGlobe, FiShield, FiLock } from 'react-icons/fi';
 import { useAuth } from './hooks/useAuth';
 import { HUSHH_BRANDING } from './core/constants';
 import HushhLogo from '../components/images/Hushhogo.png';
@@ -76,7 +75,7 @@ const LoginScreen: React.FC<{
           <div className="space-y-4 pt-4">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                <FiMessageSquare className="w-5 h-5 text-white" />
+                <span className="material-symbols-outlined text-white text-xl">chat</span>
               </div>
               <div>
                 <p className="text-white font-medium">Natural Conversations</p>
@@ -85,7 +84,7 @@ const LoginScreen: React.FC<{
             </div>
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                <FiMic className="w-5 h-5 text-white" />
+                <span className="material-symbols-outlined text-white text-xl">mic</span>
               </div>
               <div>
                 <p className="text-white font-medium">Voice Chat <span className="text-xs text-gray-500 ml-1">Pro</span></p>
@@ -94,7 +93,7 @@ const LoginScreen: React.FC<{
             </div>
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                <FiGlobe className="w-5 h-5 text-white" />
+                <span className="material-symbols-outlined text-white text-xl">translate</span>
               </div>
               <div>
                 <p className="text-white font-medium">Multi-lingual</p>
@@ -105,7 +104,7 @@ const LoginScreen: React.FC<{
         </div>
         
         <div className="flex items-center gap-2 text-gray-500 text-sm">
-          <FiShield className="w-4 h-4" />
+          <span className="material-symbols-outlined text-base">shield</span>
           <span>Your data stays private and secure</span>
         </div>
       </div>
@@ -171,19 +170,19 @@ const LoginScreen: React.FC<{
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="p-3 rounded-xl bg-gray-50">
                 <div className="flex justify-center mb-2">
-                  <FiMessageSquare className="w-5 h-5 text-gray-600" />
+                  <span className="material-symbols-outlined text-xl text-gray-600">chat</span>
                 </div>
                 <p className="text-xs text-gray-600">Text Chat</p>
               </div>
               <div className="p-3 rounded-xl bg-gray-50">
                 <div className="flex justify-center mb-2">
-                  <FiMic className="w-5 h-5 text-gray-600" />
+                  <span className="material-symbols-outlined text-xl text-gray-600">mic</span>
                 </div>
                 <p className="text-xs text-gray-600">Voice (Pro)</p>
               </div>
               <div className="p-3 rounded-xl bg-gray-50">
                 <div className="flex justify-center mb-2">
-                  <FiGlobe className="w-5 h-5 text-gray-600" />
+                  <span className="material-symbols-outlined text-xl text-gray-600">translate</span>
                 </div>
                 <p className="text-xs text-gray-600">Multi-lingual</p>
               </div>
@@ -193,7 +192,7 @@ const LoginScreen: React.FC<{
           {/* Trust Badge */}
           <section className="flex flex-col items-center lg:items-start justify-center text-center lg:text-left gap-2 pt-4 pb-4">
             <div className="flex items-center gap-2">
-              <FiLock className="w-4 h-4 text-gray-400" />
+              <span className="material-symbols-outlined text-base text-gray-400">lock</span>
               <span className="text-xs text-gray-400 tracking-wide uppercase font-medium">
                 Private & Secure
               </span>
