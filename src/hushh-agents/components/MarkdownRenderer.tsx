@@ -15,8 +15,8 @@ interface MarkdownRendererProps {
   className?: string;
 }
 
-/** Copy button for inline code blocks */
-const CopyButton = ({ text }: { text: string }) => {
+/** Copy button for code blocks — always visible */
+const CopyButton = ({ text, theme }: { text: string; theme: 'dark' | 'light' }) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(text);
@@ -24,13 +24,22 @@ const CopyButton = ({ text }: { text: string }) => {
     setTimeout(() => setCopied(false), 2000);
   }, [text]);
 
+  const isDark = theme === 'dark';
+
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-2 right-2 px-2 py-1 rounded text-[10px] bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${
+        copied
+          ? isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'
+          : isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-900'
+      }`}
       aria-label="Copy code"
     >
-      {copied ? '✓ Copied' : 'Copy'}
+      <span className="material-symbols-outlined text-xs">
+        {copied ? 'check' : 'content_copy'}
+      </span>
+      {copied ? 'Copied!' : 'Copy'}
     </button>
   );
 };
@@ -143,13 +152,25 @@ export default function MarkdownRenderer({ content, theme = 'dark', className = 
             );
           },
 
-          /* Code block wrapper */
+          /* Code block wrapper with header bar + copy */
           pre: ({ children }) => {
-            // Extract text content for copy button
             const codeText = extractTextFromChildren(children);
+            // Try to extract language from child code element
+            const lang = extractLanguageFromChildren(children);
             return (
-              <div className={`group relative rounded-xl border ${colors.codeBlock} my-3 overflow-hidden`}>
-                <CopyButton text={codeText} />
+              <div className={`rounded-xl border ${colors.codeBlock} my-3 overflow-hidden`}>
+                {/* Header bar with language + copy */}
+                <div className={`flex items-center justify-between px-4 py-2 border-b ${
+                  isDark ? 'border-gray-800 bg-gray-900/60' : 'border-gray-200 bg-gray-100/80'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`material-symbols-outlined text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>code</span>
+                    <span className={`text-[10px] font-mono uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {lang || 'code'}
+                    </span>
+                  </div>
+                  <CopyButton text={codeText} theme={theme} />
+                </div>
                 <pre className="p-4 overflow-x-auto text-sm font-mono leading-relaxed">
                   {children}
                 </pre>
@@ -204,6 +225,25 @@ export default function MarkdownRenderer({ content, theme = 'dark', className = 
       </ReactMarkdown>
     </div>
   );
+}
+
+/** Extract language from code element's className (e.g., "language-typescript" → "typescript") */
+function extractLanguageFromChildren(children: React.ReactNode): string {
+  if (children && typeof children === 'object' && 'props' in children) {
+    const el = children as React.ReactElement;
+    const className = el.props?.className as string | undefined;
+    if (className) {
+      const match = className.match(/language-(\w+)/);
+      if (match) return match[1];
+    }
+  }
+  if (Array.isArray(children)) {
+    for (const child of children) {
+      const result = extractLanguageFromChildren(child);
+      if (result) return result;
+    }
+  }
+  return '';
 }
 
 /** Recursively extract text from React children (for copy button) */
