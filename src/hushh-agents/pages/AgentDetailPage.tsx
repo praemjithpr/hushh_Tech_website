@@ -1,14 +1,15 @@
 /**
  * Agent Detail Page
  * 
- * Shows full agent profile with contact info, location, categories.
- * Tapping from the Kirkland Agents listing leads here.
+ * Follows KYC onboarding UI patterns: white bg, HushhTechBackHeader,
+ * max-w-md centered layout, Playfair headings, info rows, CTA buttons.
  */
 
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { FiArrowLeft, FiMapPin, FiPhone, FiStar, FiExternalLink, FiNavigation, FiTag, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { useParams, useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
+import HushhTechBackHeader from '../../components/hushh-tech-back-header/HushhTechBackHeader';
+import HushhTechCta, { HushhTechCtaVariant } from '../../components/hushh-tech-cta/HushhTechCta';
 
 const playfair = { fontFamily: "'Playfair Display', serif" };
 
@@ -22,7 +23,6 @@ interface AgentFull {
   name: string;
   alias: string | null;
   phone: string | null;
-  localized_phone: string | null;
   address1: string | null;
   address2: string | null;
   city: string | null;
@@ -38,49 +38,66 @@ interface AgentFull {
   photo_url: string | null;
 }
 
-/** Full address string */
+/** Format full address */
 const formatAddress = (a: AgentFull): string => {
   const parts = [a.address1, a.address2, a.city, a.state, a.zip].filter(Boolean);
   return parts.join(', ') || 'Address not available';
 };
 
-/** Star display */
-const Stars: React.FC<{ rating: number | null; size?: string }> = ({ rating, size = 'w-5 h-5' }) => {
-  if (!rating) return <span className="text-sm text-gray-400">No rating yet</span>;
+/** Star rating display */
+const Stars: React.FC<{ rating: number | null }> = ({ rating }) => {
+  if (!rating) return <span className="text-[11px] text-gray-400">No rating yet</span>;
   const full = Math.floor(rating);
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => (
-        <FiStar
+        <span
           key={i}
-          className={`${size} ${i < full ? 'text-yellow-500 fill-yellow-500' : 'text-gray-200'}`}
-        />
+          className={`material-symbols-outlined text-[18px] ${
+            i < full ? 'text-amber-400' : 'text-gray-200'
+          }`}
+          style={{ fontVariationSettings: i < full ? "'FILL' 1" : "'FILL' 0" }}
+        >
+          star
+        </span>
       ))}
-      <span className="text-lg font-semibold text-gray-900 ml-2">{rating.toFixed(1)}</span>
+      <span className="text-[14px] text-gray-900 ml-1.5 font-semibold">{rating.toFixed(1)}</span>
     </div>
   );
 };
 
-/** Info row */
-const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: string; action?: () => void }> = ({ icon, label, value, action }) => (
+/** Info row — matches KYC info card styling */
+const InfoRow: React.FC<{
+  icon: string;
+  label: string;
+  value: string;
+  onClick?: () => void;
+}> = ({ icon, label, value, onClick }) => (
   <button
-    onClick={action}
-    disabled={!action}
-    className={`flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-white w-full text-left ${action ? 'hover:bg-gray-50 active:scale-[0.99] cursor-pointer' : ''} transition-all`}
+    onClick={onClick}
+    disabled={!onClick}
+    className={`flex items-start gap-3.5 p-4 rounded-2xl border border-gray-200/60 bg-white w-full text-left transition-all ${
+      onClick ? 'hover:border-gray-300 active:scale-[0.99] cursor-pointer' : ''
+    }`}
   >
-    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-      {icon}
+    <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center shrink-0">
+      <span className="material-symbols-outlined text-[18px] text-gray-500">{icon}</span>
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-xs text-gray-400 uppercase tracking-wider font-medium">{label}</p>
-      <p className="text-sm text-gray-900 mt-0.5 break-words">{value}</p>
+      <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em] font-medium">{label}</p>
+      <p className="text-[13px] text-gray-900 mt-0.5 break-words font-light leading-relaxed">{value}</p>
     </div>
-    {action && <FiExternalLink className="w-4 h-4 text-gray-300 shrink-0 mt-1" />}
+    {onClick && (
+      <span className="material-symbols-outlined text-gray-300 text-[16px] shrink-0 mt-1">
+        open_in_new
+      </span>
+    )}
   </button>
 );
 
 const AgentDetailPage: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
+  const navigate = useNavigate();
   const [agent, setAgent] = useState<AgentFull | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -100,21 +117,36 @@ const AgentDetailPage: React.FC = () => {
     fetchAgent();
   }, [agentId]);
 
+  // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 animate-pulse" />
+      <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white">
+        <HushhTechBackHeader onBackClick={() => navigate('/hushh-agents/kirkland')} rightLabel="FAQs" />
+        <main className="px-6 flex-grow max-w-md mx-auto w-full pb-48 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-2xl bg-gray-100 animate-pulse mx-auto mb-3" />
+            <p className="text-[13px] text-gray-400 font-light">Loading...</p>
+          </div>
+        </main>
       </div>
     );
   }
 
+  // Not found state
   if (!agent) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
-        <p className="text-gray-500 text-lg mb-4">Agent not found</p>
-        <Link to="/hushh-agents/kirkland" className="text-blue-500 text-sm underline">
-          Back to Agents
-        </Link>
+      <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white">
+        <HushhTechBackHeader onBackClick={() => navigate('/hushh-agents/kirkland')} rightLabel="FAQs" />
+        <main className="px-6 flex-grow max-w-md mx-auto w-full pb-48 flex flex-col items-center justify-center">
+          <span className="material-symbols-outlined text-gray-200 text-[48px] mb-4">person_off</span>
+          <p className="text-gray-500 text-[15px] font-light">Agent not found</p>
+          <button
+            onClick={() => navigate('/hushh-agents/kirkland')}
+            className="mt-4 text-hushh-blue text-[13px] font-medium underline underline-offset-2"
+          >
+            Back to Directory
+          </button>
+        </main>
       </div>
     );
   }
@@ -124,47 +156,42 @@ const AgentDetailPage: React.FC = () => {
     : `https://www.google.com/maps/search/${encodeURIComponent(formatAddress(agent))}`;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link
-            to="/hushh-agents/kirkland"
-            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-          >
-            <FiArrowLeft className="w-4 h-4" />
-          </Link>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-base font-semibold text-gray-900 truncate">{agent.name}</h1>
-          </div>
-        </div>
-      </header>
+    <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white">
+      {/* Header — matches KYC */}
+      <HushhTechBackHeader onBackClick={() => navigate('/hushh-agents/kirkland')} rightLabel="FAQs" />
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* Hero Card */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+      <main className="px-6 flex-grow max-w-md mx-auto w-full pb-48">
+
+        {/* ── Profile Hero ── */}
+        <section className="pt-8 pb-6 text-center">
           {/* Avatar */}
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-3xl font-bold text-white mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-2xl font-bold text-white mx-auto mb-4">
             {agent.name.charAt(0)}
           </div>
 
-          <h2 className="text-2xl font-semibold text-gray-900" style={playfair}>
+          {/* Name */}
+          <h1
+            className="text-[1.75rem] leading-[1.1] font-normal text-black tracking-tight font-serif"
+            style={playfair}
+          >
             {agent.name}
-          </h2>
+          </h1>
 
           {agent.alias && (
-            <p className="text-sm text-gray-400 mt-1">@{agent.alias}</p>
+            <p className="text-[11px] text-gray-400 mt-1.5 font-light">@{agent.alias}</p>
           )}
 
-          {/* Status */}
-          <div className="flex items-center justify-center gap-2 mt-3">
+          {/* Status badge */}
+          <div className="flex items-center justify-center mt-3">
             {agent.is_closed ? (
-              <span className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
-                <FiXCircle className="w-3 h-3" /> Closed
+              <span className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-500 rounded-full text-[10px] font-medium uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                Closed
               </span>
             ) : (
-              <span className="flex items-center gap-1 px-3 py-1 bg-green-50 text-green-600 rounded-full text-xs font-medium">
-                <FiCheckCircle className="w-3 h-3" /> Open
+              <span className="flex items-center gap-1 px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-medium uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                Open
               </span>
             )}
           </div>
@@ -173,104 +200,112 @@ const AgentDetailPage: React.FC = () => {
           <div className="flex flex-col items-center mt-4">
             <Stars rating={agent.avg_rating} />
             {agent.review_count > 0 && (
-              <p className="text-xs text-gray-400 mt-1">{agent.review_count} reviews</p>
+              <p className="text-[11px] text-gray-400 mt-1 font-light">
+                {agent.review_count} review{agent.review_count !== 1 ? 's' : ''}
+              </p>
             )}
           </div>
+        </section>
 
-          {/* Categories */}
-          {agent.categories?.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 mt-4">
+        {/* ── Categories ── */}
+        {agent.categories?.length > 0 && (
+          <section className="pb-6">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-2.5 font-medium">
+              Categories
+            </p>
+            <div className="flex flex-wrap gap-2">
               {agent.categories.map((cat) => (
                 <span
                   key={cat}
-                  className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center gap-1"
+                  className="px-3 py-1.5 bg-gray-50 border border-gray-200/60 text-gray-600 text-[11px] rounded-full font-medium"
                 >
-                  <FiTag className="w-3 h-3" />
                   {cat}
                 </span>
               ))}
             </div>
-          )}
-        </div>
+          </section>
+        )}
 
-        {/* Contact Info */}
-        <section className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-1">
+        {/* ── Contact Information ── */}
+        <section className="pb-6">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-3 font-medium">
             Contact Information
-          </h3>
+          </p>
+          <div className="space-y-3">
+            {agent.phone && (
+              <InfoRow
+                icon="call"
+                label="Phone"
+                value={agent.phone}
+                onClick={() => window.open(`tel:${agent.phone}`, '_self')}
+              />
+            )}
 
-          {agent.phone && (
             <InfoRow
-              icon={<FiPhone className="w-5 h-5 text-gray-500" />}
-              label="Phone"
-              value={agent.phone}
-              action={() => window.open(`tel:${agent.phone}`, '_self')}
+              icon="location_on"
+              label="Address"
+              value={formatAddress(agent)}
+              onClick={() => window.open(googleMapsUrl, '_blank')}
             />
-          )}
 
-          <InfoRow
-            icon={<FiMapPin className="w-5 h-5 text-gray-500" />}
-            label="Address"
-            value={formatAddress(agent)}
-            action={() => window.open(googleMapsUrl, '_blank')}
-          />
-
-          {agent.latitude && agent.longitude && (
-            <InfoRow
-              icon={<FiNavigation className="w-5 h-5 text-gray-500" />}
-              label="Get Directions"
-              value={`${agent.latitude.toFixed(4)}, ${agent.longitude.toFixed(4)}`}
-              action={() => window.open(googleMapsUrl, '_blank')}
-            />
-          )}
+            {agent.latitude && agent.longitude && (
+              <InfoRow
+                icon="directions"
+                label="Get Directions"
+                value={`${agent.latitude.toFixed(4)}, ${agent.longitude.toFixed(4)}`}
+                onClick={() => window.open(googleMapsUrl, '_blank')}
+              />
+            )}
+          </div>
         </section>
 
-        {/* Location Map Preview */}
+        {/* ── Map Preview ── */}
         {agent.latitude && agent.longitude && (
-          <section>
+          <section className="pb-8">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-3 font-medium">
+              Location
+            </p>
             <a
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-2xl overflow-hidden border border-gray-200 hover:shadow-md transition-shadow"
+              className="block rounded-2xl overflow-hidden border border-gray-200/60 hover:border-gray-300 transition-colors"
             >
               <img
                 src={`https://maps.googleapis.com/maps/api/staticmap?center=${agent.latitude},${agent.longitude}&zoom=14&size=600x200&markers=color:red%7C${agent.latitude},${agent.longitude}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`}
                 alt={`Map of ${agent.name}`}
-                className="w-full h-[160px] object-cover bg-gray-100"
+                className="w-full h-[140px] object-cover bg-gray-50"
                 loading="lazy"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
-              <div className="p-3 bg-white flex items-center justify-between">
-                <span className="text-xs text-gray-500">View on Google Maps</span>
-                <FiExternalLink className="w-3.5 h-3.5 text-gray-400" />
+              <div className="p-3 flex items-center justify-between">
+                <span className="text-[11px] text-gray-400 font-light">View on Google Maps</span>
+                <span className="material-symbols-outlined text-gray-300 text-[14px]">open_in_new</span>
               </div>
             </a>
           </section>
         )}
 
-        {/* Quick Actions */}
-        <section className="flex gap-3">
+        {/* ── Action CTAs ── */}
+        <section className="space-y-3 pb-8">
           {agent.phone && (
-            <a
-              href={`tel:${agent.phone}`}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-900 transition-colors"
+            <HushhTechCta
+              variant={HushhTechCtaVariant.BLACK}
+              onClick={() => window.open(`tel:${agent.phone}`, '_self')}
             >
-              <FiPhone className="w-4 h-4" />
+              <span className="material-symbols-outlined text-[18px]">call</span>
               Call Now
-            </a>
+            </HushhTechCta>
           )}
-          <a
-            href={googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white text-gray-900 border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+          <HushhTechCta
+            variant={HushhTechCtaVariant.WHITE}
+            onClick={() => window.open(googleMapsUrl, '_blank')}
           >
-            <FiNavigation className="w-4 h-4" />
-            Directions
-          </a>
+            <span className="material-symbols-outlined text-[18px]">directions</span>
+            Get Directions
+          </HushhTechCta>
         </section>
-      </div>
+      </main>
     </div>
   );
 };
