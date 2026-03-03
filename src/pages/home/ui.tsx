@@ -68,12 +68,11 @@ export default function HomePage() {
             </p>
 
             {/* Desktop CTAs — shown inline on md+ */}
-            <div className="hidden md:flex gap-3 mt-8 max-w-md">
+            <div className="hidden md:flex gap-3 mt-8">
               <HushhTechCta
                 onClick={primaryCTA.action}
                 disabled={primaryCTA.loading}
                 variant={HushhTechCtaVariant.BLACK}
-                className="flex-1"
               >
                 {primaryCTA.text}
                 <span className="material-symbols-outlined thin-icon text-lg">arrow_forward</span>
@@ -81,7 +80,6 @@ export default function HomePage() {
               <HushhTechCta
                 onClick={() => onNavigate("/discover-fund-a")}
                 variant={HushhTechCtaVariant.WHITE}
-                className="flex-1"
               >
                 Discover Fund A
               </HushhTechCta>
@@ -312,7 +310,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Bottom CTAs ── */}
-        <section className="flex flex-col sm:flex-row gap-3 py-6 sm:max-w-lg sm:mx-auto sm:w-full md:max-w-xl">
+        <section className="flex flex-col sm:flex-row sm:justify-center gap-3 py-6">
           <HushhTechCta
             onClick={() => onNavigate("/discover-fund-a")}
             variant={HushhTechCtaVariant.BLACK}
