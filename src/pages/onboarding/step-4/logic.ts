@@ -66,6 +66,8 @@ export const useStep4Logic = (): Step4Logic => {
   const [userId, setUserId] = useState<string | null>(null);
   const [citizenshipCountry, setCitizenshipCountry] = useState('');
   const [residenceCountry, setResidenceCountry] = useState('');
+  const [plaidCity, setPlaidCity] = useState('');
+  const [citizenshipFromPlaid, setCitizenshipFromPlaid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const isFooterVisible = useFooterVisibility();
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -92,10 +94,52 @@ export const useStep4Logic = (): Step4Logic => {
       const { data: { user } } = await config.supabaseClient.auth.getUser();
       if (!user) { navigate('/login'); return; }
       setUserId(user.id);
+
+      /* Load previously saved onboarding data */
       const { data } = await config.supabaseClient.from('onboarding_data').select('*').eq('user_id', user.id).maybeSingle();
       if (data) {
         if (data.citizenship_country) { setCitizenshipCountry(data.citizenship_country); setUserManuallyChanged(true); setHasPreviousData(true); }
         if (data.residence_country) setResidenceCountry(data.residence_country);
+      }
+
+      /* ── Fetch Plaid identity data for citizenship pre-fill ── */
+      try {
+        const { data: finData } = await config.supabaseClient
+          .from('user_financial_data')
+          .select('identity_data')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (finData?.identity_data) {
+          const identityAccounts = finData.identity_data.accounts || [];
+          const owners = identityAccounts[0]?.owners || [];
+          const owner = owners[0];
+          if (owner?.addresses?.length) {
+            /* Find primary address, or fall back to first */
+            const primaryAddr = owner.addresses.find((a: any) => a.primary) || owner.addresses[0];
+            const addrData = primaryAddr?.data || {};
+
+            /* Country of citizenship from bank identity */
+            if (addrData.country && !data?.citizenship_country) {
+              const plaidCountryCode = addrData.country.toUpperCase();
+              const plaidCountryName = COUNTRY_CODE_TO_NAME[plaidCountryCode] || addrData.country;
+              if (countries.includes(plaidCountryName)) {
+                setCitizenshipCountry(plaidCountryName);
+                setCitizenshipFromPlaid(true);
+                setHasPreviousData(true);
+                console.log('[Step4] Citizenship pre-filled from Plaid:', plaidCountryName);
+              }
+            }
+
+            /* City from bank identity */
+            if (addrData.city) {
+              setPlaidCity(addrData.city);
+              console.log('[Step4] City from Plaid:', addrData.city);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Step4] Failed to fetch Plaid identity data:', err);
       }
     };
     getCurrentUser();
@@ -113,7 +157,11 @@ export const useStep4Logic = (): Step4Logic => {
       if ((result.source === 'detected' || result.source === 'ip-detected') && result.data) {
         const locationData: LocationData = result.data;
         const countryName = COUNTRY_CODE_TO_NAME[locationData.countryCode] || locationData.country;
-        if (countries.includes(countryName)) { setCitizenshipCountry(countryName); setResidenceCountry(countryName); }
+        /* GPS sets residence; only set citizenship if Plaid didn't already */
+        if (countries.includes(countryName)) {
+          setResidenceCountry(countryName);
+          if (!citizenshipFromPlaid) setCitizenshipCountry(countryName);
+        }
         setDetectedLocation(locationData.city || locationData.state || countryName);
         setLocationDetected(true);
         setLocationStatus(result.source === 'detected' ? 'success' : 'ip-success');
@@ -151,7 +199,14 @@ export const useStep4Logic = (): Step4Logic => {
     if (!userId || !config.supabaseClient || !canContinue) return;
     setIsLoading(true);
     try {
-      await upsertOnboardingData(userId, { citizenship_country: citizenshipCountry, residence_country: residenceCountry, current_step: 4 });
+      const updatePayload: Record<string, any> = {
+        citizenship_country: citizenshipCountry,
+        residence_country: residenceCountry,
+        current_step: 4,
+      };
+      /* Save city from Plaid identity if available */
+      if (plaidCity) updatePayload.city = plaidCity;
+      await upsertOnboardingData(userId, updatePayload);
       navigate('/onboarding/step-5');
     } catch (error) { console.error('Error:', error); }
     finally { setIsLoading(false); }
