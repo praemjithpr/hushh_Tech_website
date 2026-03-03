@@ -48,6 +48,7 @@ import SellTheWallPage from './pages/sell-the-wall';
 import AIPoweredBerkshirePage from './pages/ai-powered-berkshire';
 import UserRegistration from './pages/UserRegistration';
 import ProtectedRoute from './components/ProtectedRoute';
+import AuthOnlyRoute from './components/AuthOnlyRoute';
 import YourProfilePage from './pages/your-profile';
 import HushhUserProfilePage from './pages/hushh-user-profile';
 import ViewPreferencesPage from './pages/hushh-user-profile/view';
@@ -241,11 +242,11 @@ function App() {
             <Route path="/community" element={
               <CommunityPage />
             } />
-            {/* Community Events — requires login */}
+            {/* Community Events — login only, no onboarding required */}
             <Route path="/community/events" element={
-              <ProtectedRoute>
+              <AuthOnlyRoute>
                 <CommunityEventsPage />
-              </ProtectedRoute>
+              </AuthOnlyRoute>
             } />
             <Route path='/california-privacy-policy' element={<CaliforniaPrivacyPolicy />} />
             <Route path='/eu-uk-jobs-privacy-policy' element={<EUUKPrivacyPolicy />} />
