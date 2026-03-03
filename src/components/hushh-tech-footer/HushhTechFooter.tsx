@@ -80,12 +80,12 @@ const HushhTechFooter: React.FC<HushhTechFooterProps> = ({
     }
   };
 
-  /** Handle logo click — use parent callback if provided, else go home */
+  /** Handle logo click — use parent callback if provided, else go to community events */
   const handleLogoClick = () => {
     if (onLogoClick) {
       onLogoClick();
     } else {
-      navigate("/");
+      navigate("/community/events");
     }
   };
 

@@ -237,13 +237,13 @@ function App() {
             <Route path="/career/*" element={<Career />} />
             <Route path='/privacy-policy' element={<PrivacyPolicy />} />
             <Route path='/carrer-privacy-policy' element={<CareersPrivacyPolicy />} />
-            {/* Community Events — main /community page */}
+            {/* Community blog/articles — main /community page (nav tab) */}
             <Route path="/community" element={
-              <CommunityEventsPage />
-            } />
-            {/* Old community articles preserved at /community/posts */}
-            <Route path="/community/posts" element={
               <CommunityPage />
+            } />
+            {/* Community Events — standalone registration page */}
+            <Route path="/community/events" element={
+              <CommunityEventsPage />
             } />
             <Route path='/california-privacy-policy' element={<CaliforniaPrivacyPolicy />} />
             <Route path='/eu-uk-jobs-privacy-policy' element={<EUUKPrivacyPolicy />} />
