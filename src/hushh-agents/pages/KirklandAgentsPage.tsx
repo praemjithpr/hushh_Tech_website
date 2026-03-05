@@ -113,6 +113,9 @@ const SwipeCard = memo(forwardRef<SwipeCardHandle, SwipeCardProps>(function Swip
   onTap,
 }, ref) {
   const x = useMotionValue(0);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const allPhotos = (agent.photos && agent.photos.length > 0) ? agent.photos : (agent.photo_url ? [agent.photo_url] : []);
+  const hasMultiplePhotos = allPhotos.length > 1;
 
   /* Derived transforms from drag position */
   const rotate = useTransform(x, [-300, 0, 300], [-12, 0, 12]);
@@ -168,10 +171,23 @@ const SwipeCard = memo(forwardRef<SwipeCardHandle, SwipeCardProps>(function Swip
     [agent.id, onSwipeRight, onSwipeLeft, onTap, x]
   );
 
+  /* Photo navigation — tap left/right halves (only when not dragging) */
+  const handlePhotoTap = useCallback((e: React.MouseEvent) => {
+    if (!isTop || !hasMultiplePhotos) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const tapX = e.clientX - rect.left;
+    const isRightHalf = tapX > rect.width / 2;
+    
+    if (isRightHalf) {
+      setPhotoIndex(prev => Math.min(prev + 1, allPhotos.length - 1));
+    } else {
+      setPhotoIndex(prev => Math.max(prev - 1, 0));
+    }
+    e.stopPropagation();
+  }, [isTop, hasMultiplePhotos, allPhotos.length]);
+
   /* Star rating display */
   const rating = agent.avg_rating || 0;
-  const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
-  const categories = (agent.categories || []).slice(0, 3).join(' · ');
   const bioSnippet = agent.bio ? (agent.bio.length > 100 ? agent.bio.slice(0, 100) + '…' : agent.bio) : null;
 
   return (
@@ -238,54 +254,83 @@ const SwipeCard = memo(forwardRef<SwipeCardHandle, SwipeCardProps>(function Swip
           </>
         )}
 
-        {/* ── Full-bleed visual area ── */}
-        {agent.photo_url ? (
-          /* Has photo — show it full-bleed */
-          <img
-            src={agent.photo_url}
-            alt={agent.name}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading={isTop ? 'eager' : 'lazy'}
-            draggable={false}
-          />
-        ) : (
-          /* No photo — gradient with large icon + initials */
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            {/* Category icon */}
-            <span className="text-6xl mb-3 opacity-30">
-              {getCategoryIcon(agent.categories)}
-            </span>
-            {/* Large initials */}
-            <span
-              className="text-7xl sm:text-8xl font-bold tracking-wider opacity-20"
-              style={{ color: '#ffffff', ...serif }}
+        {/* ── WhatsApp-style photo progress bars (top) ── */}
+        {hasMultiplePhotos && isTop && (
+          <div className="absolute top-2 left-3 right-3 z-20 flex gap-1">
+            {allPhotos.map((_, i) => (
+              <div
+                key={i}
+                className="flex-1 h-[3px] rounded-full transition-all duration-200"
+                style={{
+                  background: i <= photoIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)',
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ── Full-bleed visual area — tap zones for photo nav ── */}
+        <div
+          className="absolute inset-0"
+          onClick={hasMultiplePhotos && isTop ? handlePhotoTap : undefined}
+        >
+          {allPhotos.length > 0 ? (
+            /* Has photos — show current photo full-bleed */
+            <img
+              src={allPhotos[photoIndex] || allPhotos[0]}
+              alt={agent.name}
+              className="w-full h-full object-cover"
+              loading={isTop ? 'eager' : 'lazy'}
+              draggable={false}
+            />
+          ) : (
+            /* No photo — gradient with large icon + initials */
+            <div
+              className="w-full h-full flex flex-col items-center justify-center"
+              style={{ background: getGradient(agent.categories) }}
             >
-              {getInitials(agent.name)}
+              <span className="text-6xl mb-3 opacity-30">
+                {getCategoryIcon(agent.categories)}
+              </span>
+              <span
+                className="text-7xl sm:text-8xl font-bold tracking-wider opacity-20"
+                style={{ color: '#ffffff', ...serif }}
+              >
+                {getInitials(agent.name)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Rating badge top-right ── */}
+        {rating > 0 && (
+          <div className="absolute top-6 right-3 z-10">
+            <span
+              className="text-xs px-2.5 py-1 rounded-full font-semibold backdrop-blur-sm flex items-center gap-1"
+              style={{ background: 'rgba(0,0,0,0.5)', color: '#FFD700', ...sans }}
+            >
+              ★ {rating.toFixed(1)}
             </span>
           </div>
         )}
 
-        {/* ── MCP badge top-right ── */}
-        <div className="absolute top-4 right-4 z-10">
+        {/* ── Review count + MCP top-left ── */}
+        <div className="absolute top-6 left-3 z-10 flex gap-1.5">
           <span
-            className="text-[10px] px-3 py-1.5 rounded-full tracking-wider uppercase font-semibold backdrop-blur-sm"
-            style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff', ...sans }}
+            className="text-[10px] px-2.5 py-1 rounded-full tracking-wider uppercase font-semibold backdrop-blur-sm"
+            style={{ background: 'rgba(0,0,0,0.5)', color: '#ffffff', ...sans }}
           >
             🤖 MCP
           </span>
-        </div>
-
-        {/* ── Review count top-left ── */}
-        {agent.review_count > 0 && (
-          <div className="absolute top-4 left-4 z-10">
+          {agent.review_count > 0 && (
             <span
-              className="text-[10px] px-3 py-1.5 rounded-full tracking-wider uppercase font-semibold backdrop-blur-sm"
-              style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff', ...sans }}
+              className="text-[10px] px-2.5 py-1 rounded-full tracking-wider uppercase font-semibold backdrop-blur-sm"
+              style={{ background: 'rgba(0,0,0,0.5)', color: '#ffffff', ...sans }}
             >
               {agent.review_count} reviews
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* ── Bottom gradient overlay with info (Tinder-style) ── */}
         <div

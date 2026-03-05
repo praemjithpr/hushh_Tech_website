@@ -30,6 +30,7 @@ export interface SwipeAgent {
   review_count: number;
   categories: string[];
   photo_url: string | null;
+  photos: string[];
   bio: string | null;
   services: string[];
   years_in_business: number | null;
@@ -162,7 +163,7 @@ export function useAgentSwipe(): UseAgentSwipeReturn {
         if (selectedIds.length > 0) {
           const { data: agents } = await supabase
             .from('kirkland_agents')
-            .select('id,name,alias,phone,city,state,zip,avg_rating,review_count,categories,photo_url,bio,services,years_in_business,email,website')
+            .select('id,name,alias,phone,city,state,zip,avg_rating,review_count,categories,photo_url,photos,bio,services,years_in_business,email,website')
             .in('id', selectedIds);
           setSelectedAgents(agents || []);
         }
@@ -182,7 +183,7 @@ export function useAgentSwipe(): UseAgentSwipeReturn {
     try {
       let query = supabase
         .from('kirkland_agents')
-        .select('id,name,alias,phone,city,state,zip,avg_rating,review_count,categories,photo_url,bio,services,years_in_business,email,website')
+        .select('id,name,alias,phone,city,state,zip,avg_rating,review_count,categories,photo_url,photos,bio,services,years_in_business,email,website')
         .eq('is_closed', false)
         .order('avg_rating', { ascending: false, nullsFirst: false })
         .limit(BATCH_SIZE);
