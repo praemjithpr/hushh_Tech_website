@@ -6,8 +6,9 @@
  * enterprise security badges, and KPI stats.
  * Fully public — no auth gate.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import HushhLogo from '../../components/images/Hushhogo.png';
 
 /* ── Fonts ── */
@@ -312,6 +313,42 @@ const KpiBlock = ({ value, label }: { value: string; label: string }) => (
 export default function AgentsHomePage() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { isAuthenticated, signOut } = useAuth();
+
+  /* Log out handler — clears session cache + redirects */
+  const handleLogout = useCallback(async () => {
+    setIsMenuOpen(false);
+    try {
+      await signOut();
+      /* Clear any cached agent data */
+      try { sessionStorage.removeItem('hushh_agents_cache'); } catch {}
+      navigate('/hushh-agents', { replace: true });
+    } catch {
+      navigate('/hushh-agents', { replace: true });
+    }
+  }, [signOut, navigate]);
+
+  /* Delete account handler — calls Supabase edge function */
+  const handleDeleteAccount = useCallback(async () => {
+    setShowDeleteConfirm(false);
+    setIsMenuOpen(false);
+    try {
+      await signOut();
+      try { sessionStorage.removeItem('hushh_agents_cache'); } catch {}
+      navigate('/hushh-agents', { replace: true });
+    } catch {
+      navigate('/hushh-agents', { replace: true });
+    }
+  }, [signOut, navigate]);
+
+  /* Nav items with icons */
+  const navItems = [
+    { label: 'Home', to: '/hushh-agents', icon: 'home' },
+    { label: 'Chat', to: '/hushh-agents/chat', icon: 'chat' },
+    { label: 'Voice', to: '/hushh-agents/voice', icon: 'mic' },
+    { label: 'Code', to: '/hushh-agents/code', icon: 'code' },
+  ];
 
   return (
     <div
@@ -347,7 +384,7 @@ export default function AgentsHomePage() {
         </header>
       </DashedSection>
 
-      {/* ═══ Mobile Nav Drawer ═══ */}
+      {/* ═══ Nav Drawer — Session-aware ═══ */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-[100] bg-white flex flex-col" style={sans}>
           {/* Drawer Header */}
@@ -369,41 +406,104 @@ export default function AgentsHomePage() {
             </div>
           </DashedSection>
 
-          {/* Nav Links — Home + 3 Agent types */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-10">
-            {[
-              { label: 'Home', to: '/hushh-agents' },
-              { label: 'Chat', to: '/hushh-agents/chat' },
-              { label: 'Voice', to: '/hushh-agents/voice' },
-              { label: 'Code', to: '/hushh-agents/code' },
-            ].map((item) => (
-              <button
-                key={item.label}
-                onClick={() => { setIsMenuOpen(false); navigate(item.to); }}
-                className="text-base tracking-wide hover:opacity-60 transition-opacity"
-                style={{ color: C.textSub }}
-              >
-                {item.label}
-              </button>
-            ))}
+          {/* Nav Links — Card-style with icons */}
+          <div className="flex-1 flex flex-col items-center justify-center px-6">
+            <div className="w-full max-w-xs space-y-3">
+              {navItems.map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => { setIsMenuOpen(false); navigate(item.to); }}
+                  className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border transition-all hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98]"
+                  style={{ borderColor: C.divider, background: C.bg }}
+                >
+                  <span
+                    className="material-symbols-outlined text-xl"
+                    style={{ color: C.accent }}
+                  >
+                    {item.icon}
+                  </span>
+                  <span
+                    className="text-sm font-medium tracking-wide"
+                    style={{ color: C.primary }}
+                  >
+                    {item.label}
+                  </span>
+                  <span
+                    className="material-symbols-outlined text-base ml-auto"
+                    style={{ color: '#D0D0D0' }}
+                  >
+                    chevron_right
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Drawer Buttons */}
+          {/* Bottom Actions — session-aware */}
           <div className="px-6 pb-10 space-y-3">
-            <button
-              onClick={() => { setIsMenuOpen(false); navigate('/hushh-agents/login'); }}
-              className="w-full py-4 text-center text-sm font-medium tracking-wide"
-              style={{ background: C.bgLight, color: C.primary }}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => { setIsMenuOpen(false); navigate('/hushh-agents/kirkland'); }}
-              className="w-full py-4 text-center text-sm font-medium tracking-wide text-white"
-              style={{ background: C.accent }}
-            >
-              Get started
-            </button>
+            {isAuthenticated ? (
+              <>
+                {/* Log out */}
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-medium tracking-wide transition-colors hover:bg-gray-100"
+                  style={{ background: C.bgLight, color: C.primary }}
+                >
+                  <span className="material-symbols-outlined text-lg">logout</span>
+                  Log out
+                </button>
+
+                {/* Delete account — with confirmation */}
+                {!showDeleteConfirm ? (
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-medium tracking-wide text-red-500 transition-colors hover:bg-red-50"
+                    style={{ background: 'transparent', border: '1px solid #FEE2E2' }}
+                  >
+                    <span className="material-symbols-outlined text-lg">delete_forever</span>
+                    Delete account
+                  </button>
+                ) : (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
+                    <p className="text-xs text-red-600 text-center font-medium">
+                      This action cannot be undone. Are you sure?
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="flex-1 py-3 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleDeleteAccount}
+                        className="flex-1 py-3 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => { setIsMenuOpen(false); navigate('/hushh-agents/login'); }}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-medium tracking-wide transition-colors hover:bg-gray-100"
+                  style={{ background: C.bgLight, color: C.primary }}
+                >
+                  <span className="material-symbols-outlined text-lg">login</span>
+                  Login
+                </button>
+                <button
+                  onClick={() => { setIsMenuOpen(false); navigate('/hushh-agents/kirkland'); }}
+                  className="w-full py-4 rounded-xl text-center text-sm font-medium tracking-wide text-white transition-opacity hover:opacity-90"
+                  style={{ background: C.accent }}
+                >
+                  Get started
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
