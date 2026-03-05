@@ -6,7 +6,7 @@
  * Bottom tab bar: Discover | Selected.
  */
 
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, useRef, useImperativeHandle, forwardRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, animate, PanInfo } from 'framer-motion';
 import { useAgentSwipe, type SwipeAgent } from '../hooks/useAgentSwipe';
@@ -35,28 +35,18 @@ const VELOCITY_THRESHOLD = 500;
 const FLY_DISTANCE = 800;
 
 /* ══════════════════════════════════════════
-   DashedSection — crop-mark borders
+   Section — clean container (no crop marks)
    ══════════════════════════════════════════ */
-const DashedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <section
-    className={`relative mx-3 sm:mx-6 my-1 ${className}`}
-    style={{ border: `1px solid ${C.divider}` }}
-  >
-    {[
-      'top-0 left-0 border-t border-l',
-      'top-0 right-0 border-t border-r',
-      'bottom-0 left-0 border-b border-l',
-      'bottom-0 right-0 border-b border-r',
-    ].map((pos) => (
-      <div
-        key={pos}
-        className={`absolute w-4 h-4 pointer-events-none ${pos}`}
-        style={{ borderColor: C.primary, borderWidth: '1px' }}
-      />
-    ))}
+const Section = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <section className={`relative ${className}`}>
     {children}
   </section>
 );
+
+/* ── Imperative handle for button-triggered swipes ── */
+export interface SwipeCardHandle {
+  triggerSwipe: (direction: 'left' | 'right') => void;
+}
 
 /* ══════════════════════════════════════════
    SwipeCard — Draggable agent card
@@ -70,14 +60,14 @@ interface SwipeCardProps {
   onTap: (id: string) => void;
 }
 
-const SwipeCard = memo(function SwipeCard({
+const SwipeCard = memo(forwardRef<SwipeCardHandle, SwipeCardProps>(function SwipeCard({
   agent,
   isTop,
   stackIndex,
   onSwipeRight,
   onSwipeLeft,
   onTap,
-}: SwipeCardProps) {
+}, ref) {
   const x = useMotionValue(0);
 
   /* Derived transforms from drag position */
@@ -85,9 +75,24 @@ const SwipeCard = memo(function SwipeCard({
   const selectOpacity = useTransform(x, [0, DRAG_THRESHOLD], [0, 1]);
   const rejectOpacity = useTransform(x, [-DRAG_THRESHOLD, 0], [1, 0]);
 
-  /* Stack depth offset */
-  const scale = 1 - stackIndex * 0.04;
-  const yOffset = stackIndex * 8;
+  /* Expose triggerSwipe for button clicks */
+  useImperativeHandle(ref, () => ({
+    triggerSwipe: (direction: 'left' | 'right') => {
+      const dir = direction === 'right' ? 1 : -1;
+      animate(x, dir * FLY_DISTANCE, {
+        duration: 0.35,
+        ease: 'easeIn',
+        onComplete: () => {
+          if (dir > 0) onSwipeRight(agent.id);
+          else onSwipeLeft(agent.id);
+        },
+      });
+    },
+  }), [x, agent.id, onSwipeRight, onSwipeLeft]);
+
+  /* Stack depth offset — visible stacked edges */
+  const scale = 1 - stackIndex * 0.05;
+  const yOffset = stackIndex * 12;
   const zIndex = 10 - stackIndex;
 
   const handleDragEnd = useCallback(
@@ -127,14 +132,19 @@ const SwipeCard = memo(function SwipeCard({
 
   return (
     <motion.div
-      className="absolute inset-0 touch-none select-none"
+      className="absolute touch-none select-none"
       style={{
+        /* Inset back cards so stack edges are visible */
+        top: 0,
+        left: stackIndex * 6,
+        right: stackIndex * 6,
+        bottom: 0,
         x: isTop ? x : 0,
         rotate: isTop ? rotate : 0,
         scale,
         y: yOffset,
         zIndex,
-        opacity: stackIndex > 2 ? 0 : 1 - stackIndex * 0.2,
+        opacity: stackIndex > 2 ? 0 : 1 - stackIndex * 0.15,
       }}
       drag={isTop ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -142,8 +152,14 @@ const SwipeCard = memo(function SwipeCard({
       onDragEnd={isTop ? handleDragEnd : undefined}
     >
       <div
-        className="w-full h-full rounded-none overflow-hidden flex flex-col"
-        style={{ background: C.bg, border: `1px solid ${C.divider}` }}
+        className="w-full h-full rounded-2xl overflow-hidden flex flex-col"
+        style={{
+          background: C.bg,
+          border: `1px solid ${C.divider}`,
+          boxShadow: stackIndex === 0
+            ? '0 4px 20px rgba(0,0,0,0.08)'
+            : `0 ${2 + stackIndex * 2}px ${8 + stackIndex * 4}px rgba(0,0,0,${0.04 + stackIndex * 0.02})`,
+        }}
       >
         {/* ── SELECT / PASS overlays ── */}
         {isTop && (
@@ -259,7 +275,7 @@ const SwipeCard = memo(function SwipeCard({
       </div>
     </motion.div>
   );
-});
+}));
 
 /* ══════════════════════════════════════════
    SelectedAgentCard — Horizontal card
@@ -349,14 +365,21 @@ export default function KirklandAgentsPage() {
     navigate(`/hushh-agents/kirkland/${id}`);
   }, [navigate]);
 
-  /* Button-triggered swipes (for accessibility + desktop) */
+  /* Ref to top card for button-triggered fly-away animation */
+  const topCardRef = useRef<SwipeCardHandle>(null);
+
+  /* Button-triggered swipes — animate card flying out */
   const handleButtonReject = useCallback(() => {
-    if (cards.length > 0) swipeLeft(cards[0].id);
-  }, [cards, swipeLeft]);
+    if (cards.length > 0 && topCardRef.current) {
+      topCardRef.current.triggerSwipe('left');
+    }
+  }, [cards]);
 
   const handleButtonSelect = useCallback(() => {
-    if (cards.length > 0) swipeRight(cards[0].id);
-  }, [cards, swipeRight]);
+    if (cards.length > 0 && topCardRef.current) {
+      topCardRef.current.triggerSwipe('right');
+    }
+  }, [cards]);
 
   return (
     <div
@@ -364,7 +387,7 @@ export default function KirklandAgentsPage() {
       style={{ background: C.bg, color: C.primary, ...sans }}
     >
       {/* ═══ Header ═══ */}
-      <DashedSection>
+      <Section>
         <header className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <button
             onClick={() => navigate('/hushh-agents')}
@@ -386,10 +409,10 @@ export default function KirklandAgentsPage() {
 
           <div className="w-16" /> {/* Spacer for centering */}
         </header>
-      </DashedSection>
+      </Section>
 
       {/* ═══ Content ═══ */}
-      <DashedSection className="flex-1 flex flex-col">
+      <Section className="flex-1 flex flex-col">
         <div className="flex-1 flex flex-col items-center px-4 pt-4 pb-24">
           {activeTab === 'discover' ? (
             /* ── Discover View ── */
@@ -433,9 +456,11 @@ export default function KirklandAgentsPage() {
                   </div>
                 ) : (
                   /* Card stack — only render top 3 */
+                  /* Render top 3 cards — reversed so index 0 renders last (on top) */
                   cards.slice(0, 3).map((agent, i) => (
                     <SwipeCard
                       key={agent.id}
+                      ref={i === 0 ? topCardRef : undefined}
                       agent={agent}
                       isTop={i === 0}
                       stackIndex={i}
@@ -542,7 +567,7 @@ export default function KirklandAgentsPage() {
             </div>
           )}
         </div>
-      </DashedSection>
+      </Section>
 
       {/* ═══ Bottom Tab Bar — Fixed ═══ */}
       <div
