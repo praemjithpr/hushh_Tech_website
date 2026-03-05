@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import DeleteAccountModal from '../../components/DeleteAccountModal';
 import HushhLogo from '../../components/images/Hushhogo.png';
 
 /* ── Fonts ── */
@@ -313,7 +314,7 @@ const KpiBlock = ({ value, label }: { value: string; label: string }) => (
 export default function AgentsHomePage() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { isAuthenticated, signOut } = useAuth();
 
   /* Log out handler — clears session cache + redirects */
@@ -321,26 +322,27 @@ export default function AgentsHomePage() {
     setIsMenuOpen(false);
     try {
       await signOut();
-      /* Clear any cached agent data */
+      /* Clear cached agent data */
       try { sessionStorage.removeItem('hushh_agents_cache'); } catch {}
+      try { localStorage.removeItem('hushh_agents_cache'); } catch {}
       navigate('/hushh-agents', { replace: true });
     } catch {
       navigate('/hushh-agents', { replace: true });
     }
   }, [signOut, navigate]);
 
-  /* Delete account handler — calls Supabase edge function */
-  const handleDeleteAccount = useCallback(async () => {
-    setShowDeleteConfirm(false);
+  /* Delete account — opens production glassmorphism modal */
+  const handleOpenDeleteModal = useCallback(() => {
     setIsMenuOpen(false);
-    try {
-      await signOut();
-      try { sessionStorage.removeItem('hushh_agents_cache'); } catch {}
-      navigate('/hushh-agents', { replace: true });
-    } catch {
-      navigate('/hushh-agents', { replace: true });
-    }
-  }, [signOut, navigate]);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  /* After account is deleted via modal — redirect to landing */
+  const handleAccountDeleted = useCallback(() => {
+    setIsDeleteModalOpen(false);
+    try { sessionStorage.clear(); } catch {}
+    navigate('/hushh-agents', { replace: true });
+  }, [navigate]);
 
   /* Nav items with icons */
   const navItems = [
@@ -453,37 +455,15 @@ export default function AgentsHomePage() {
                   Log out
                 </button>
 
-                {/* Delete account — with confirmation */}
-                {!showDeleteConfirm ? (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-medium tracking-wide text-red-500 transition-colors hover:bg-red-50"
-                    style={{ background: 'transparent', border: '1px solid #FEE2E2' }}
-                  >
-                    <span className="material-symbols-outlined text-lg">delete_forever</span>
-                    Delete account
-                  </button>
-                ) : (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
-                    <p className="text-xs text-red-600 text-center font-medium">
-                      This action cannot be undone. Are you sure?
-                    </p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className="flex-1 py-3 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleDeleteAccount}
-                        className="flex-1 py-3 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* Delete account — opens production glassmorphism modal */}
+                <button
+                  onClick={handleOpenDeleteModal}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-medium tracking-wide text-red-500 transition-colors hover:bg-red-50"
+                  style={{ background: 'transparent', border: '1px solid #FEE2E2' }}
+                >
+                  <span className="material-symbols-outlined text-lg">delete_forever</span>
+                  Delete account
+                </button>
               </>
             ) : (
               <>
@@ -912,6 +892,13 @@ export default function AgentsHomePage() {
 
       {/* Bottom spacing */}
       <div className="h-8" />
+
+      {/* ═══ Delete Account Modal — Production glassmorphism (reused from main app) ═══ */}
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onAccountDeleted={handleAccountDeleted}
+      />
     </div>
   );
 }
