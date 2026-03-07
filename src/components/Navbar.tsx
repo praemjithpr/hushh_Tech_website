@@ -90,7 +90,7 @@ export default function Navbar() {
         return isSameSession ? currentSession : nextSession;
       });
     };
-    
+
     // Fetch the current session
     config.supabaseClient.auth.getSession().then(({ data: { session } }) => {
       syncSessionIfUserChanged(session);
@@ -100,7 +100,7 @@ export default function Navbar() {
     const { data: { subscription } } = config.supabaseClient.auth.onAuthStateChange((_event, nextSession) => {
       syncSessionIfUserChanged(nextSession);
     });
-    
+
     const cleanup = () => subscription?.unsubscribe();
     return cleanup;
   }, []);
@@ -115,7 +115,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     if (!config.supabaseClient) return;
-    
+
     try {
       await config.supabaseClient.auth.signOut();
       setSession(null);
@@ -150,7 +150,7 @@ export default function Navbar() {
       setToastShown(true);
       return;
     }
-    
+
     toast({
       title: t('common.welcome'),
       description: t('common.signInMessage'),
@@ -223,7 +223,7 @@ export default function Navbar() {
     setToastShown(true); // Prevent welcome toast from showing
     setIsOpen(false); // Close sidebar drawer immediately
     onDeleteModalClose();
-    
+
     // Navigate to home after a brief delay for cleanup
     setTimeout(() => {
       navigate("/");
@@ -251,21 +251,19 @@ export default function Navbar() {
       {/* Fixed Header with Navigation + Ticker - Light Theme */}
       <header className="fixed w-full z-[999] top-0">
         {/* Main Navigation Bar - Soft Light Background */}
-        <nav className="flex w-full items-center justify-between bg-[#F8F9FA] px-4 lg:px-8 h-16 border-b border-gray-200 transition-colors duration-300">
+        <nav className="flex w-full items-center justify-between bg-white px-4 lg:px-8 h-16 border-b border-[#F2F0EB] transition-colors duration-300" style={{ fontFamily: 'var(--font-body)' }}>
           {/* Left: Brand Lockup */}
           <Link to="/" className="flex items-center gap-3">
-            {/* Hushh Logo Image in Circle with subtle gradient */}
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200/50 shadow-sm shrink-0 overflow-hidden">
-              <Image 
-                src={hushhLogo} 
-                alt="Hushh Logo" 
-                className="w-7 h-7 object-contain"
+            <div className="flex items-center justify-center w-10 h-10 rounded-md shrink-0 overflow-hidden">
+              <Image
+                src={hushhLogo}
+                alt="Hushh Logo"
+                className="w-10 h-10 object-contain"
               />
             </div>
-            {/* Brand Text - Stacked Layout */}
-            <div className="flex flex-col">
-              <h1 className="text-[18px] font-bold leading-none tracking-tight text-gray-900">Hushh</h1>
-              <span className="text-[13px] text-gray-500 font-medium mt-0.5">Technologies</span>
+            <div className="flex flex-col leading-none">
+              <h1 className="text-[16px] font-bold tracking-tight text-[#151513]">hushh</h1>
+              <span className="text-[9px] font-semibold tracking-[0.14em] uppercase text-[#8C8479] mt-px">Technologies</span>
             </div>
           </Link>
 
@@ -277,11 +275,10 @@ export default function Navbar() {
                 <button
                   key={path}
                   onClick={() => handleLinkClick(path)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                    active
-                      ? 'bg-[#2F80ED]/10 text-[#1f6cc7]'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                  className={`px-3 py-2 text-[14px] font-semibold rounded transition-colors ${active
+                    ? 'text-[#AA4528]'
+                    : 'text-[#4A4540] hover:text-[#151513]'
+                    }`}
                 >
                   {label}
                 </button>
@@ -301,24 +298,32 @@ export default function Navbar() {
                   <>
                     <button
                       onClick={() => navigate('/hushh-user-profile')}
-                      className="hidden xl:inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="hidden xl:inline-flex items-center px-3 py-2 text-[14px] font-semibold text-[#4A4540] hover:text-[#151513] transition-colors"
                     >
                       {t('nav.viewProfile')}
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="inline-flex items-center justify-center rounded-full bg-[#2F80ED] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f6cc7] transition-colors"
+                      className="fr-btn-dark text-[13px] !py-2.5 !px-5 !rounded !min-h-0 !w-auto"
                     >
                       {t('nav.logout')}
                     </button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => navigate('/Login')}
-                    className="inline-flex items-center justify-center rounded-full bg-[#2F80ED] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f6cc7] transition-colors"
-                  >
-                    {t('nav.login')}
-                  </button>
+                  <>
+                    <button
+                      onClick={() => navigate('/Login')}
+                      className="px-3 py-2 text-[14px] font-semibold text-[#4A4540] hover:text-[#151513] transition-colors"
+                    >
+                      {t('nav.login')}
+                    </button>
+                    <button
+                      onClick={() => navigate('/investor-profile')}
+                      className="fr-btn-primary text-[13px] !py-2.5 !px-5 !rounded !min-h-0 !w-auto"
+                    >
+                      Get started
+                    </button>
+                  </>
                 )}
               </>
             )}
@@ -327,10 +332,10 @@ export default function Navbar() {
             {!isDesktop && (
               <button
                 onClick={toggleDrawer}
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-[#2F80ED] text-white active:scale-95 transition-transform shadow-lg shadow-blue-500/30 hover:bg-blue-600"
+                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[#F2F0EB] transition-colors"
                 aria-label="Toggle menu"
               >
-                <FiMenu className="w-5 h-5" />
+                <FiMenu className="w-5 h-5 text-[#151513]" />
               </button>
             )}
           </div>
@@ -338,39 +343,39 @@ export default function Navbar() {
 
         {/* Chip-based Ticker Strip - BELOW Navigation (hidden on onboarding & profile pages) */}
         {!hideTicker && (
-        <section className="relative w-full bg-[#F8F9FA] py-2.5 border-b border-gray-200">
-          {/* Ticker Marquee with Fade Mask */}
-          <div className="ticker-mask relative flex w-full overflow-hidden">
-            <div className="ticker-track flex items-center gap-3 px-4">
-              {/* First set of tickers */}
-              {displayQuotes.map((quote, idx) => (
-                <TickerChip 
-                  key={`first-${quote.symbol}-${idx}`} 
-                  quote={quote} 
-                  isLoading={quotesLoading && quotes.length === 0}
-                />
-              ))}
-              {/* Duplicate for seamless loop */}
-              {displayQuotes.map((quote, idx) => (
-                <TickerChip 
-                  key={`second-${quote.symbol}-${idx}`} 
-                  quote={quote}
-                  isLoading={quotesLoading && quotes.length === 0}
-                />
-              ))}
+          <section className="relative w-full bg-[#F7F5F0] py-2.5 border-b border-[#F2F0EB]">
+            {/* Ticker Marquee with Fade Mask */}
+            <div className="ticker-mask relative flex w-full overflow-hidden">
+              <div className="ticker-track flex items-center gap-3 px-4">
+                {/* First set of tickers */}
+                {displayQuotes.map((quote, idx) => (
+                  <TickerChip
+                    key={`first-${quote.symbol}-${idx}`}
+                    quote={quote}
+                    isLoading={quotesLoading && quotes.length === 0}
+                  />
+                ))}
+                {/* Duplicate for seamless loop */}
+                {displayQuotes.map((quote, idx) => (
+                  <TickerChip
+                    key={`second-${quote.symbol}-${idx}`}
+                    quote={quote}
+                    isLoading={quotesLoading && quotes.length === 0}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Live Indicator - Small dot on right */}
-          {lastUpdated && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-[9px] font-medium text-gray-500">
-                {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-          )}
-        </section>
+            {/* Live Indicator - Small dot on right */}
+            {lastUpdated && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                <span className="text-[9px] font-medium text-gray-500">
+                  {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            )}
+          </section>
         )}
       </header>
 
@@ -428,7 +433,7 @@ export default function Navbar() {
                       {label}
                     </span>
                     <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
-                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     {/* Separator line (skip last item) */}
                     {idx < arr.length - 1 && (
@@ -459,7 +464,7 @@ export default function Navbar() {
                       {label}
                     </span>
                     <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
-                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     {idx < arr.length - 1 && (
                       <div className="absolute bottom-0 right-0 h-[0.5px] bg-[#C6C6C8]" style={{ width: 'calc(100% - 56px)', marginLeft: '56px' }} />
@@ -483,7 +488,7 @@ export default function Navbar() {
                       <span className="text-[13px] text-[#8E8E93] leading-tight mt-0.5">$1 or use coupon code</span>
                     </div>
                     <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
-                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </div>
@@ -522,7 +527,7 @@ export default function Navbar() {
                       </div>
                       <span className="text-[17px] text-black flex-grow text-left leading-none">Book Consultation</span>
                       <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
-                        <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       <div className="absolute bottom-0 right-0 h-[0.5px] bg-[#C6C6C8]" style={{ width: 'calc(100% - 56px)', marginLeft: '56px' }} />
                     </button>
@@ -535,7 +540,7 @@ export default function Navbar() {
                       </div>
                       <span className="text-[17px] text-black flex-grow text-left leading-none">Transaction History</span>
                       <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
-                        <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
                   </div>
@@ -556,7 +561,7 @@ export default function Navbar() {
                       {t('nav.viewProfile')}
                     </span>
                     <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
-                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <div className="absolute bottom-0 right-0 h-[0.5px] bg-[#C6C6C8]" style={{ width: 'calc(100% - 56px)', marginLeft: '56px' }} />
                   </button>
