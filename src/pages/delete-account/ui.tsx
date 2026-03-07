@@ -33,7 +33,7 @@ const ACCORDION_SECTIONS = [
   {
     id: "data-deleted",
     icon: "folder_off",
-    iconColor: "text-hushh-blue",
+    iconColor: "text-fr-rust",
     title: "Data That Will Be Permanently Deleted",
     subtitle: "Profile, history & preferences",
     content: [
@@ -103,14 +103,13 @@ const DeleteAccountPage: React.FC = () => {
         />
       </Helmet>
 
-      <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white relative overflow-hidden">
+      <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-fr-rust selection:text-white relative overflow-hidden">
         {/* ═══ Background layer (blurs when modal is open) ═══ */}
         <div
-          className={`flex-1 flex flex-col transition-all duration-300 ${
-            isOpen
+          className={`flex-1 flex flex-col transition-all duration-300 ${isOpen
               ? "scale-[0.98] blur-[2px] opacity-40 pointer-events-none select-none"
               : ""
-          }`}
+            }`}
         >
           {/* ═══ Common Header ═══ */}
           <HushhTechHeader />
@@ -125,13 +124,13 @@ const DeleteAccountPage: React.FC = () => {
                 {isLoading
                   ? "Checking Session..."
                   : isLoggedIn
-                  ? <>Ready to Delete Your{" "}<span className="text-gray-400 italic font-light">Account?</span></>
-                  : <>Login to Delete Your{" "}<span className="text-gray-400 italic font-light">Account.</span></>}
+                    ? <>Ready to Delete Your{" "}<span className="text-gray-400 italic font-light">Account?</span></>
+                    : <>Login to Delete Your{" "}<span className="text-gray-400 italic font-light">Account.</span></>}
               </h1>
 
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-hushh-blue rounded-full" />
+                  <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-fr-rust rounded-full" />
                   <p className="text-gray-500 text-sm">
                     Verifying session...
                   </p>
@@ -203,9 +202,8 @@ const DeleteAccountPage: React.FC = () => {
                         </div>
                       </div>
                       <span
-                        className={`material-symbols-outlined text-gray-400 text-xl transition-transform duration-300 ${
-                          isExpanded ? "rotate-90" : ""
-                        }`}
+                        className={`material-symbols-outlined text-gray-400 text-xl transition-transform duration-300 ${isExpanded ? "rotate-90" : ""
+                          }`}
                       >
                         arrow_forward
                       </span>
@@ -214,11 +212,10 @@ const DeleteAccountPage: React.FC = () => {
                     {/* Expandable content */}
                     <div
                       id={`accordion-${section.id}`}
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isExpanded
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded
                           ? "max-h-[500px] opacity-100"
                           : "max-h-0 opacity-0"
-                      }`}
+                        }`}
                     >
                       <div className="py-4 pl-16 pr-4 space-y-3 border-b border-gray-100">
                         {section.content.map((item, idx) => (
@@ -247,7 +244,7 @@ const DeleteAccountPage: React.FC = () => {
             {/* ── Trust Badge ── */}
             <div className="mt-auto pt-8 flex items-center justify-center gap-2 opacity-60">
               <span
-                className="material-symbols-outlined text-[1.2rem] text-hushh-blue"
+                className="material-symbols-outlined text-[1.2rem] text-fr-rust"
                 style={{
                   fontVariationSettings:
                     "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24",

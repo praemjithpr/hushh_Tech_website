@@ -197,18 +197,18 @@ export default function InvestorGuide() {
   const isPhaseActive = useCallback((index: number) => activePhases.has(index), [activePhases]);
 
   return (
-    <div className="bg-[#f6f7f8] min-h-screen font-['Manrope',sans-serif] antialiased text-[#111418] selection:bg-[#AA4528]/20 selection:text-[#AA4528]">
-      <div className="onboarding-shell mx-auto flex h-full min-h-screen w-full max-w-[500px] flex-col bg-white shadow-xl relative overflow-hidden border-x border-slate-100">
+    <div className="bg-[#faf9f6] min-h-screen font-['Source Sans Pro',sans-serif] antialiased text-[#151513] selection:bg-fr-rust/20 selection:text-fr-rust" style={{ fontFamily: "var(--font-body)" }}>
+      <div className="onboarding-shell mx-auto flex h-full min-h-screen w-full max-w-[500px] flex-col bg-[#faf9f6] shadow-xl relative overflow-hidden border-x border-slate-100">
 
         {/* Top App Bar */}
-        <header className="sticky top-0 z-50 flex items-center justify-between bg-white/95 px-4 py-3 backdrop-blur-sm border-b border-gray-100">
+        <header className="sticky top-0 z-50 flex items-center justify-between bg-[#faf9f6]/95 px-4 py-3 backdrop-blur-sm border-b border-gray-100">
           <button
             onClick={handleBack}
-            className="flex size-10 items-center justify-center rounded-full text-[#111418] transition hover:bg-[#f6f7f8]"
+            className="flex size-10 items-center justify-center rounded-full text-[#151513] transition hover:bg-gray-100"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>arrow_back</span>
           </button>
-          <h2 className="flex-1 text-center text-lg font-bold leading-tight tracking-tight text-[#111418] pr-10">Investor Guide</h2>
+          <h2 className="flex-1 text-center text-lg font-bold leading-tight tracking-tight text-[#151513] pr-10" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>Investor Guide</h2>
         </header>
 
         {/* Main Scrollable Content */}
@@ -219,7 +219,7 @@ export default function InvestorGuide() {
             <div className="mb-4 inline-flex items-center justify-center rounded-full bg-[#AA4528]/10 px-3 py-1">
               <span className="text-xs font-bold uppercase tracking-wider text-[#AA4528]">Investor Guide</span>
             </div>
-            <h1 className="mb-3 text-3xl font-extrabold leading-tight tracking-tight text-[#111418]">
+            <h1 className="mb-3 text-3xl text-[#151513] tracking-tight" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>
               Investor Onboarding Guide
             </h1>
             <p className="text-base font-medium leading-relaxed text-[#617589]">
@@ -269,8 +269,8 @@ export default function InvestorGuide() {
                     {/* Phase number circle with animation */}
                     <div
                       className={`relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ring-4 ring-white transition-all duration-500 ease-out ${isActive
-                          ? 'bg-[#AA4528] text-white shadow-md scale-100'
-                          : 'bg-white border-2 border-gray-200 text-gray-400 scale-95'
+                        ? 'bg-[#AA4528] text-white shadow-md scale-100'
+                        : 'bg-white border-2 border-gray-200 text-gray-400 scale-95'
                         }`}
                     >
                       <span className="text-sm font-bold">{String(phase.phase).padStart(2, '0')}</span>
@@ -314,7 +314,7 @@ export default function InvestorGuide() {
           </section>
 
           {/* Requirements & Benefits Grid */}
-          <section className="px-6 py-6 bg-[#f6f7f8]">
+          <section className="px-6 py-6 bg-gray-50/50">
             <div className="grid grid-cols-1 gap-8">
               {/* Requirements */}
               <div>
@@ -402,7 +402,7 @@ export default function InvestorGuide() {
                   </div>
 
                   {/* Minimum Investment */}
-                  <h4 className="text-3xl font-bold text-[#111418] mb-1">{tier.minimum}</h4>
+                  <h4 className="text-3xl font-bold text-[#151513] mb-1" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>{tier.minimum}</h4>
                   <p className="text-xs text-[#617589] mb-3">Minimum Investment</p>
 
                   {/* Tier Name */}
@@ -474,7 +474,7 @@ export default function InvestorGuide() {
         </main>
 
         {/* Sticky Footer */}
-        <footer className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-[500px] mx-auto border-t border-slate-100 bg-white/90 backdrop-blur-md px-4 sm:px-6 pt-4 sm:pt-5 pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-[0_-4px_20px_rgba(0,0,0,0.04)]" data-onboarding-footer>
+        <footer className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-[500px] mx-auto border-t border-slate-100 bg-[#faf9f6]/90 backdrop-blur-md px-4 sm:px-6 pt-4 sm:pt-5 pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-[0_-4px_20px_rgba(0,0,0,0.04)]" data-onboarding-footer>
           <button
             onClick={handleStartJourney}
             data-onboarding-cta

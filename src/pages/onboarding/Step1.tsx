@@ -269,8 +269,8 @@ export default function OnboardingStep1() {
       <div className="mb-8">
         <p className="fr-overline mb-2">Institutional Series</p>
         <h1
-          className="text-[2rem] md:text-[2.4rem] font-light leading-tight text-[#151513] mb-3"
-          style={{ fontFamily: 'var(--font-display)' }}
+          className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-3"
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
         >
           Select your{' '}
           <em className="not-italic text-[#AA4528]">share class allocation</em>
@@ -333,7 +333,7 @@ export default function OnboardingStep1() {
                   >
                     <span className="material-symbols-outlined text-[18px]">remove</span>
                   </button>
-                  <span className="text-[20px] font-light w-5 text-center text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+                  <span className="text-[20px] font-medium w-5 text-center text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
                     {count}
                   </span>
                   <button
@@ -354,7 +354,7 @@ export default function OnboardingStep1() {
       {totalInvestment > 0 && (
         <div className="mb-8 px-5 py-4 bg-[#F7F5F0] rounded-md border border-[#EEE9E0] flex items-center justify-between">
           <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#8C8479]">Total Initial Investment</span>
-          <span className="text-[24px] font-light text-[#AA4528]" style={{ fontFamily: 'var(--font-display)' }}>
+          <span className="text-[24px] font-medium text-[#AA4528]" style={{ fontFamily: 'var(--font-display)' }}>
             {formatCurrency(totalInvestment)}
           </span>
         </div>
@@ -364,7 +364,7 @@ export default function OnboardingStep1() {
       <div className="border-t border-[#F2F0EB] pt-8">
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-[18px] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <h2 className="text-[18px] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
               Recurring Investment
             </h2>
             <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8C8479] bg-[#F2F0EB] px-2 py-0.5 rounded-full">

@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════
    Fundrise Design System — Google Fonts
    ══════════════════════════════════════════════════════════ */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Source+Sans+3:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -12,25 +12,25 @@
    ══════════════════════════════════════════════════════════ */
 :root {
   /* Brand Colors */
-  --fr-rust:        #AA4528;
-  --fr-rust-dark:   #8C3720;
-  --fr-navy:        #151513;
-  --fr-cream:       #F7F5F0;
-  --fr-cream-dark:  #EEE9E0;
-  --fr-white:       #FFFFFF;
-  --fr-gray-100:    #F2F0EB;
-  --fr-gray-300:    #C4BFB5;
-  --fr-gray-500:    #8C8479;
-  --fr-gray-700:    #4A4540;
+  --fr-rust: #AA4528;
+  --fr-rust-dark: #8C3720;
+  --fr-navy: #151513;
+  --fr-cream: #faf9f6;
+  --fr-cream-dark: #EEE9E0;
+  --fr-white: #FFFFFF;
+  --fr-gray-100: #F2F0EB;
+  --fr-gray-300: #C4BFB5;
+  --fr-gray-500: #8C8479;
+  --fr-gray-700: #4A4540;
 
   /* Typography */
-  --font-display: "Cormorant Garamond", Georgia, serif;
-  --font-body:    "Source Sans 3", "Source Sans Pro", ui-sans-serif, system-ui, sans-serif;
-  --font-main:    "Source Sans 3", "Source Sans Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Ivar Headline", "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-main: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* Spacing */
   --section-padding: 96px;
-  --container-max:   1200px;
+  --container-max: 1200px;
 }
 
 html,
@@ -57,6 +57,7 @@ body {
   padding-left: 48px;
   padding-right: 48px;
 }
+
 @media (max-width: 768px) {
   .fr-container {
     padding-left: 20px;
@@ -69,12 +70,14 @@ body {
   padding-top: var(--section-padding);
   padding-bottom: var(--section-padding);
 }
+
 @media (max-width: 1024px) {
   .fr-section {
     padding-top: 64px;
     padding-bottom: 64px;
   }
 }
+
 @media (max-width: 768px) {
   .fr-section {
     padding-top: 48px;
@@ -120,10 +123,12 @@ body {
   text-decoration: none;
   white-space: nowrap;
 }
+
 .fr-btn-primary:hover {
   background-color: var(--fr-rust-dark);
   transform: translateY(-1px);
 }
+
 .fr-btn-primary:active {
   transform: translateY(0);
 }
@@ -147,6 +152,7 @@ body {
   text-decoration: none;
   white-space: nowrap;
 }
+
 .fr-btn-dark:hover {
   background-color: #2a2a26;
   transform: translateY(-1px);
@@ -171,6 +177,7 @@ body {
   text-decoration: none;
   white-space: nowrap;
 }
+
 .fr-btn-outline:hover {
   background-color: rgba(21, 21, 19, 0.05);
   transform: translateY(-1px);
@@ -185,6 +192,7 @@ body {
   box-shadow: 0 2px 12px rgba(21, 21, 19, 0.06);
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
+
 .fr-card:hover {
   box-shadow: 0 8px 32px rgba(21, 21, 19, 0.12);
   transform: translateY(-2px);
@@ -195,12 +203,14 @@ body {
 [data-page="home"] *:not(.material-symbols-outlined) {
   font-family: var(--font-body) !important;
 }
+
 [data-page="home"] .font-display,
 [data-page="home"] .font-display *,
 [data-page="home"] .font-serif,
 [data-page="home"] .font-serif * {
   font-family: var(--font-display) !important;
 }
+
 [data-page="home"] .font-mono,
 [data-page="home"] .font-mono * {
   font-family: "JetBrains Mono", monospace !important;
@@ -424,7 +434,7 @@ html[dir="rtl"] nav .flex.justify-between {
   flex-direction: row-reverse;
 }
 
-html[dir="rtl"] nav .space-x-6 > * + * {
+html[dir="rtl"] nav .space-x-6>*+* {
   margin-left: 0;
   margin-right: 1.5rem;
 }
@@ -497,6 +507,7 @@ html[dir="rtl"] .marquee-track {
   0% {
     transform: translateX(-50%);
   }
+
   100% {
     transform: translateX(0);
   }
@@ -582,24 +593,24 @@ body.onboarding-page-scroll {
   z-index: 0;
 }
 
-.onboarding-shell > header,
-.onboarding-shell > main {
+.onboarding-shell>header,
+.onboarding-shell>main {
   position: relative;
   z-index: 1;
 }
 
-.onboarding-shell > header {
+.onboarding-shell>header {
   background: rgba(255, 255, 255, 0.86) !important;
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
-.onboarding-shell > header button {
+.onboarding-shell>header button {
   color: #0f172a;
 }
 
-.onboarding-shell > header button:hover {
+.onboarding-shell>header button:hover {
   background: rgba(43, 140, 238, 0.08);
   color: var(--onboarding-primary-deep);
 }
@@ -634,7 +645,7 @@ body.onboarding-page-scroll {
   min-width: 0;
 }
 
-.onboarding-shell main .grid > * {
+.onboarding-shell main .grid>* {
   min-width: 0;
 }
 
@@ -714,6 +725,7 @@ body.onboarding-page-scroll {
 }
 
 @media (min-width: 640px) {
+
   .onboarding-shell [data-onboarding-footer].flex.flex-col,
   .onboarding-shell [data-onboarding-footer] .flex.flex-col {
     gap: 0.55rem !important;
@@ -727,7 +739,7 @@ body.onboarding-page-scroll {
     box-shadow: 0 26px 64px rgba(15, 23, 42, 0.14);
   }
 
-  .onboarding-shell > header {
+  .onboarding-shell>header {
     padding-left: 1.25rem !important;
     padding-right: 1.25rem !important;
   }
@@ -775,12 +787,14 @@ body.onboarding-page-scroll {
 [data-page="home"] *:not(.material-symbols-outlined) {
   font-family: "Manrope", sans-serif !important;
 }
+
 [data-page="home"] .font-display,
 [data-page="home"] .font-display *,
 [data-page="home"] .font-serif,
 [data-page="home"] .font-serif * {
   font-family: "Playfair Display", serif !important;
 }
+
 [data-page="home"] .font-mono,
 [data-page="home"] .font-mono * {
   font-family: "JetBrains Mono", monospace !important;
@@ -790,6 +804,7 @@ body.onboarding-page-scroll {
 .thin-icon {
   font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
 }
+
 .filled-icon {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
@@ -798,6 +813,7 @@ body.onboarding-page-scroll {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

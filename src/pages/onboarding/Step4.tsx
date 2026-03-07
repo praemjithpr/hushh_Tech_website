@@ -229,8 +229,8 @@ export default function OnboardingStep4() {
         {/* ── Title ── */}
         <div className="mb-6">
           <h1
-            className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-2"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-2"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
           >
             Confirm your residence
           </h1>
@@ -394,7 +394,7 @@ export default function OnboardingStep4() {
                 <h3 className="text-[17px] font-semibold leading-[22px] text-black mb-1">
                   Allow &ldquo;Hushh&rdquo; to use your location?
                 </h3>
-                <p className="text-[13px] leading-[16px] font-normal text-black px-1">
+                <p className="text-[13px] leading-[16px] font-medium text-black px-1">
                   Your location is used to automatically determine your country and streamline the verification process.
                 </p>
               </div>
@@ -403,21 +403,21 @@ export default function OnboardingStep4() {
               <div className="flex flex-col border-t" style={{ borderColor: 'rgba(60,60,67,0.2)' }}>
                 <button
                   onClick={handleAllowLocation}
-                  className="h-[44px] w-full text-[17px] leading-[22px] text-[#007AFF] font-normal active:bg-gray-200/50 transition-colors border-b"
+                  className="h-[44px] w-full text-[17px] leading-[22px] text-[#AA4528] font-medium active:bg-gray-200/50 transition-colors border-b"
                   style={{ borderColor: 'rgba(60,60,67,0.2)' }}
                 >
                   Allow Once
                 </button>
                 <button
                   onClick={handleAllowLocation}
-                  className="h-[44px] w-full text-[17px] leading-[22px] text-[#007AFF] font-normal active:bg-gray-200/50 transition-colors border-b"
+                  className="h-[44px] w-full text-[17px] leading-[22px] text-[#AA4528] font-medium active:bg-gray-200/50 transition-colors border-b"
                   style={{ borderColor: 'rgba(60,60,67,0.2)' }}
                 >
                   Allow While Using App
                 </button>
                 <button
                   onClick={handleDontAllow}
-                  className="h-[44px] w-full text-[17px] leading-[22px] text-[#007AFF] font-semibold active:bg-gray-200/50 transition-colors"
+                  className="h-[44px] w-full text-[17px] leading-[22px] text-[#AA4528] font-semibold active:bg-gray-200/50 transition-colors"
                 >
                   Don&apos;t Allow
                 </button>

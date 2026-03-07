@@ -17,7 +17,7 @@ const getColor = (grade: string): string => {
   switch (grade) {
     case 'A+': return '#34C759';
     case 'A': return '#30D158';
-    case 'B+': return '#007AFF';
+    case 'B+': return '#AA4528';
     case 'B': return '#5856D6';
     case 'C+': return '#FF9500';
     case 'C': return '#FF9500';

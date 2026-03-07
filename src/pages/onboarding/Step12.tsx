@@ -372,8 +372,8 @@ function OnboardingStep12() {
       {/* Title */}
       <div className="mb-8">
         <h1
-          className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-3"
-          style={{ fontFamily: 'var(--font-display)' }}
+          className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-3"
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
         >
           Make a recurring investment
         </h1>
@@ -406,7 +406,7 @@ function OnboardingStep12() {
           </div>
 
           <div className="mb-5">
-            <span className="text-3xl font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <span className="text-3xl font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
               {formatCurrency(totalInvestment)}
             </span>
           </div>
@@ -465,8 +465,8 @@ function OnboardingStep12() {
                 key={option.value}
                 onClick={() => setFrequency(option.value as RecurringFrequency)}
                 className={`flex h-12 items-center justify-center rounded-md text-[14px] font-semibold transition-all ${frequency === option.value
-                    ? 'bg-[#AA4528] text-white border-transparent'
-                    : 'bg-white border border-[#EEE9E0] text-[#5C564D] hover:bg-[#F7F5F0]'
+                  ? 'bg-[#AA4528] text-white border-transparent'
+                  : 'bg-white border border-[#EEE9E0] text-[#5C564D] hover:bg-[#F7F5F0]'
                   }`}
               >
                 {option.label}
@@ -510,8 +510,8 @@ function OnboardingStep12() {
                 key={amount}
                 onClick={() => handleAmountClick(amount)}
                 className={`relative flex items-center justify-center h-14 rounded-md transition-all ${selectedAmount === amount
-                    ? 'border-2 border-[#AA4528] bg-[#FDF9F7] text-[#AA4528]'
-                    : 'border border-[#EEE9E0] bg-white hover:border-[#AA4528]/50 hover:bg-[#F7F5F0] text-[#151513]'
+                  ? 'border-2 border-[#AA4528] bg-[#FDF9F7] text-[#AA4528]'
+                  : 'border border-[#EEE9E0] bg-white hover:border-[#AA4528]/50 hover:bg-[#F7F5F0] text-[#151513]'
                   }`}
               >
                 <span className="text-[15px] font-bold">
@@ -539,8 +539,8 @@ function OnboardingStep12() {
                 onChange={handleCustomAmountChange}
                 placeholder="Other Amount"
                 className={`w-full h-14 rounded-md border bg-white text-[#151513] pl-8 pr-4 text-[16px] font-bold outline-none transition-all placeholder:text-[#C4BFB5] ${customAmountError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
+                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
                   }`}
               />
             </div>

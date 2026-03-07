@@ -61,8 +61,8 @@ export default function OnboardingStep3() {
 
       {/* Heading */}
       <h1
-        className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-4 text-center"
-        style={{ fontFamily: 'var(--font-display)' }}
+        className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-4 text-center"
+        style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
       >
         Let's continue with some information about you
       </h1>

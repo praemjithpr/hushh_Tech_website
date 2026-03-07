@@ -412,7 +412,7 @@ export default function Navbar() {
               {/* Section 1: Primary Navigation */}
               <div className="bg-white rounded-[10px] overflow-hidden mb-5 shadow-sm">
                 {[
-                  { path: "/", label: t('nav.home'), icon: "home", bg: "#007AFF" },
+                  { path: "/", label: t('nav.home'), icon: "home", bg: "#AA4528" },
                   { path: "/about/leadership", label: t('nav.ourPhilosophy'), icon: "menu_book", bg: "#34C759" },
                   { path: "/discover-fund-a", label: t('nav.fundA'), icon: "pie_chart", bg: "#5856D6" },
                   { path: "/community", label: t('nav.community'), icon: "groups", bg: "#FF9500" },
@@ -429,7 +429,7 @@ export default function Navbar() {
                     >
                       <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
                     </div>
-                    <span className={`text-[17px] flex-grow text-left leading-none ${isActive(path) ? 'font-semibold text-[#007AFF]' : 'text-black'}`}>
+                    <span className={`text-[17px] flex-grow text-left leading-none ${isActive(path) ? 'font-semibold text-[#AA4528]' : 'text-black'}`}>
                       {label}
                     </span>
                     <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
@@ -460,7 +460,7 @@ export default function Navbar() {
                     >
                       <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>{icon}</span>
                     </div>
-                    <span className={`text-[17px] flex-grow text-left leading-none ${isActive(path) ? 'font-semibold text-[#007AFF]' : 'text-black'}`}>
+                    <span className={`text-[17px] flex-grow text-left leading-none ${isActive(path) ? 'font-semibold text-[#AA4528]' : 'text-black'}`}>
                       {label}
                     </span>
                     <svg className="w-[7px] h-[12px] text-[#C7C7CC] shrink-0" viewBox="0 0 7 12" fill="none">
@@ -554,7 +554,7 @@ export default function Navbar() {
                     onClick={() => handleLinkClick("/hushh-user-profile")}
                     className="flex items-center w-full min-h-[44px] py-2.5 pr-4 pl-4 active:bg-[#E5E5EA] transition-colors relative"
                   >
-                    <div className="w-[29px] h-[29px] rounded-[7px] bg-[#007AFF] flex items-center justify-center mr-3 shrink-0">
+                    <div className="w-[29px] h-[29px] rounded-[7px] bg-[#AA4528] flex items-center justify-center mr-3 shrink-0">
                       <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>person</span>
                     </div>
                     <span className="text-[17px] text-black flex-grow text-left leading-none">
@@ -587,14 +587,14 @@ export default function Navbar() {
                 {isAuthenticated ? (
                   <button
                     onClick={handleLogout}
-                    className="w-full h-[50px] rounded-[12px] bg-white text-[#007AFF] font-semibold text-[17px] active:scale-[0.98] active:opacity-90 transition-all flex items-center justify-center shadow-sm"
+                    className="w-full h-[50px] rounded-[12px] bg-white text-[#AA4528] font-semibold text-[17px] active:scale-[0.98] active:opacity-90 transition-all flex items-center justify-center shadow-sm"
                   >
                     {t('nav.logout')}
                   </button>
                 ) : (
                   <button
                     onClick={() => handleLinkClick("/Login")}
-                    className="w-full h-[50px] rounded-[12px] bg-[#007AFF] text-white font-semibold text-[17px] active:scale-[0.98] active:opacity-90 transition-all flex items-center justify-center shadow-sm"
+                    className="w-full h-[50px] rounded-[12px] bg-[#AA4528] text-white font-semibold text-[17px] active:scale-[0.98] active:opacity-90 transition-all flex items-center justify-center shadow-sm"
                   >
                     {t('nav.login')}
                   </button>

@@ -12,7 +12,7 @@ export default {
         "fr-rust-dark": "#8C3720", // Hover state for rust
         "fr-navy": "#151513",  // Dark surfaces, footer, secondary CTAs
         "fr-navy-light": "#1E1E1B", // Slightly lighter dark for hover
-        "fr-cream": "#F7F5F0",  // Page background, section alternates
+        "fr-cream": "#faf9f6",  // Page background, section alternates
         "fr-cream-dark": "#EEE9E0", // Subtle card fills on cream bg
         "fr-white": "#FFFFFF",  // Cards, nav background
         "fr-gray-100": "#F2F0EB", // Subtle borders, dividers
@@ -33,9 +33,9 @@ export default {
       },
       fontFamily: {
         // ── Fundrise Typography ──────────────────────────────
-        display: ['"Cormorant Garamond"', 'Georgia', 'serif'], // Headings
-        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'], // Headings alt
-        sans: ['"Source Sans 3"', '"Source Sans Pro"', 'ui-sans-serif', 'system-ui', 'sans-serif'], // Body
+        display: ['"Ivar Headline"', '"Source Sans Pro"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'], // Headings
+        serif: ['"Ivar Headline"', '"Source Sans Pro"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'], // Headings alt
+        sans: ['"Source Sans Pro"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'], // Body
         // Legacy
         mono: ['"JetBrains Mono"', 'monospace'],
       },

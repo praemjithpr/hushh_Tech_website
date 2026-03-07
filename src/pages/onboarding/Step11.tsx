@@ -506,8 +506,8 @@ function OnboardingStep11() {
     >
       <div className="mb-8">
         <h1
-          className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-3"
-          style={{ fontFamily: 'var(--font-display)' }}
+          className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-3"
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
         >
           Investment Summary
         </h1>
@@ -546,8 +546,8 @@ function OnboardingStep11() {
               <div
                 key={shareClass.id}
                 className={`flex flex-col rounded-md border p-5 relative overflow-hidden transition-colors ${hasUnits
-                    ? 'bg-white border-[#EEE9E0]'
-                    : 'bg-[#FDF9F7]/30 border-[#EEE9E0] opacity-60'
+                  ? 'bg-white border-[#EEE9E0]'
+                  : 'bg-[#FDF9F7]/30 border-[#EEE9E0] opacity-60'
                   }`}
               >
                 {/* Colored left border */}
@@ -561,8 +561,8 @@ function OnboardingStep11() {
                       {shareClass.name}
                     </h3>
                     <span className={`px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase rounded-sm border ${hasUnits
-                        ? 'bg-[#FDF9F7] text-[#AA4528] border-[#AA4528]/20'
-                        : 'bg-[#F2F0EB] text-[#8C8479] border-[#EEE9E0]'
+                      ? 'bg-[#FDF9F7] text-[#AA4528] border-[#AA4528]/20'
+                      : 'bg-[#F2F0EB] text-[#8C8479] border-[#EEE9E0]'
                       }`}>
                       {hasUnits ? 'active' : 'disabled'}
                     </span>
@@ -595,7 +595,7 @@ function OnboardingStep11() {
         <span className="text-[12px] font-bold uppercase tracking-[0.1em] text-[#8C8479] mb-2">
           Total Initial Investment
         </span>
-        <span className="text-4xl md:text-5xl font-light text-[#151513] mb-3" style={{ fontFamily: 'var(--font-display)' }}>
+        <span className="text-4xl md:text-5xl font-medium text-[#151513] mb-3" style={{ fontFamily: 'var(--font-display)' }}>
           {hasAnyUnits ? formatFullCurrency(totalInvestment) : '$0'}
         </span>
         <div className="h-[2px] w-12 bg-[#AA4528] mb-3" />
@@ -657,8 +657,8 @@ function OnboardingStep11() {
                     key={option.value}
                     onClick={() => setFrequency(option.value as RecurringFrequency)}
                     className={`flex h-12 items-center justify-center rounded-md text-[14px] font-semibold transition-all ${frequency === option.value
-                        ? 'bg-[#AA4528] text-white border-transparent'
-                        : 'bg-white border border-[#EEE9E0] text-[#5C564D] hover:bg-[#F7F5F0]'
+                      ? 'bg-[#AA4528] text-white border-transparent'
+                      : 'bg-white border border-[#EEE9E0] text-[#5C564D] hover:bg-[#F7F5F0]'
                       }`}
                   >
                     {option.label}
@@ -701,8 +701,8 @@ function OnboardingStep11() {
                     key={amount}
                     onClick={() => handleAmountClick(amount)}
                     className={`relative flex items-center justify-center h-14 rounded-md transition-all ${selectedAmount === amount
-                        ? 'border-2 border-[#AA4528] bg-[#FDF9F7] text-[#AA4528]'
-                        : 'border border-[#EEE9E0] bg-white hover:border-[#AA4528]/50 hover:bg-[#F7F5F0] text-[#151513]'
+                      ? 'border-2 border-[#AA4528] bg-[#FDF9F7] text-[#AA4528]'
+                      : 'border border-[#EEE9E0] bg-white hover:border-[#AA4528]/50 hover:bg-[#F7F5F0] text-[#151513]'
                       }`}
                   >
                     <span className="text-[15px] font-bold">
@@ -730,8 +730,8 @@ function OnboardingStep11() {
                     onChange={handleCustomAmountChange}
                     placeholder="Other Amount"
                     className={`w-full h-14 rounded-md border bg-white text-[#151513] pl-8 pr-4 text-[16px] font-bold outline-none transition-all placeholder:text-[#C4BFB5] ${customAmountError
-                        ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                        : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                      : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
                       }`}
                   />
                 </div>
@@ -767,8 +767,8 @@ function OnboardingStep11() {
           onClick={handleContinue}
           disabled={!isFormValid || loading}
           className={`flex-[2] py-3.5 rounded-md text-[14px] font-semibold transition-all ${isFormValid && !loading
-              ? 'bg-[#AA4528] text-white hover:bg-[#8C3720] active:scale-[0.99]'
-              : 'bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed'
+            ? 'bg-[#AA4528] text-white hover:bg-[#8C3720] active:scale-[0.99]'
+            : 'bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed'
             }`}
         >
           {loading ? 'Saving…' : 'Continue'}
@@ -784,7 +784,7 @@ function OnboardingStep11() {
             {/* Modal Header */}
             <div className="flex flex-col bg-white border-b border-[#EEE9E0] px-6 py-5 sticky top-0 z-10 shrink-0">
               <div className="flex justify-between items-center mb-1">
-                <h3 className="text-[22px] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>Edit Units</h3>
+                <h3 className="text-[22px] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>Edit Units</h3>
                 <button onClick={handleCloseModal} className="text-[#8C8479] hover:text-[#151513] transition-colors">
                   <CloseIcon />
                 </button>
@@ -812,8 +812,8 @@ function OnboardingStep11() {
                           </h4>
                           {shareClass.badge && (
                             <span className={`px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase rounded border ${shareClass.tier === 'platinum'
-                                ? 'bg-[#F2F0EB] text-[#5C564D] border-[#E5E0D8]'
-                                : 'bg-[#FDF9F7] text-[#AA4528] border-[#AA4528]/20'
+                              ? 'bg-[#F2F0EB] text-[#5C564D] border-[#E5E0D8]'
+                              : 'bg-[#FDF9F7] text-[#AA4528] border-[#AA4528]/20'
                               }`}>
                               {shareClass.badge}
                             </span>
@@ -831,8 +831,8 @@ function OnboardingStep11() {
                               onClick={() => handleDecrement(shareClass.id)}
                               disabled={units === 0}
                               className={`flex items-center justify-center w-8 h-8 rounded border transition-colors ${units === 0
-                                  ? 'border-[#EEE9E0] text-[#E5E0D8] bg-[#F2F0EB] cursor-not-allowed'
-                                  : 'border-[#C4BFB5] text-[#5C564D] hover:bg-[#F2F0EB] hover:border-[#8C8479]'
+                                ? 'border-[#EEE9E0] text-[#E5E0D8] bg-[#F2F0EB] cursor-not-allowed'
+                                : 'border-[#C4BFB5] text-[#5C564D] hover:bg-[#F2F0EB] hover:border-[#8C8479]'
                                 }`}
                             >
                               <RemoveIcon />
@@ -861,7 +861,7 @@ function OnboardingStep11() {
                 <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#8C8479] mb-1">
                   New Total Selection
                 </span>
-                <span className="text-[28px] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+                <span className="text-[28px] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
                   {formatFullCurrency(modalTotalInvestment)}
                 </span>
               </div>
@@ -879,8 +879,8 @@ function OnboardingStep11() {
                 onClick={handleSaveChanges}
                 disabled={!hasModalChanges || savingModal}
                 className={`flex-1 py-3 rounded-md text-[14px] font-semibold transition-colors ${hasModalChanges && !savingModal
-                    ? 'bg-[#151513] text-white hover:bg-[#2A2A2A]'
-                    : 'bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed'
+                  ? 'bg-[#151513] text-white hover:bg-[#2A2A2A]'
+                  : 'bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed'
                   }`}
               >
                 {savingModal ? 'Saving…' : 'Update Selection'}

@@ -108,7 +108,7 @@ function VerifyCompletePage() {
             <div className="w-20 h-20 rounded-full flex items-center justify-center bg-[#F7F5F0]">
               <div className="w-10 h-10 border-4 border-[#EEE9E0] border-t-[#AA4528] rounded-full animate-spin" />
             </div>
-            <h2 className="text-[1.8rem] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <h2 className="text-[1.8rem] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
               Checking Status...
             </h2>
             <p className="text-[15px] text-[#8C8479] text-center max-w-sm">
@@ -123,7 +123,7 @@ function VerifyCompletePage() {
             <div className="w-24 h-24 rounded-full flex items-center justify-center bg-[#E3F2E7] animate-[pulse_2s_ease-in-out_infinite]">
               <CheckCircle className="w-14 h-14 text-[#2D7A41]" />
             </div>
-            <h2 className="text-[1.8rem] md:text-[2.2rem] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <h2 className="text-[1.8rem] md:text-[2.2rem] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
               Verification Complete
             </h2>
             <p className="text-[15px] text-[#8C8479] text-center max-w-sm leading-relaxed mb-4">
@@ -142,10 +142,10 @@ function VerifyCompletePage() {
       case 'processing':
         return (
           <div className="flex flex-col items-center justify-center space-y-6 py-10">
-            <div className="w-24 h-24 rounded-full flex items-center justify-center bg-[#F0F7FF]">
-              <Clock className="w-14 h-14 text-[#2b8cee]" />
+            <div className="w-24 h-24 rounded-full flex items-center justify-center bg-[#FDF9F7]">
+              <Clock className="w-14 h-14 text-[#AA4528]" />
             </div>
-            <h2 className="text-[1.8rem] md:text-[2.2rem] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <h2 className="text-[1.8rem] md:text-[2.2rem] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
               Verification in Progress
             </h2>
             <p className="text-[15px] text-[#8C8479] text-center max-w-sm leading-relaxed">
@@ -153,7 +153,7 @@ function VerifyCompletePage() {
             </p>
             <div className="w-full max-w-[320px] space-y-2 mt-4">
               <div className="w-full h-1 bg-[#EEE9E0] overflow-hidden rounded-full">
-                <div className="h-full bg-[#2b8cee] animate-[loading_2s_linear_infinite] w-[40%]" />
+                <div className="h-full bg-[#AA4528] animate-[loading_2s_linear_infinite] w-[40%]" />
               </div>
               <p className="text-[13px] text-[#8C8479] text-center">
                 {pollingCount < 10 ? 'Checking status...' : 'Taking longer than expected'}
@@ -177,7 +177,7 @@ function VerifyCompletePage() {
             <div className="w-24 h-24 rounded-full flex items-center justify-center bg-[#FFFAEB]">
               <AlertCircle className="w-14 h-14 text-[#B8860B]" />
             </div>
-            <h2 className="text-[1.8rem] md:text-[2.2rem] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <h2 className="text-[1.8rem] md:text-[2.2rem] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
               Additional Info Needed
             </h2>
             <p className="text-[15px] text-[#8C8479] text-center max-w-sm leading-relaxed mb-4">
@@ -205,7 +205,7 @@ function VerifyCompletePage() {
             <div className="w-24 h-24 rounded-full flex items-center justify-center bg-red-50">
               <AlertCircle className="w-14 h-14 text-red-600" />
             </div>
-            <h2 className="text-[1.8rem] md:text-[2.2rem] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <h2 className="text-[1.8rem] md:text-[2.2rem] font-medium text-[#151513]" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
               Verification Failed
             </h2>
             <p className="text-[15px] text-[#8C8479] text-center max-w-sm leading-relaxed mb-4">

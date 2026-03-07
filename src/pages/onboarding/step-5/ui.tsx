@@ -51,14 +51,13 @@ export default function OnboardingStep5() {
   } = useStep5Logic();
 
   return (
-    <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white relative overflow-hidden">
+    <div className="bg-[#faf9f6] text-[#151513] min-h-screen antialiased flex flex-col selection:bg-fr-rust selection:text-white relative overflow-hidden" style={{ fontFamily: "var(--font-body)" }}>
       {/* ═══ Background layer (blurs when dial picker is open) ═══ */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          showDialPicker
-            ? "scale-[0.98] blur-[2px] opacity-40 pointer-events-none select-none"
-            : ""
-        }`}
+        className={`flex-1 flex flex-col transition-all duration-300 ${showDialPicker
+          ? "scale-[0.98] blur-[2px] opacity-40 pointer-events-none select-none"
+          : ""
+          }`}
       >
         {/* ═══ Header ═══ */}
         <HushhTechBackHeader onBackClick={handleBack} rightLabel="FAQs" />
@@ -74,7 +73,7 @@ export default function OnboardingStep5() {
             </div>
             <div className="h-0.5 w-full bg-gray-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-hushh-blue transition-all duration-500"
+                className="h-full bg-fr-rust transition-all duration-500"
                 style={{ width: `${PROGRESS_PCT}%` }}
               />
             </div>
@@ -86,14 +85,14 @@ export default function OnboardingStep5() {
               Account Setup
             </h3>
             <h1
-              className="text-[2.75rem] leading-[1.1] font-normal text-black tracking-tight font-serif"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="text-[2.75rem] leading-[1.1] text-[#151513] tracking-tight"
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
             >
               A Few More
               <br />
-              <span className="text-gray-400 italic font-light">Details</span>
+              <span className="text-gray-400 italic font-medium">Details</span>
             </h1>
-            <p className="text-sm text-gray-500 mt-4 leading-relaxed font-light">
+            <p className="text-sm text-gray-500 mt-4 leading-relaxed font-medium">
               This helps us personalize your account and keep your profile
               secure.
             </p>
@@ -114,25 +113,22 @@ export default function OnboardingStep5() {
                   <button
                     key={option.value}
                     onClick={() => setSelectedAccountType(option.value)}
-                    className={`w-full flex items-center gap-4 py-5 text-left transition-colors group ${
-                      !isLast ? "border-b border-gray-200" : ""
-                    }`}
+                    className={`w-full flex items-center gap-4 py-5 text-left transition-colors group ${!isLast ? "border-b border-gray-200" : ""
+                      }`}
                     role="radio"
                     aria-checked={isSelected}
                     aria-label={`Select ${option.label} account`}
                   >
                     {/* Icon circle */}
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                        isSelected
-                          ? "bg-hushh-blue"
-                          : "bg-gray-100 group-hover:bg-gray-200"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${isSelected
+                        ? "bg-fr-rust"
+                        : "bg-gray-100 group-hover:bg-gray-200"
+                        }`}
                     >
                       <span
-                        className={`material-symbols-outlined text-lg ${
-                          isSelected ? "text-white" : "text-gray-700"
-                        }`}
+                        className={`material-symbols-outlined text-lg ${isSelected ? "text-white" : "text-gray-700"
+                          }`}
                         style={{ fontVariationSettings: "'wght' 400" }}
                       >
                         {icon}
@@ -141,9 +137,8 @@ export default function OnboardingStep5() {
 
                     {/* Label */}
                     <span
-                      className={`text-sm font-semibold flex-1 ${
-                        isSelected ? "text-black" : "text-gray-700"
-                      }`}
+                      className={`text-sm font-semibold flex-1 ${isSelected ? "text-black" : "text-gray-700"
+                        }`}
                     >
                       {option.label}
                     </span>
@@ -151,7 +146,7 @@ export default function OnboardingStep5() {
                     {/* Checkmark */}
                     {isSelected && (
                       <span
-                        className="material-symbols-outlined text-hushh-blue text-lg shrink-0"
+                        className="material-symbols-outlined text-fr-rust text-lg shrink-0"
                         style={{
                           fontVariationSettings: "'FILL' 1, 'wght' 600",
                         }}
@@ -177,7 +172,7 @@ export default function OnboardingStep5() {
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-400 font-light mb-5">
+            <p className="text-xs text-gray-400 font-medium mb-5">
               We&apos;ll use this to verify your identity when needed.
             </p>
 
@@ -251,7 +246,7 @@ export default function OnboardingStep5() {
               </div>
             )}
 
-            <p className="text-[10px] text-gray-400 mt-2 font-light">
+            <p className="text-[10px] text-gray-400 mt-2 font-medium">
               Standard message and data rates may apply.
             </p>
           </section>
@@ -277,7 +272,7 @@ export default function OnboardingStep5() {
           {/* ── Trust Badges ── */}
           <section className="flex flex-col items-center justify-center text-center gap-2 pb-8">
             <div className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[12px] text-hushh-blue">
+              <span className="material-symbols-outlined text-[12px] text-fr-rust">
                 lock
               </span>
               <span className="text-[10px] text-gray-500 tracking-wide uppercase font-medium">
@@ -293,18 +288,18 @@ export default function OnboardingStep5() {
         <>
           {/* Glass overlay */}
           <div
-            className="fixed inset-0 z-40 bg-white/60 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/5 backdrop-blur-sm"
             onClick={() => setShowDialPicker(false)}
           />
 
           {/* Modal card */}
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-0 sm:pb-0">
-            <div className="relative w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08),0_0_1px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col max-h-[70vh]">
+            <div className="relative w-full max-w-sm bg-[#faf9f6] rounded-t-3xl sm:rounded-3xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08),0_0_1px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col max-h-[70vh]">
               {/* Header */}
               <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
                 <h2
-                  className="text-xl text-black tracking-tight font-serif"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="text-xl text-[#151513] tracking-tight"
+                  style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
                 >
                   Select Country Code
                 </h2>
@@ -326,11 +321,10 @@ export default function OnboardingStep5() {
                     <button
                       key={option.iso}
                       onClick={() => handleSelectDialCode(option)}
-                      className={`w-full flex items-center justify-between px-6 py-4 border-b border-gray-100 transition-colors ${
-                        isActive
-                          ? "bg-gray-50"
-                          : "hover:bg-gray-50 active:bg-gray-100"
-                      }`}
+                      className={`w-full flex items-center justify-between px-6 py-4 border-b border-gray-100 transition-colors ${isActive
+                        ? "bg-gray-50"
+                        : "hover:bg-gray-50 active:bg-gray-100"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <ReactCountryFlag

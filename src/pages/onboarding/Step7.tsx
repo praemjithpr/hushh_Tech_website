@@ -117,8 +117,8 @@ export default function OnboardingStep7() {
       {/* ── Title ── */}
       <div className="mb-8">
         <h1
-          className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-3"
-          style={{ fontFamily: 'var(--font-display)' }}
+          className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-3"
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
         >
           Enter your full legal name
         </h1>

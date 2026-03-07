@@ -221,8 +221,8 @@ export default function OnboardingStep5() {
         {/* ── Title ── */}
         <div className="mb-8">
           <h1
-            className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-2"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-2"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
           >
             A few more details
           </h1>
@@ -272,7 +272,7 @@ export default function OnboardingStep5() {
         {/* ─── Phone Number ─── */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-[18px] font-light text-[#151513]" style={{ fontFamily: 'var(--font-display)' }}>
+            <h2 className="text-[20px] font-medium text-[#151513] mb-1" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
               Phone number
             </h2>
             {isAutoDetectingDialCode && (
@@ -330,8 +330,8 @@ export default function OnboardingStep5() {
             onClick={handleContinue}
             disabled={!canContinue || isLoading}
             className={`flex-[2] py-3.5 rounded-md text-[14px] font-semibold transition-all ${canContinue && !isLoading
-                ? 'bg-[#AA4528] text-white hover:bg-[#8C3720] active:scale-[0.99]'
-                : 'bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed'
+              ? 'bg-[#AA4528] text-white hover:bg-[#8C3720] active:scale-[0.99]'
+              : 'bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed'
               }`}
           >
             {isLoading ? 'Saving…' : 'Continue'}
@@ -363,8 +363,8 @@ export default function OnboardingStep5() {
                   key={option.iso}
                   onClick={() => handleSelectDialCode(option)}
                   className={`w-full flex items-center justify-between px-6 py-3.5 transition-colors ${option.code === countryCode && option.iso === selectedDialCountryIso
-                      ? 'bg-[#FDF9F7]'
-                      : 'bg-white hover:bg-[#F7F5F0]'
+                    ? 'bg-[#FDF9F7]'
+                    : 'bg-white hover:bg-[#F7F5F0]'
                     }`}
                 >
                   <div className="flex items-center gap-4">

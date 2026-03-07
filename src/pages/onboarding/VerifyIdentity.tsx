@@ -6,11 +6,9 @@ import {
   Camera,
   Mail,
   Phone,
-  ArrowRight,
   RefreshCw,
   AlertCircle,
-  XCircle,
-  Icon as LucideIcon
+  XCircle
 } from 'lucide-react';
 import config from '../../resources/config/config';
 import OnboardingShell from '../../components/OnboardingShell';
@@ -214,8 +212,8 @@ function VerifyIdentityPage() {
         {/* Title */}
         <div className="text-center mb-10 w-full">
           <h1
-            className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-3"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-3"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
           >
             Verify Your Identity
           </h1>
@@ -234,11 +232,11 @@ function VerifyIdentityPage() {
 
         {/* Status Alerts */}
         {verificationStatus.status === 'processing' && (
-          <div className="w-full mb-6 p-4 bg-[#F0F7FF] border border-[#2b8cee]/20 rounded-md flex items-start space-x-3">
-            <RefreshCw className="w-5 h-5 text-[#2b8cee] shrink-0 mt-0.5 animate-spin" />
+          <div className="w-full mb-6 p-4 bg-[#FDF9F7] border border-[#AA4528]/20 rounded-md flex items-start space-x-3">
+            <RefreshCw className="w-5 h-5 text-[#AA4528] shrink-0 mt-0.5 animate-spin" />
             <div>
-              <h3 className="text-[14px] font-bold text-[#1e6ebb] mb-1">Verification in Progress</h3>
-              <p className="text-[13px] text-[#2b8cee]">Your verification is being processed. This usually takes a few minutes.</p>
+              <h3 className="text-[14px] font-bold text-[#AA4528] mb-1">Verification in Progress</h3>
+              <p className="text-[13px] text-[#8C8479]">Your verification is being processed. This usually takes a few minutes.</p>
             </div>
           </div>
         )}

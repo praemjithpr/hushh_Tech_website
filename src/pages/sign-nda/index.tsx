@@ -283,21 +283,21 @@ const SignNDAPage: React.FC = () => {
   /* Loading state */
   if (isLoading) {
     return (
-      <div className="bg-white min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-hushh-blue border-t-transparent rounded-full animate-spin" />
+      <div className="bg-[#faf9f6] min-h-screen flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-fr-rust border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   /* ─── RENDER ─── */
   return (
-    <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white">
+    <div className="bg-[#faf9f6] text-[#151513] min-h-screen antialiased flex flex-col selection:bg-fr-rust selection:text-white" style={{ fontFamily: "var(--font-body)" }}>
       <HushhTechHeader />
 
       <main className="px-6 md:px-10 flex-grow max-w-md md:max-w-2xl lg:max-w-3xl mx-auto w-full pb-32">
         {/* ── Icon + Title ── */}
         <section className="pt-12 pb-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-hushh-blue flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-fr-rust flex items-center justify-center">
             <span
               className="material-symbols-outlined text-white text-3xl"
               style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}
@@ -306,12 +306,12 @@ const SignNDAPage: React.FC = () => {
             </span>
           </div>
           <h1
-            className="text-[2.5rem] md:text-[3rem] lg:text-[3.5rem] leading-[1.1] font-normal text-black tracking-tight font-serif"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="text-[2.5rem] md:text-[3rem] lg:text-[3.5rem] leading-[1.1] text-[#151513] tracking-tight"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
           >
             Non-Disclosure
             <br />
-            <span className="text-gray-400 italic font-light">Agreement</span>
+            <span className="text-gray-400 italic font-medium">Agreement</span>
           </h1>
           <p className="text-gray-500 text-sm font-light mt-3 leading-relaxed">
             Review and sign to access confidential investment materials.
@@ -322,7 +322,7 @@ const SignNDAPage: React.FC = () => {
         <section className="mb-8">
           <div className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 bg-gray-50 rounded-xl">
             <span
-              className="material-symbols-outlined text-hushh-blue text-lg"
+              className="material-symbols-outlined text-fr-rust text-lg"
               style={{ fontVariationSettings: "'wght' 400" }}
             >
               lock
@@ -393,9 +393,8 @@ const SignNDAPage: React.FC = () => {
 
             {/* Agreement checkbox */}
             <div
-              className={`px-4 py-4 transition-colors ${
-                agreedToTerms ? 'bg-gray-50' : 'bg-white'
-              }`}
+              className={`px-4 py-4 transition-colors ${agreedToTerms ? 'bg-gray-50' : 'bg-white'
+                }`}
             >
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
@@ -459,7 +458,7 @@ const SignNDAPage: React.FC = () => {
         {/* ── Trust Badges ── */}
         <section className="flex flex-col items-center justify-center text-center gap-2 pt-12 pb-4">
           <div className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-[12px] text-hushh-blue">
+            <span className="material-symbols-outlined text-[12px] text-fr-rust">
               lock
             </span>
             <span className="text-[10px] text-gray-500 tracking-wide uppercase font-medium">

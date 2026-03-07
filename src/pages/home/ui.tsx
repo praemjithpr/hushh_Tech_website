@@ -27,7 +27,7 @@ const bodyFont = { fontFamily: "var(--font-body)" };
 /* ── Inline Fundrise section/container helpers ── */
 const Section = ({
   children,
-  bg = "bg-[#F7F5F0]",
+  bg = "bg-[#faf9f6]",
   className = "",
 }: {
   children: React.ReactNode;
@@ -45,7 +45,7 @@ const Overline = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function HomePage() {
-  const { session, primaryCTA, onNavigate } = useHomeLogic();
+  const { primaryCTA, onNavigate } = useHomeLogic();
 
   return (
     <div
@@ -80,7 +80,7 @@ export default function HomePage() {
 
                 {/* H1 */}
                 <h1
-                  className="text-[3.2rem] md:text-[4rem] lg:text-[4.8rem] xl:text-[5.5rem] leading-[1.05] font-light text-[#151513] tracking-tight mb-6"
+                  className="text-[3.2rem] md:text-[4rem] lg:text-[4.8rem] xl:text-[5.5rem] leading-[1.05] font-medium text-[#151513] tracking-tight mb-6"
                   style={displayFont}
                 >
                   Investing in<br />

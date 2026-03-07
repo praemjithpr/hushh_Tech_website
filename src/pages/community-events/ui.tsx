@@ -58,7 +58,7 @@ export default function CommunityEventsPage() {
   };
 
   return (
-    <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white">
+    <div className="bg-fr-cream text-fr-navy min-h-screen antialiased flex flex-col selection:bg-fr-rust selection:text-white font-sans">
       {/* ═══ Header ═══ */}
       <HushhTechBackHeader onBackClick={s.handleBack} rightLabel="FAQs" />
 
@@ -80,12 +80,11 @@ export default function CommunityEventsPage() {
                 animate="visible"
                 variants={fadeIn}
               >
-                <h3 className="text-[10px] sm:text-xs tracking-[0.2em] text-gray-400 uppercase mb-4 font-medium">
+                <h3 className="text-[10px] sm:text-xs tracking-[0.2em] text-fr-rust uppercase mb-4 font-medium">
                   Community
                 </h3>
                 <h1
-                  className="text-[2.75rem] sm:text-5xl lg:text-6xl leading-[1.1] font-normal text-black tracking-tight font-serif"
-                  style={playfair}
+                  className="text-[2.75rem] sm:text-5xl lg:text-6xl leading-[1.1] font-normal text-fr-navy tracking-tight font-display"
                 >
                   Build. Break.
                   <br />
@@ -112,14 +111,14 @@ export default function CommunityEventsPage() {
                     <motion.div
                       key={event.id}
                       variants={cardVariants}
-                      className="py-5 border-b border-gray-200 md:border md:border-gray-200 md:rounded-xl md:p-5 md:hover:shadow-md md:transition-shadow group cursor-default"
+                      className="py-5 border-b border-gray-200 md:border md:border-gray-200 md:rounded-xl md:p-5 md:hover:shadow-md md:transition-shadow group cursor-default bg-white shadow-sm hover:border-fr-rust/30"
                     >
                       <div className="flex items-start gap-4">
                         {/* Icon circle with accent dot */}
                         <div className="relative shrink-0">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-fr-cream flex items-center justify-center group-hover:bg-fr-rust/5 transition-colors">
                             <span
-                              className="material-symbols-outlined text-gray-700 text-lg sm:text-xl"
+                              className="material-symbols-outlined text-fr-navy text-lg sm:text-xl"
                               style={{ fontVariationSettings: "'wght' 400" }}
                             >
                               {event.icon}
@@ -127,21 +126,21 @@ export default function CommunityEventsPage() {
                           </div>
                           {/* Accent dot */}
                           <div
-                            className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${event.accent}`}
+                            className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${event.id === 'hackathon' ? 'bg-fr-rust' : 'bg-fr-navy'}`}
                           />
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <p className="text-sm sm:text-base font-semibold text-gray-900">
+                            <p className="text-sm sm:text-base font-semibold text-fr-navy">
                               {event.title}
                             </p>
-                            <span className="material-symbols-outlined text-gray-300 text-base group-hover:text-gray-500 group-hover:translate-x-1 transition-all duration-300">
+                            <span className="material-symbols-outlined text-gray-300 text-base group-hover:text-fr-rust group-hover:translate-x-1 transition-all duration-300">
                               arrow_forward
                             </span>
                           </div>
-                          <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">
+                          <p className="text-xs sm:text-sm text-fr-rust font-medium mt-0.5">
                             {event.subtitle}
                           </p>
                           <p className="text-xs sm:text-sm text-gray-400 font-light mt-1 leading-relaxed">
@@ -164,12 +163,11 @@ export default function CommunityEventsPage() {
                 viewport={{ once: true, margin: "-40px" }}
                 variants={fadeIn}
               >
-                <h3 className="text-[10px] sm:text-xs tracking-[0.2em] text-gray-400 uppercase mb-4 font-medium">
+                <h3 className="text-[10px] sm:text-xs tracking-[0.2em] text-fr-rust uppercase mb-4 font-medium">
                   Get Started
                 </h3>
                 <h2
-                  className="text-[2rem] sm:text-[2.5rem] lg:text-5xl leading-[1.15] font-normal text-black tracking-tight font-serif mb-2"
-                  style={playfair}
+                  className="text-[2rem] sm:text-[2.5rem] lg:text-5xl leading-[1.15] font-normal text-fr-navy tracking-tight font-display mb-2"
                 >
                   Ready to
                   <br />
@@ -191,13 +189,12 @@ export default function CommunityEventsPage() {
                       <motion.button
                         key={opt.id}
                         onClick={() => handleTrackSelect(opt.id)}
-                        className={`w-full text-left p-5 sm:p-6 border transition-all duration-300 rounded-none md:rounded-xl ${
-                          isSelected
-                            ? "bg-black text-white border-black shadow-lg"
+                        className={`w-full text-left p-5 sm:p-6 border transition-all duration-300 rounded-none md:rounded-xl shadow-sm ${isSelected
+                            ? "bg-fr-navy text-white border-fr-navy shadow-lg"
                             : isOther
-                            ? "bg-white text-gray-400 border-gray-200 opacity-50"
-                            : "bg-white text-gray-900 border-gray-200 hover:border-gray-400"
-                        }`}
+                              ? "bg-white text-gray-400 border-gray-200 opacity-50"
+                              : "bg-white text-fr-navy border-gray-200 hover:border-fr-rust"
+                          }`}
                         whileTap={{ scale: 0.98 }}
                         layout
                         aria-label={`Select ${opt.title} track`}
@@ -205,14 +202,12 @@ export default function CommunityEventsPage() {
                       >
                         <div className="flex items-center gap-4">
                           <div
-                            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 ${
-                              isSelected ? "bg-white/10" : "bg-gray-100"
-                            }`}
+                            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 ${isSelected ? "bg-white/10" : "bg-fr-cream"
+                              }`}
                           >
                             <span
-                              className={`material-symbols-outlined text-lg sm:text-xl ${
-                                isSelected ? "text-white" : "text-gray-700"
-                              }`}
+                              className={`material-symbols-outlined text-lg sm:text-xl ${isSelected ? "text-white" : "text-fr-navy"
+                                }`}
                               style={{
                                 fontVariationSettings: "'wght' 400",
                               }}
@@ -222,27 +217,24 @@ export default function CommunityEventsPage() {
                           </div>
                           <div>
                             <p
-                              className={`text-sm sm:text-base font-semibold ${
-                                isSelected ? "text-white" : ""
-                              }`}
+                              className={`text-sm sm:text-base font-semibold ${isSelected ? "text-white" : ""
+                                }`}
                             >
                               {opt.title}
                             </p>
                             <p
-                              className={`text-xs sm:text-sm font-medium mt-0.5 ${
-                                isSelected
+                              className={`text-xs sm:text-sm font-medium mt-0.5 ${isSelected
                                   ? "text-white/70"
-                                  : "text-gray-500"
-                              }`}
+                                  : "text-fr-rust"
+                                }`}
                             >
                               {opt.subtitle}
                             </p>
                             <p
-                              className={`text-xs sm:text-sm font-light mt-1 ${
-                                isSelected
+                              className={`text-xs sm:text-sm font-light mt-1 ${isSelected
                                   ? "text-white/50"
                                   : "text-gray-400"
-                              }`}
+                                }`}
                             >
                               {opt.description}
                             </p>
@@ -275,7 +267,7 @@ export default function CommunityEventsPage() {
                       </div>
                       <div className="h-0.5 w-full bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-hushh-blue transition-all duration-500 ease-out"
+                          className="h-full bg-fr-rust transition-all duration-500 ease-out"
                           style={{ width: `${s.progress}%` }}
                         />
                       </div>
@@ -283,12 +275,11 @@ export default function CommunityEventsPage() {
 
                     {/* ── Title ── */}
                     <section className="py-8 sm:py-10">
-                      <h3 className="text-[10px] sm:text-xs tracking-[0.2em] text-gray-400 uppercase mb-4 font-medium">
+                      <h3 className="text-[10px] sm:text-xs tracking-[0.2em] text-fr-rust uppercase mb-4 font-medium">
                         Your Details
                       </h3>
                       <h2
-                        className="text-[2rem] sm:text-[2.5rem] leading-[1.15] font-normal text-black tracking-tight font-serif"
-                        style={playfair}
+                        className="text-[2rem] sm:text-[2.5rem] leading-[1.15] font-normal text-fr-navy tracking-tight font-display"
                       >
                         Register
                         <br />
@@ -317,7 +308,7 @@ export default function CommunityEventsPage() {
                             s.updateField("fullName", e.target.value)
                           }
                           placeholder="John Doe"
-                          className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
+                          className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
                           aria-label="Full name"
                         />
                       </FormRow>
@@ -335,7 +326,7 @@ export default function CommunityEventsPage() {
                             s.updateField("university", e.target.value)
                           }
                           placeholder="MIT, Stanford, IIT Delhi..."
-                          className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
+                          className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
                           aria-label="University or college"
                         />
                       </FormRow>
@@ -353,7 +344,7 @@ export default function CommunityEventsPage() {
                             s.updateField("rollNumber", e.target.value)
                           }
                           placeholder="2024CS101"
-                          className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
+                          className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
                           aria-label="University roll number"
                         />
                       </FormRow>
@@ -371,7 +362,7 @@ export default function CommunityEventsPage() {
                             s.updateField("universityEmail", e.target.value)
                           }
                           placeholder="john@university.edu"
-                          className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
+                          className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
                           aria-label="University email address"
                         />
                       </FormRow>
@@ -389,7 +380,7 @@ export default function CommunityEventsPage() {
                             s.updateField("personalEmail", e.target.value)
                           }
                           placeholder="john@gmail.com"
-                          className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
+                          className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
                           aria-label="Personal email address"
                         />
                       </FormRow>
@@ -402,7 +393,7 @@ export default function CommunityEventsPage() {
                       >
                         <div className="flex items-center gap-3">
                           <label
-                            className="text-xs sm:text-sm text-hushh-blue font-semibold cursor-pointer hover:underline"
+                            className="text-xs sm:text-sm text-fr-rust font-semibold cursor-pointer hover:underline"
                             tabIndex={0}
                             role="button"
                             aria-label="Choose profile photo"
@@ -443,7 +434,7 @@ export default function CommunityEventsPage() {
                           }
                           placeholder="Jane Smith, Mike Johnson, Sarah Lee"
                           rows={2}
-                          className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 resize-none placeholder:text-gray-300"
+                          className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 resize-none placeholder:text-gray-300"
                           aria-label="Team participants"
                         />
                       </FormRow>
@@ -451,9 +442,9 @@ export default function CommunityEventsPage() {
                       {/* Events Selection */}
                       <div className="py-5 border-b border-gray-200">
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-fr-cream flex items-center justify-center shrink-0">
                             <span
-                              className="material-symbols-outlined text-gray-700 text-lg sm:text-xl"
+                              className="material-symbols-outlined text-fr-navy text-lg sm:text-xl"
                               style={{
                                 fontVariationSettings: "'wght' 400",
                               }}
@@ -462,7 +453,7 @@ export default function CommunityEventsPage() {
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm sm:text-base font-semibold text-gray-900 mb-3">
+                            <p className="text-sm sm:text-base font-semibold text-fr-navy mb-3">
                               Which Events?
                             </p>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -474,22 +465,20 @@ export default function CommunityEventsPage() {
                                   <button
                                     key={ev.id}
                                     onClick={() => s.toggleEvent(ev.id)}
-                                    className={`flex items-center gap-2 py-2.5 px-3 text-xs sm:text-sm font-medium transition-all duration-200 ${
-                                      checked
-                                        ? "bg-black text-white"
-                                        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
-                                    }`}
+                                    className={`flex items-center gap-2 py-2.5 px-3 text-xs sm:text-sm font-medium transition-all duration-200 rounded-lg ${checked
+                                        ? "bg-fr-navy text-white shadow-md"
+                                        : "bg-white text-fr-navy border border-gray-100 hover:border-fr-rust hover:bg-fr-cream"
+                                      }`}
                                     aria-label={`Toggle ${ev.title}`}
                                     aria-pressed={checked}
                                     tabIndex={0}
                                     type="button"
                                   >
                                     <span
-                                      className={`material-symbols-outlined text-sm ${
-                                        checked
+                                      className={`material-symbols-outlined text-sm ${checked
                                           ? "text-white"
                                           : "text-gray-400"
-                                      }`}
+                                        }`}
                                     >
                                       {checked
                                         ? "check_box"
@@ -530,7 +519,7 @@ export default function CommunityEventsPage() {
                                 s.updateField("prLink", e.target.value)
                               }
                               placeholder="https://github.com/org/repo/pull/123"
-                              className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
+                              className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
                               aria-label="GitHub pull request link"
                             />
                           </FormRow>
@@ -551,7 +540,7 @@ export default function CommunityEventsPage() {
                           >
                             <div className="flex items-center gap-3">
                               <label
-                                className="text-xs sm:text-sm text-hushh-blue font-semibold cursor-pointer hover:underline"
+                                className="text-xs sm:text-sm text-fr-rust font-semibold cursor-pointer hover:underline"
                                 tabIndex={0}
                                 role="button"
                                 aria-label="Upload PRD document"
@@ -581,17 +570,17 @@ export default function CommunityEventsPage() {
 
                       {/* ── Demo Requirements Callout ── */}
                       <div className="py-6">
-                        <div className="bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100">
+                        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100 shadow-sm">
                           <div className="flex items-center gap-2 mb-3">
                             <span
-                              className="material-symbols-outlined text-gray-700 text-lg"
+                              className="material-symbols-outlined text-fr-navy text-lg"
                               style={{
                                 fontVariationSettings: "'wght' 400",
                               }}
                             >
                               videocam
                             </span>
-                            <p className="text-sm sm:text-base font-semibold text-gray-900">
+                            <p className="text-sm sm:text-base font-semibold text-fr-navy">
                               Demo Requirements
                             </p>
                           </div>
@@ -606,7 +595,7 @@ export default function CommunityEventsPage() {
                                 key={i}
                                 className="flex items-start gap-2 text-xs sm:text-sm text-gray-500 font-light leading-relaxed"
                               >
-                                <span className="material-symbols-outlined text-gray-300 text-xs mt-0.5">
+                                <span className="material-symbols-outlined text-fr-rust text-xs mt-0.5">
                                   check
                                 </span>
                                 {item}
@@ -629,7 +618,7 @@ export default function CommunityEventsPage() {
                             s.updateField("demoLink", e.target.value)
                           }
                           placeholder="https://youtube.com/watch?v=..."
-                          className="w-full text-xs sm:text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
+                          className="w-full text-xs sm:text-sm text-fr-navy font-medium bg-transparent border-none outline-none p-0 placeholder:text-gray-300"
                           aria-label="Demo video YouTube link"
                         />
                       </FormRow>
@@ -656,7 +645,7 @@ export default function CommunityEventsPage() {
                     {/* ── Trust Badge ── */}
                     <section className="flex flex-col items-center justify-center text-center gap-2 pb-8">
                       <div className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px] text-hushh-blue">
+                        <span className="material-symbols-outlined text-[12px] text-fr-rust">
                           lock
                         </span>
                         <span className="text-[10px] sm:text-xs text-gray-500 tracking-wide uppercase font-medium">
@@ -689,7 +678,7 @@ export default function CommunityEventsPage() {
                   damping: 15,
                   delay: 0.2,
                 }}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-emerald-500 flex items-center justify-center mb-8"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-emerald-500 flex items-center justify-center mb-8 bg-white shadow-sm"
               >
                 <motion.span
                   initial={{ opacity: 0 }}
@@ -703,8 +692,7 @@ export default function CommunityEventsPage() {
               </motion.div>
 
               <h1
-                className="text-[2.5rem] sm:text-5xl lg:text-6xl leading-[1.1] font-normal text-black tracking-tight font-serif mb-3"
-                style={playfair}
+                className="text-[2.5rem] sm:text-5xl lg:text-6xl leading-[1.1] font-normal text-fr-navy tracking-tight font-display mb-3"
               >
                 You're{" "}
                 <span className="text-gray-400 italic font-light">In.</span>
@@ -712,14 +700,14 @@ export default function CommunityEventsPage() {
 
               <p className="text-sm sm:text-base text-gray-500 font-light leading-relaxed max-w-xs sm:max-w-sm mb-8">
                 We'll be in touch at{" "}
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-fr-navy">
                   {s.form.universityEmail}
                 </span>
               </p>
 
               {/* Registered events */}
               <div className="w-full max-w-xs sm:max-w-md space-y-2 mb-10">
-                <p className="text-[10px] sm:text-xs tracking-[0.2em] text-gray-400 uppercase font-medium mb-3">
+                <p className="text-[10px] sm:text-xs tracking-[0.2em] text-fr-rust uppercase font-medium mb-3">
                   Registered For
                 </p>
                 {s.form.events.map((evId) => {
@@ -731,19 +719,19 @@ export default function CommunityEventsPage() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.6 }}
-                      className="flex items-center gap-3 py-3 px-1 border-b border-gray-100"
+                      className="flex items-center gap-3 py-3 px-1 border-b border-gray-100 bg-white/50 rounded-lg px-2 mb-1"
                     >
                       <div className="relative">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                          <span className="material-symbols-outlined text-gray-700 text-sm sm:text-base">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-fr-cream flex items-center justify-center">
+                          <span className="material-symbols-outlined text-fr-navy text-sm sm:text-base">
                             {ev.icon}
                           </span>
                         </div>
                         <div
-                          className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ${ev.accent}`}
+                          className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ${evId === 'hackathon' ? 'bg-fr-rust' : 'bg-fr-navy'}`}
                         />
                       </div>
-                      <p className="text-sm sm:text-base font-medium text-gray-900">
+                      <p className="text-sm sm:text-base font-medium text-fr-navy">
                         {ev.title}
                       </p>
                       <span className="material-symbols-outlined text-emerald-500 text-sm ml-auto">
@@ -755,11 +743,11 @@ export default function CommunityEventsPage() {
               </div>
 
               {/* Track badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 bg-gray-50 rounded-full border border-gray-100">
-                <span className="material-symbols-outlined text-gray-500 text-sm sm:text-base">
+              <div className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 bg-white rounded-full border border-gray-100 shadow-sm">
+                <span className="material-symbols-outlined text-fr-rust text-sm sm:text-base">
                   {s.track === "engineering" ? "terminal" : "analytics"}
                 </span>
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                <span className="text-xs sm:text-sm font-semibold text-fr-navy uppercase tracking-wide">
                   {s.track === "engineering"
                     ? "Engineering Track"
                     : "MBA Track"}
@@ -795,20 +783,17 @@ interface FormRowProps {
 
 const FormRow = ({ icon, label, error, children }: FormRowProps) => (
   <div
-    className={`py-5 border-b ${
-      error ? "border-red-200" : "border-gray-200"
-    }`}
+    className={`py-5 border-b ${error ? "border-red-200" : "border-gray-200"
+      }`}
   >
     <div className="flex items-start gap-4">
       <div
-        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 ${
-          error ? "bg-red-50" : "bg-gray-100"
-        }`}
+        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 ${error ? "bg-red-50" : "bg-gray-100"
+          }`}
       >
         <span
-          className={`material-symbols-outlined text-lg sm:text-xl ${
-            error ? "text-red-500" : "text-gray-700"
-          }`}
+          className={`material-symbols-outlined text-lg sm:text-xl ${error ? "text-red-500" : "text-gray-700"
+            }`}
           style={{ fontVariationSettings: "'wght' 400" }}
         >
           {icon}
@@ -816,9 +801,8 @@ const FormRow = ({ icon, label, error, children }: FormRowProps) => (
       </div>
       <div className="flex-1 min-w-0">
         <p
-          className={`text-sm sm:text-base font-semibold mb-1 ${
-            error ? "text-red-600" : "text-gray-900"
-          }`}
+          className={`text-sm sm:text-base font-semibold mb-1 ${error ? "text-red-600" : "text-gray-900"
+            }`}
         >
           {label}
         </p>

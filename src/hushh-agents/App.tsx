@@ -34,7 +34,7 @@ const playfair = { fontFamily: "'Playfair Display', serif" };
 const LoadingScreen: React.FC = () => (
   <div className="min-h-screen bg-white flex items-center justify-center">
     <div className="text-center">
-      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-hushh-blue to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fr-rust to-[#8B3820] flex items-center justify-center mx-auto mb-4 animate-pulse">
         <span className="text-white text-2xl font-bold">H</span>
       </div>
       <p className="text-gray-400 text-sm">Loading {HUSHH_BRANDING.FULL_NAME}...</p>
@@ -52,7 +52,7 @@ const LoginScreen: React.FC<{
   <div className="min-h-screen bg-white text-gray-900 antialiased flex flex-col">
     {/* Desktop: Two-column layout, Mobile: Single column */}
     <div className="flex-grow flex flex-col lg:flex-row">
-      
+
       {/* Left Panel - Branding (Desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 via-gray-800 to-black p-12 flex-col justify-between">
         <div>
@@ -63,17 +63,17 @@ const LoginScreen: React.FC<{
             <span className="text-white text-xl font-medium" style={playfair}>Hushh</span>
           </Link>
         </div>
-        
+
         <div className="space-y-8">
           <h1 className="text-5xl xl:text-6xl text-white font-normal leading-tight" style={playfair}>
             Your Private<br />
             <span className="text-gray-400 italic">AI Companions</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-md leading-relaxed">
-            Intelligent conversations in Hindi, English, and Tamil. 
+            Intelligent conversations in Hindi, English, and Tamil.
             Powered by advanced AI, designed for you.
           </p>
-          
+
           {/* Feature List - Desktop */}
           <div className="space-y-4 pt-4">
             <div className="flex items-center gap-4">
@@ -105,20 +105,20 @@ const LoginScreen: React.FC<{
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2 text-gray-500 text-sm">
           <span className="material-symbols-outlined text-base">shield</span>
           <span>Your data stays private and secure</span>
         </div>
       </div>
-      
+
       {/* Right Panel - Login Form */}
       <main className="flex-grow lg:w-1/2 px-6 lg:px-12 xl:px-20 flex flex-col justify-center py-12 lg:py-0">
         <div className="max-w-md mx-auto w-full">
           {/* Logo - Mobile only */}
           <section className="flex justify-center pt-8 pb-6 lg:hidden">
             <Link to="/">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-hushh-blue to-blue-600 flex items-center justify-center overflow-hidden border border-black/5">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fr-rust to-[#8B3820] flex items-center justify-center overflow-hidden border border-black/5">
                 <img src={HushhLogo} alt="Hushh Logo" className="w-10 h-10 object-contain" />
               </div>
             </Link>

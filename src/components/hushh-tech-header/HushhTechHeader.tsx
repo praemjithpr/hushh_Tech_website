@@ -53,7 +53,7 @@ const HushhTechHeader: React.FC<HushhTechHeaderProps> = ({
 
   const isActive = (path: string) => location.pathname === path;
 
-  const headerBg = isScrolled ? "bg-white shadow-nav" : "bg-white border-b border-[#F2F0EB]";
+  const headerBg = isScrolled ? "bg-white shadow-nav" : "bg-[#faf9f6] border-b border-[#F2F0EB]";
   const positionCls = fixed ? "fixed top-0 left-0 right-0 z-50" : "sticky top-0 z-50";
 
   return (
@@ -87,8 +87,8 @@ const HushhTechHeader: React.FC<HushhTechHeaderProps> = ({
                   key={path}
                   to={path}
                   className={`px-3 py-2 text-[14px] font-semibold rounded transition-colors duration-150 ${isActive(path)
-                      ? "text-[#AA4528]"
-                      : "text-[#4A4540] hover:text-[#151513]"
+                    ? "text-[#AA4528]"
+                    : "text-[#4A4540] hover:text-[#151513]"
                     }`}
                 >
                   {label}

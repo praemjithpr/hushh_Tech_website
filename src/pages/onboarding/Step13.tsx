@@ -6,20 +6,12 @@ import OnboardingShell from '../../components/OnboardingShell';
 import { fetchAuthNumbers } from '../../services/plaid/plaidService';
 
 // SVG Icons
-const BackIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 12H5M12 19l-7-7 7-7" />
-  </svg>
-);
+// BackIcon removed as unused
 
-const BankIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2b8cee" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 21H21M3 10H21M5 6L12 3L19 6M4 10V21M20 10V21M8 14V17M12 14V17M16 14V17" />
-  </svg>
-);
+// BankIcon removed as unused
 
 const LockIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b8cee" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#AA4528" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </svg>
@@ -31,12 +23,7 @@ const ChevronDownIcon = () => (
   </svg>
 );
 
-const ArrowForwardIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="5" y1="12" x2="19" y2="12" />
-    <polyline points="12,5 19,12 12,19" />
-  </svg>
-);
+// ArrowForwardIcon removed as unused
 
 // Share class pill icons
 const StarIcon = () => (
@@ -230,11 +217,7 @@ function OnboardingStep13() {
   const totalInvestment = calculateTotalInvestment();
   const hasAnyUnits = shareUnits.class_a_units > 0 || shareUnits.class_b_units > 0 || shareUnits.class_c_units > 0;
 
-  const formattedOnboardingAccountType = selectedOnboardingAccountType
-    ? selectedOnboardingAccountType
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (char) => char.toUpperCase())
-    : 'Not selected';
+  // formattedOnboardingAccountType removed as unused
 
   // Cleanup on unmount — clear timeouts, mark unmounted
   useEffect(() => {
@@ -682,8 +665,8 @@ function OnboardingStep13() {
     >
       <div className="mb-8">
         <h1
-          className="text-[2rem] md:text-[2.3rem] font-light leading-tight text-[#151513] mb-3"
-          style={{ fontFamily: 'var(--font-display)' }}
+          className="text-[2.2rem] md:text-[2.6rem] font-medium leading-tight text-[#151513] mb-3"
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}
         >
           Bank Details
         </h1>
@@ -742,8 +725,8 @@ function OnboardingStep13() {
                         applyAccountSelection(acct);
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-md border transition-all text-left ${isSelected
-                          ? 'border-[#AA4528] bg-[#FDF9F7] ring-1 ring-[#AA4528]/20'
-                          : 'border-[#EEE9E0] bg-white hover:bg-[#F7F5F0]'
+                        ? 'border-[#AA4528] bg-[#FDF9F7] ring-1 ring-[#AA4528]/20'
+                        : 'border-[#EEE9E0] bg-white hover:bg-[#F7F5F0]'
                         }`}
                       aria-label={`Select ${acct.name} ending in ${acct.mask}`}
                     >
@@ -762,7 +745,7 @@ function OnboardingStep13() {
                       {/* Selected check */}
                       {isSelected && (
                         <span className="text-[#AA4528] text-xl font-bold">
-                          <CheckIcon />
+                          <span className="material-symbols-outlined text-[20px]">check</span>
                         </span>
                       )}
                     </button>
@@ -780,7 +763,7 @@ function OnboardingStep13() {
               <p className="text-[12px] font-bold tracking-[0.1em] text-[#8C8479] uppercase mb-2">
                 Investment Amount
               </p>
-              <div className="text-3xl font-light text-[#151513] mb-4" style={{ fontFamily: 'var(--font-display)' }}>
+              <div className="text-3xl font-medium text-[#151513] mb-4" style={{ fontFamily: 'var(--font-display)' }}>
                 {formatCurrency(totalInvestment)}
               </div>
 
@@ -832,8 +815,8 @@ function OnboardingStep13() {
                 onBlur={() => handleBlur('bankName')}
                 placeholder="Bank Name"
                 className={`w-full h-12 rounded-md border bg-white px-4 text-[16px] text-[#151513] placeholder:text-[#C4BFB5] outline-none transition-all ${touched.bankName && bankNameError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
+                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
                   }`}
               />
               {touched.bankName && bankNameError && <p className="mt-1.5 text-[12px] text-red-500">{bankNameError}</p>}
@@ -851,8 +834,8 @@ function OnboardingStep13() {
                 onBlur={() => handleBlur('accountHolderName')}
                 placeholder="Account Holder Name"
                 className={`w-full h-12 rounded-md border bg-white px-4 text-[16px] text-[#151513] placeholder:text-[#C4BFB5] outline-none transition-all ${touched.accountHolderName && accountHolderNameError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
+                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
                   }`}
               />
               <p className="mt-1.5 text-[12px] text-[#8C8479]">Ensure the account holder name matches your ID exactly.</p>
@@ -927,8 +910,8 @@ function OnboardingStep13() {
                 placeholder={bankCountry === 'US' ? '9 digits' : 'Routing number'}
                 maxLength={bankCountry === 'US' ? 9 : 15}
                 className={`w-full h-12 rounded-md border bg-white px-4 text-[16px] text-[#151513] placeholder:text-[#C4BFB5] outline-none transition-all font-mono ${touched.routingNumber && routingNumberError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
+                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
                   }`}
               />
               <p className="mt-1.5 text-[12px] text-[#8C8479]">Routing number can be found on the bottom left of your check.</p>
@@ -948,8 +931,8 @@ function OnboardingStep13() {
                 onBlur={() => handleBlur('accountNumber')}
                 placeholder="Account Number"
                 className={`w-full h-12 rounded-md border bg-white px-4 text-[16px] text-[#151513] placeholder:text-[#C4BFB5] outline-none transition-all font-mono ${touched.accountNumber && accountNumberError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
+                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
                   }`}
               />
               {touched.accountNumber && accountNumberError && <p className="mt-1.5 text-[12px] text-red-500">{accountNumberError}</p>}
@@ -968,8 +951,8 @@ function OnboardingStep13() {
                 onBlur={() => handleBlur('confirmAccountNumber')}
                 placeholder="Re-enter number"
                 className={`w-full h-12 rounded-md border bg-white px-4 text-[16px] text-[#151513] placeholder:text-[#C4BFB5] outline-none transition-all font-mono ${touched.confirmAccountNumber && confirmAccountNumberError
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
+                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-[#EEE9E0] focus:border-[#AA4528] focus:ring-1 focus:ring-[#AA4528]/20'
                   }`}
               />
               {touched.confirmAccountNumber && confirmAccountNumberError && <p className="mt-1.5 text-[12px] text-red-500">{confirmAccountNumberError}</p>}

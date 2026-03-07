@@ -49,6 +49,8 @@ interface OnboardingShellProps {
     children: React.ReactNode;
     /** Optional bottom CTA (overrides built-in Continue btn) */
     footerSlot?: React.ReactNode;
+    /** If true, hide the footer slot area */
+    hideFooter?: boolean;
 }
 
 const OnboardingShell: React.FC<OnboardingShellProps> = ({
@@ -63,12 +65,13 @@ const OnboardingShell: React.FC<OnboardingShellProps> = ({
     hideContinueBtn = false,
     children,
     footerSlot,
+    hideFooter = false,
 }) => {
     const progressPct = Math.min(100, Math.round((step / totalSteps) * 100));
 
     return (
         <div
-            className="min-h-[100dvh] flex flex-col bg-[#F7F5F0]"
+            className="min-h-[100dvh] flex flex-col bg-[#faf9f6]"
             style={{ fontFamily: "var(--font-body)", color: "var(--fr-navy)" }}
         >
             {/* ══════════════════════════════════════
@@ -105,8 +108,8 @@ const OnboardingShell: React.FC<OnboardingShellProps> = ({
                                 onClick={onContinue}
                                 disabled={continueDisabled || continueLoading}
                                 className={`px-4 py-2 rounded text-[13px] font-semibold transition-all ${continueDisabled || continueLoading
-                                        ? "bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed"
-                                        : "bg-[#AA4528] text-white hover:bg-[#8C3720]"
+                                    ? "bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed"
+                                    : "bg-[#AA4528] text-white hover:bg-[#8C3720]"
                                     }`}
                             >
                                 {continueLoading ? "Saving…" : continueLabel}
@@ -150,7 +153,7 @@ const OnboardingShell: React.FC<OnboardingShellProps> = ({
                 </div>
 
                 {/* Footer slot (e.g. legal disclaimer, secondary actions) */}
-                {footerSlot && (
+                {footerSlot && !hideFooter && (
                     <div className="w-full max-w-xl mt-4">{footerSlot}</div>
                 )}
             </main>
