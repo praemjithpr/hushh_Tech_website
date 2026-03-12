@@ -1,8 +1,10 @@
 /**
- * HushhTechHeader — Reusable sticky header with hamburger menu + stock ticker
+ * HushhTechHeader — Fixed header with hamburger menu + stock ticker
+ * Always fixed to top of viewport. Includes spacer div to prevent
+ * content from hiding behind it.
+ *
  * Left: Hushh logo + brand name. Right: hamburger menu button.
  * Below: Scrolling stock ticker with live quotes (Google, Apple, etc.)
- * Opens HushhTechNavDrawer when hamburger is clicked.
  */
 import React, { useState } from "react";
 import hushhLogo from "../images/Hushhogo.png";
@@ -45,16 +47,13 @@ const TickerChip = ({ quote, isLoading }: { quote: StockQuote; isLoading?: boole
 );
 
 interface HushhTechHeaderProps {
-  /** Whether the header is fixed to top (default: false) */
-  fixed?: boolean;
   /** Show the stock ticker strip below header (default: true) */
   showTicker?: boolean;
-  /** Extra classes on the root container */
+  /** Extra classes on the header element */
   className?: string;
 }
 
 const HushhTechHeader: React.FC<HushhTechHeaderProps> = ({
-  fixed = false,
   showTicker = true,
   className = "",
 }) => {
@@ -63,14 +62,11 @@ const HushhTechHeader: React.FC<HushhTechHeaderProps> = ({
   // Fetch real-time stock quotes (refreshes every 2 minutes)
   const { quotes, loading: quotesLoading, lastUpdated } = useStockQuotes(120000);
 
-  const positionClasses = fixed
-    ? "fixed top-0 left-0 right-0 z-50"
-    : "sticky top-0 z-50";
-
   return (
     <>
+      {/* Fixed header — always pinned to top */}
       <header
-        className={`${positionClasses} bg-white transition-all duration-300 ${className}`}
+        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-sm ${className}`}
       >
         {/* ── Top bar: Logo + Hamburger ── */}
         <div className="px-6 py-4 flex justify-between items-center">
@@ -143,6 +139,10 @@ const HushhTechHeader: React.FC<HushhTechHeaderProps> = ({
           </section>
         )}
       </header>
+
+      {/* Spacer — prevents content from hiding behind the fixed header */}
+      {/* Nav bar ~72px + ticker strip ~49px = ~121px when ticker shown */}
+      <div className={showTicker ? "h-[121px]" : "h-[72px]"} />
 
       {/* Navigation Drawer */}
       <HushhTechNavDrawer

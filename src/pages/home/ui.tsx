@@ -33,11 +33,8 @@ export default function HomePage() {
       data-page="home"
       className="bg-white antialiased text-gray-900 min-h-screen flex flex-col relative selection:bg-hushh-blue selection:text-white"
     >
-      {/* ═══ Header ═══ */}
-      <HushhTechHeader
-        fixed={false}
-        className="sticky top-0 z-50 border-b border-transparent"
-      />
+      {/* ═══ Header (fixed to top with ticker) ═══ */}
+      <HushhTechHeader />
 
       {/* ═══ Main Content — max-w-md centered like all other pages ═══ */}
       <main className="flex-1 px-6 pb-32 flex flex-col gap-12 pt-4 max-w-md mx-auto w-full">
