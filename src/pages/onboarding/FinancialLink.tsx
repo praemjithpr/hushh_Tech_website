@@ -97,10 +97,7 @@ export default function OnboardingFinancialLink() {
     <OnboardingShell
       step={1}
       totalSteps={15}
-      continueLabel={buttonText}
-      onContinue={handleButtonClick}
-      continueDisabled={isInitializing || isProcessing}
-      continueLoading={isProcessing}
+      hideContinueBtn
       onBack={handleSkip}
       onClose={handleSkip}
     >
@@ -148,8 +145,26 @@ export default function OnboardingFinancialLink() {
           </div>
         )}
 
-        {/* Footer actions */}
+        {/* Footer actions — Connect CTA above Skip */}
         <div className="flex flex-col items-center pt-6 border-t border-[#F2F0EB]">
+          {/* Connect Bank Account CTA */}
+          <button
+            onClick={handleButtonClick}
+            disabled={isInitializing || isProcessing}
+            className={`w-full py-3.5 rounded text-[14px] font-semibold tracking-wide transition-all mb-4 flex items-center justify-center gap-2 ${
+              isInitializing || isProcessing
+                ? 'bg-[#EEE9E0] text-[#C4BFB5] cursor-not-allowed'
+                : 'bg-[#AA4528] text-white hover:bg-[#8C3720] active:scale-[0.98]'
+            }`}
+            aria-label={buttonText}
+          >
+            {isProcessing && (
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            )}
+            {buttonText}
+          </button>
+
+          {/* Skip for now */}
           <button onClick={handleSkip} className="text-[14px] font-semibold text-[#8C8479] hover:text-[#151513] mb-4">
             Skip for now
           </button>

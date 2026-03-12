@@ -31,6 +31,7 @@ export default function OnboardingFinancialLink() {
     identityInfo,
     /* Actions */
     handleButtonClick,
+    handleReconnect,
     handleSkip,
   } = useFinancialLinkLogic();
 
@@ -262,11 +263,24 @@ export default function OnboardingFinancialLink() {
             {buttonText}
           </HushhTechCta>
 
+          {/* Reconnect — only shown after bank is connected */}
+          {isDone && (
+            <button
+              onClick={handleReconnect}
+              className="w-full py-3 flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label="Reconnect or change bank account"
+              tabIndex={0}
+            >
+              <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'wght' 300" }}>sync</span>
+              Reconnect / Change Bank
+            </button>
+          )}
+
           <HushhTechCta
             variant={HushhTechCtaVariant.WHITE}
             onClick={handleSkip}
           >
-            Skip
+            Skip for now
           </HushhTechCta>
         </section>
       </main>
