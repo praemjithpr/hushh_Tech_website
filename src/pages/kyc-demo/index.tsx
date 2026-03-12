@@ -19,7 +19,7 @@ import {
   Flex,
   useToast,
 } from '@chakra-ui/react';
-import Navbar from '../../components/Navbar';
+import HushhTechHeader from '../../components/hushh-tech-header/HushhTechHeader';
 import Footer from '../../components/Footer';
 import AgentCollabStrip from '../../components/kyc/AgentCollabStrip';
 import AgentConversationLog, { ConversationEntry } from '../../components/kyc/AgentConversationLog';
@@ -234,9 +234,9 @@ const KYCDemoPage: React.FC = () => {
 
   return (
     <Box bg="white" minH="100vh">
-      <Navbar />
+      <HushhTechHeader />
       
-      <Container maxW="7xl" pt="120px" pb="60px">
+      <Container maxW="7xl" pb="60px">
         {/* Header */}
         <VStack spacing={4} mb={12} textAlign="center">
           <Badge 

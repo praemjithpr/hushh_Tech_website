@@ -3,7 +3,7 @@
 import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { A2APlaygroundContainer } from '../../components/a2aPlayground';
-import Navbar from '../../components/Navbar';
+import HushhTechHeader from '../../components/hushh-tech-header/HushhTechHeader';
 import Footer from '../../components/Footer';
 
 /**
@@ -23,8 +23,8 @@ import Footer from '../../components/Footer';
 const A2APlaygroundPage: React.FC = () => {
   return (
     <Box minH="100vh" bg="white">
-      <Navbar />
-      <Box pt="120px" pb="40px">
+      <HushhTechHeader />
+      <Box pb="40px">
         <A2APlaygroundContainer />
       </Box>
       <Footer />

@@ -22,7 +22,7 @@ import { Box, Center, Spinner, Text, VStack } from '@chakra-ui/react';
 import { Helmet } from 'react-helmet';
 import KycFlowContainer from '../../components/kyc/screens/KycFlowContainer';
 import { KycCheckResponse } from '../../types/kyc';
-import Navbar from '../../components/Navbar';
+import HushhTechHeader from '../../components/hushh-tech-header/HushhTechHeader';
 import Footer from '../../components/Footer';
 import config from '../../resources/config/config';
 
@@ -153,8 +153,8 @@ const KycFlowPage: React.FC = () => {
       
       {/* Page Layout */}
       <Box minH="100vh" bg="white">
-        <Navbar />
-        <Box pt="120px" pb="40px">
+        <HushhTechHeader />
+        <Box pb="40px">
           {/* KYC Flow Container */}
           <KycFlowContainer
             relyingPartyId={bankId}

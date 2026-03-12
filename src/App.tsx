@@ -98,6 +98,7 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isUserRegistration = location.pathname === '/user-registration';
   const isOnboarding = location.pathname.startsWith('/onboarding');
   const isKycFlow = location.pathname.startsWith('/kyc-flow');
+  const isKycDemo = location.pathname.startsWith('/kyc-demo');
   const isA2APlayground = location.pathname.startsWith('/a2a-playground');
   const isInvestorGuide = location.pathname === '/investor-guide';
   const isHushhAI = location.pathname.startsWith('/hushh-ai');
@@ -115,7 +116,7 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isSignup = location.pathname.toLowerCase() === '/signup';
 
   return (
-    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHushhUserProfile || isSignNda || isInvestorProfile || isDiscoverFundA || isCommunity || isDeleteAccount || isLogin || isSignup ? '' : 'mt-20'}`}>
+    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isKycDemo || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHushhUserProfile || isSignNda || isInvestorProfile || isDiscoverFundA || isCommunity || isDeleteAccount || isLogin || isSignup ? '' : 'mt-20'}`}>
       {children}
     </div>
   );
@@ -139,8 +140,11 @@ const useLayoutVisibility = () => {
   const isSignup = location.pathname.toLowerCase() === '/signup';
   const isSignNda = location.pathname.startsWith('/sign-nda');
 
-  // Home + Onboarding + Profile + Fund A + Community + Delete Account + Login + Signup + Sign NDA + Hushh Agents use HushhTechHeader/Footer — hide old global nav/footer
-  const hideOld = isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHomePage || isOnboarding || isProfile || isFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isSignNda;
+  // All pages using HushhTechHeader — hide old global Navbar/Footer
+  const isKycFlow = location.pathname.startsWith('/kyc-flow');
+  const isKycDemo = location.pathname.startsWith('/kyc-demo');
+  const isA2APlayground = location.pathname.startsWith('/a2a-playground');
+  const hideOld = isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHomePage || isOnboarding || isProfile || isFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isSignNda || isKycFlow || isKycDemo || isA2APlayground;
   return {
     showNavbar: !hideOld,
     showFooter: !hideOld,
