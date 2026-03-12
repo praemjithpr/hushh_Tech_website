@@ -127,11 +127,9 @@ export function useStep8Logic() {
       }
 
       await detectAndApply(user.id);
-
-      if (saved?.residence_country) {
-        const code = locationService.mapCountryToIsoCode(saved.residence_country);
-        dropdowns.applyDetectedLocation(code);
-      }
+      // NOTE: Previously we applied residence_country here, which overwrote
+      // GPS-detected location. Removed — GPS/IP detection already sets the
+      // correct country. If GPS fails, detectAndApply handles it gracefully.
     };
     init();
     return () => { locationService.cancel(); };

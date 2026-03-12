@@ -308,8 +308,14 @@ export const getCitiesOfState = async (
     console.warn('[locationData] Edge function failed for cities, trying fallback:', err);
   }
 
-  // Fallback: countriesnow.space API (needs state name, not code)
-  return fetchCitiesFromFallback(countryIsoCode, stateCode);
+  // Fallback: countriesnow.space API needs state NAME, not ISO code.
+  // Try to resolve the code to a name first using the states list.
+  const statesForLookup = await getStatesOfCountry(countryIsoCode).catch(() => []);
+  const stateMatch = statesForLookup.find(
+    s => s.isoCode === stateCode || s.name === stateCode
+  );
+  const stateName = stateMatch?.name || stateCode;
+  return fetchCitiesFromFallback(countryIsoCode, stateName);
 };
 
 // ─── Fallback Functions ───────────────────────────────────────────────

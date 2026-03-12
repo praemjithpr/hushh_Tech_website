@@ -18,7 +18,7 @@ interface CityItem {
   name: string;
 }
 
-interface LocationDropdownState {
+export interface LocationDropdownState {
   countries: DropdownItem[];
   states: DropdownItem[];
   cities: CityItem[];
@@ -163,7 +163,16 @@ export function useLocationDropdowns(
     if (stateCode) pendingState.current = stateCode;
     else if (stateName) pendingState.current = stateName;
     if (cityName) pendingCity.current = cityName;
-    if (countryCode) setCountryRaw(countryCode);
+
+    if (countryCode) {
+      // Use full cascade reset (clears states/cities, triggers fresh fetch)
+      // instead of setCountryRaw which skips the reload
+      setCountryRaw(countryCode);
+      setStateRaw('');
+      setCityRaw('');
+      setStates([]);
+      setCities([]);
+    }
 
     // Bump version so pending-resolution effects re-evaluate
     // even when states/cities arrays haven't changed.
