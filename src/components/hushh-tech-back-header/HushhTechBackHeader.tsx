@@ -41,7 +41,7 @@ const HushhTechBackHeader: React.FC<HushhTechBackHeaderProps> = ({
   return (
     <>
       <header
-        className={`px-6 py-6 flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-md z-40 ${className}`}
+        className={`px-6 py-6 flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-md z-40 max-w-5xl mx-auto w-full ${className}`}
       >
         {/* Back button */}
         <button

@@ -140,12 +140,13 @@ const useLayoutVisibility = () => {
   const isLogin = location.pathname.toLowerCase() === '/login';
   const isSignup = location.pathname.toLowerCase() === '/signup';
   const isSignNda = location.pathname.startsWith('/sign-nda');
+  const isHushhUserProfile = location.pathname.startsWith('/hushh-user-profile');
 
   // All pages using HushhTechHeader — hide old global Navbar/Footer
   const isKycFlow = location.pathname.startsWith('/kyc-flow');
   const isKycDemo = location.pathname.startsWith('/kyc-demo');
   const isA2APlayground = location.pathname.startsWith('/a2a-playground');
-  const hideOld = isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHomePage || isOnboarding || isProfile || isFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isSignNda || isKycFlow || isKycDemo || isA2APlayground;
+  const hideOld = isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHomePage || isOnboarding || isProfile || isFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isSignNda || isHushhUserProfile || isKycFlow || isKycDemo || isA2APlayground;
   return {
     showNavbar: !hideOld,
     showFooter: !hideOld,

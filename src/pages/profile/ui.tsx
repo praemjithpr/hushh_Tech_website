@@ -28,8 +28,8 @@ const ProfilePage: React.FC = () => {
       <HushhTechBackHeader rightType="hamburger" />
 
       {/* scrollable content */}
-      <main className="flex-1 flex flex-col items-start justify-center px-5 py-2 sm:px-6 md:px-8">
-        <div className="w-full max-w-[440px] flex flex-col items-start gap-8">
+      <main className="flex-1 flex flex-col items-center justify-center px-5 py-2 sm:px-6 md:px-12 lg:px-20">
+        <div className="w-full max-w-[440px] md:max-w-[560px] lg:max-w-[640px] flex flex-col items-start md:items-center gap-8 md:gap-10">
 
           {/* pill badge */}
           <span className="inline-flex items-center gap-1.5 rounded-full border border-hushh-blue/20 bg-hushh-blue/5 px-4 py-1">
@@ -40,21 +40,21 @@ const ProfilePage: React.FC = () => {
           </span>
 
           {/* headline */}
-          <div className="text-left space-y-3">
+          <div className="text-left md:text-center space-y-3 lg:space-y-4">
             <h1
-              className="text-[32px] md:text-[38px] leading-[1.08] tracking-tight text-gray-900 font-serif"
+              className="text-[32px] md:text-[42px] lg:text-[52px] leading-[1.08] tracking-tight text-gray-900 font-serif"
               style={playfair}
             >
               Investing in the{' '}
               <span className="text-gray-400 italic font-light">Future.</span>
             </h1>
-            <p className="text-[15px] md:text-[17px] leading-relaxed text-gray-500 max-w-[360px]">
+            <p className="text-[15px] md:text-[17px] lg:text-[18px] leading-relaxed text-gray-500 max-w-[360px] md:max-w-[480px] lg:max-w-[540px] md:mx-auto">
               The AI-powered Berkshire Hathaway. We combine AI and human expertise to invest in exceptional businesses for long-term value creation.
             </p>
           </div>
 
           {/* action buttons */}
-          <div className="w-full space-y-3 mt-2">
+          <div className="w-full max-w-[440px] space-y-3 mt-2">
             <HushhTechCta
               onClick={primaryCTA.action}
               variant={HushhTechCtaVariant.BLACK}
@@ -71,23 +71,23 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* trust indicators */}
-          <div className="flex items-center justify-start gap-6 mt-4">
+          <div className="flex items-center justify-start md:justify-center gap-6 md:gap-8 mt-4">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-ios-green animate-pulse" />
-              <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium">
+              <p className="text-[10px] md:text-[11px] tracking-[0.18em] uppercase text-gray-400 font-medium">
                 SEC Registered
               </p>
             </div>
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[14px] text-hushh-blue">lock</span>
-              <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium">
+              <p className="text-[10px] md:text-[11px] tracking-[0.18em] uppercase text-gray-400 font-medium">
                 Bank Level Security
               </p>
             </div>
           </div>
 
           {/* tagline */}
-          <p className="text-[12px] text-gray-400 tracking-wide text-left mt-2">
+          <p className="text-[12px] md:text-[13px] text-gray-400 tracking-wide text-left md:text-center mt-2">
             Secure. Private. AI-Powered.
           </p>
         </div>

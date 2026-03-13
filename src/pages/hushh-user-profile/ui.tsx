@@ -8,7 +8,7 @@ import React from "react";
 import { useHushhUserProfileLogic } from "./logic";
 import { Copy, Check } from "lucide-react";
 import { FaApple } from "react-icons/fa";
-import { SiGooglepay } from "react-icons/si";
+import { FcGoogle } from "react-icons/fc";
 import HushhTechBackHeader from "../../components/hushh-tech-back-header/HushhTechBackHeader";
 import HushhTechCta, { HushhTechCtaVariant } from "../../components/hushh-tech-cta/HushhTechCta";
 import HushhTechFooter, { HushhFooterTab } from "../../components/hushh-tech-footer/HushhTechFooter";
@@ -76,7 +76,7 @@ const HushhUserProfilePage: React.FC = () => {
             className="text-lg italic text-gray-400 font-serif"
             style={playfair}
           >
-            NWS
+            Net Worth Score
           </span>
           {nwsResult ? (
             <NWSScoreBadge result={nwsResult} loading={nwsLoading} size="sm" />
@@ -279,7 +279,7 @@ const HushhUserProfilePage: React.FC = () => {
               <span className="text-xs font-medium">{isApplePassLoading ? "Loading..." : "Apple Wallet"}</span>
             </button>
             <button type="button" onClick={handleGoogleWalletPass} disabled={isGooglePassLoading} className="border border-gray-200 rounded-2xl py-3 px-4 flex items-center justify-center gap-2 hover:border-hushh-blue/30 transition-colors disabled:opacity-50">
-              <SiGooglepay className="text-lg" />
+              <FcGoogle className="text-lg" />
               <span className="text-xs font-medium">{isGooglePassLoading ? "Loading..." : "Google Wallet"}</span>
             </button>
           </div>
