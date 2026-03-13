@@ -114,9 +114,10 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isDeleteAccount = location.pathname === '/delete-account';
   const isLogin = location.pathname.toLowerCase() === '/login';
   const isSignup = location.pathname.toLowerCase() === '/signup';
+  const isProfile = location.pathname === '/profile';
 
   return (
-    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isKycDemo || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHushhUserProfile || isSignNda || isInvestorProfile || isDiscoverFundA || isCommunity || isDeleteAccount || isLogin || isSignup ? '' : 'mt-20'}`}>
+    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isKycDemo || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHushhUserProfile || isSignNda || isInvestorProfile || isDiscoverFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isProfile ? '' : 'mt-20'}`}>
       {children}
     </div>
   );
