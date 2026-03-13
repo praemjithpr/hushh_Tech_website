@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import HushhTechBackHeader from '../../components/hushh-tech-back-header/HushhTechBackHeader';
 import HushhTechCta, { HushhTechCtaVariant } from '../../components/hushh-tech-cta/HushhTechCta';
 import HushhTechFooter, { HushhFooterTab } from '../../components/hushh-tech-footer/HushhTechFooter';
-import HushhLogo from '../../components/images/Hushhogo.png';
 import { useProfileLogic } from './logic';
 
 /* ── Playfair heading style ── */
@@ -26,7 +25,7 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-white selection:bg-hushh-blue selection:text-white">
       {/* header */}
-      <HushhTechBackHeader />
+      <HushhTechBackHeader rightType="hamburger" />
 
       {/* scrollable content */}
       <main className="flex-1 flex flex-col items-start justify-center px-5 py-2 sm:px-6 md:px-8">
@@ -34,18 +33,11 @@ const ProfilePage: React.FC = () => {
 
           {/* pill badge */}
           <span className="inline-flex items-center gap-1.5 rounded-full border border-hushh-blue/20 bg-hushh-blue/5 px-4 py-1">
-            <span className="material-symbols-rounded text-[10px] text-hushh-blue uppercase">person</span>
+            <span className="material-symbols-outlined text-[10px] text-hushh-blue uppercase">person</span>
             <span className="text-[10px] tracking-[0.14em] uppercase text-hushh-blue font-medium">
               Profile
             </span>
           </span>
-
-          {/* logo */}
-          <img
-            src={HushhLogo}
-            alt="Hushh Logo"
-            className="h-[100px] md:h-[120px] object-contain"
-          />
 
           {/* headline */}
           <div className="text-left space-y-3">
@@ -87,7 +79,7 @@ const ProfilePage: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="material-symbols-rounded text-[14px] text-hushh-blue">lock</span>
+              <span className="material-symbols-outlined text-[14px] text-hushh-blue">lock</span>
               <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium">
                 Bank Level Security
               </p>
