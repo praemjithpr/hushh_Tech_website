@@ -31,15 +31,30 @@ app.use(express.urlencoded({ extended: true }));
 // Global security headers (mirrors vercel.json)
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.plaid.com https://*.plaid.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.plaid.com",
+      "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com data:",
+      "img-src 'self' data: blob: https: http:",
+      "connect-src 'self' https://*.plaid.com https://*.supabase.co wss://*.supabase.co https://www.google.com https://www.gstatic.com https://www.google-analytics.com https://www.googletagmanager.com https://api.emailjs.com https://generativelanguage.googleapis.com https://*.googleapis.com https://www.walletlink.org wss://www.walletlink.org wss://mainnet.infura.io wss://*.infura.io https://*.seondnsresolve.com https://www.recaptcha.net",
+      "frame-src 'self' https://cdn.plaid.com https://*.plaid.com https://www.google.com https://www.gstatic.com https://calendly.com",
+      "media-src 'self' blob: data:",
+      "worker-src 'self' blob:",
+      "child-src 'self' blob: https://cdn.plaid.com https://*.plaid.com",
+    ].join('; ')
+  );
+  res.setHeader(
     'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(self), encrypted-media=(self "https://cdn.plaid.com"), accelerometer=(self "https://cdn.plaid.com")'
+    'camera=*, microphone=(), geolocation=(self), encrypted-media=*, accelerometer=*'
   );
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-  res.setHeader('X-DNS-Prefetch-Control', 'off');
+  res.setHeader('X-DNS-Prefetch-Control', 'on');
   next();
 });
 

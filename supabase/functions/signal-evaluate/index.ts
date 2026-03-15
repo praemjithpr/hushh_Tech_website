@@ -1,6 +1,7 @@
 // signal-evaluate — Evaluate ACH transaction return risk via Plaid Signal
 // Returns: risk scores (1-99), core attributes, ruleset result
 import { corsHeaders } from '../_shared/cors.ts';
+import { getPlaidConfig } from '../_shared/plaid.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,15 +22,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    const PLAID_CLIENT_ID = Deno.env.get('PLAID_CLIENT_ID');
-    const PLAID_SECRET = Deno.env.get('PLAID_SECRET');
-    const PLAID_ENV = Deno.env.get('PLAID_ENV') || 'sandbox';
-    const baseUrl = `https://${PLAID_ENV}.plaid.com`;
+    const plaid = getPlaidConfig();
 
     // Build request body
     const plaidBody: Record<string, any> = {
-      client_id: PLAID_CLIENT_ID,
-      secret: PLAID_SECRET,
+      client_id: plaid.clientId,
+      secret: plaid.secret,
       access_token: accessToken,
       account_id: accountId,
       client_transaction_id: clientTransactionId,
@@ -49,7 +47,7 @@ Deno.serve(async (req) => {
     // Optional device info
     if (body.device) plaidBody.device = body.device;
 
-    const response = await fetch(`${baseUrl}/signal/evaluate`, {
+    const response = await fetch(`${plaid.baseUrl}/signal/evaluate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(plaidBody),
