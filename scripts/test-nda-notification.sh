@@ -14,11 +14,15 @@ echo -e "${YELLOW}🧪 Testing NDA Signed Notification Function${NC}"
 echo "================================================"
 
 # Supabase project settings
-SUPABASE_URL="https://ibsisfnjxeowvdtvgzff.supabase.co"
+SUPABASE_URL="${VITE_SUPABASE_URL:-}"
 FUNCTION_URL="${SUPABASE_URL}/functions/v1/nda-signed-notification"
 
-# Get the anon key from environment or use the project's key
-SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlic2lzZm5qeGVvd3ZkdHZnemZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI4NjIwMDAsImV4cCI6MjA0ODQzODAwMH0.aqNwqVJnDJXcXEVhfXRXbFVhKNrPWk8QQH06sS0dExg}"
+SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY:-}"
+
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+  echo -e "${RED}❌ Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY before running this script.${NC}"
+  exit 1
+fi
 
 echo ""
 echo -e "${YELLOW}Test 1: OPTIONS Preflight Request${NC}"

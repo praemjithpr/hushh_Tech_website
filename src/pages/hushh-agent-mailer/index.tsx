@@ -9,14 +9,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast, Spinner, Badge } from "@chakra-ui/react";
-import { createClient } from "@supabase/supabase-js";
+import config from "../../resources/config/config";
 import { useFooterVisibility } from "../../utils/useFooterVisibility";
 
 // Supabase client
-const supabase = createClient(
-  "https://ibsisfnjxeowvdtvgzff.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlic2lzZm5qeGVvd3ZkdHZnemZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NTk1NzgsImV4cCI6MjA4MDEzNTU3OH0.K16sO1R9L2WZGPueDP0mArs2eDYZc-TnIk2LApDw_fs"
-);
+const supabase = config.supabaseClient;
 
 // Types
 interface SendResult {
@@ -53,8 +50,7 @@ interface SendResponse {
 }
 
 // Supabase Edge Function URL
-const SALES_MAILER_URL = "https://ibsisfnjxeowvdtvgzff.supabase.co/functions/v1/sales-mailer";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlic2lzZm5qeGVvd3ZkdHZnemZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NTk1NzgsImV4cCI6MjA4MDEzNTU3OH0.K16sO1R9L2WZGPueDP0mArs2eDYZc-TnIk2LApDw_fs";
+const SALES_MAILER_URL = `${config.SUPABASE_URL}/functions/v1/sales-mailer`;
 
 // Sender options
 const SENDER_OPTIONS = [
@@ -138,6 +134,10 @@ const HushhAgentMailerPage: React.FC = () => {
   const fetchLogs = async () => {
     setIsLoadingLogs(true);
     try {
+      if (!supabase) {
+        throw new Error("Supabase client is not configured");
+      }
+
       const { data, error } = await supabase
         .from('agent_mailer_logs')
         .select('*')
@@ -172,11 +172,15 @@ const HushhAgentMailerPage: React.FC = () => {
     setResults(null);
 
     try {
+      if (!config.SUPABASE_ANON_KEY) {
+        throw new Error("VITE_SUPABASE_ANON_KEY is not configured");
+      }
+
       const response = await fetch(SALES_MAILER_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Authorization": `Bearer ${config.SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           from: fromEmail,

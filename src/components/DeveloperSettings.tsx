@@ -77,8 +77,7 @@ interface DeveloperSettingsProps {
 }
 
 const DeveloperSettings: React.FC<DeveloperSettingsProps> = ({ investorSlug }) => {
-  // Get Supabase URL - use the actual deployed URL
-  const supabaseUrl = "https://ibsisfnjxeowvdtvgzff.supabase.co";
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '{VITE_SUPABASE_URL}';
   
   const endpoints = [
     {

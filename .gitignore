@@ -28,3 +28,4 @@ dist-ssr
 .vercel
 vertex-ai-key.json
 .env.gemini-keys
+AuthKey_*.p8

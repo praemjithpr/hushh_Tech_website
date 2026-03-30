@@ -10,7 +10,7 @@
  * Created: Jan 17, 2026
  */
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://ibsisfnjxeowvdtvgzff.supabase.co';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const RESUME_ANALYSIS_ENDPOINT = `${SUPABASE_URL}/functions/v1/resume-analysis-agent`;
 
 export interface ResumeAnalysisScores {
@@ -66,6 +66,10 @@ export async function triggerResumeAnalysis(
   params: TriggerAnalysisParams
 ): Promise<ResumeAnalysisResponse> {
   try {
+    if (!SUPABASE_URL) {
+      throw new Error('VITE_SUPABASE_URL is not configured');
+    }
+
     console.log('[ResumeAnalysis] Triggering analysis for:', params.userEmail);
     
     const response = await fetch(RESUME_ANALYSIS_ENDPOINT, {

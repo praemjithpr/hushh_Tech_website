@@ -2,8 +2,13 @@
 # Test script for hushh-profile-search API
 # Exact same functionality as the React app
 
-SUPABASE_URL="https://ibsisfnjxeowvdtvgzff.supabase.co"
-ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlic2lzZm5qeGVvd3ZkdHZnemZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NTk1NzgsImV4cCI6MjA4MDEzNTU3OH0.xAi4rEhCVSIFtcWvXoF5aPfTPWFtIvbT4ILfKnJRiIg"
+SUPABASE_URL="${VITE_SUPABASE_URL:-}"
+ANON_KEY="${VITE_SUPABASE_ANON_KEY:-}"
+
+if [ -z "$SUPABASE_URL" ] || [ -z "$ANON_KEY" ]; then
+  echo "❌ Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY before running this script."
+  exit 1
+fi
 
 echo "🔍 Testing Hushh Profile Search API..."
 echo ""

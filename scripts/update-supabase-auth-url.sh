@@ -54,7 +54,7 @@ RESPONSE=$(curl -s -X PATCH \
   -H "Content-Type: application/json" \
   -d '{
     "site_url": "https://hushhtech.com",
-    "uri_allow_list": "https://hushhtech.com/**,https://www.hushhtech.com/**,https://hushhtech.com/auth/callback,https://hushhtech.com/auth/callback?redirect=/hushh-ai,ai.hushh.app://,ai.hushh.app://**,capacitor://localhost,http://localhost:3000/**,http://localhost:5173/**"
+    "uri_allow_list": "https://hushhtech.com/**,https://www.hushhtech.com/**,https://hushhtech.com/auth/callback,https://hushhtech.com/auth/callback?redirect=/hushh-ai,https://www.hushhtech.com/auth/callback,https://www.hushhtech.com/auth/callback?redirect=/hushh-ai,hushh://auth/callback,hushh://**,ai.hushh.app://,ai.hushh.app://**,capacitor://localhost,http://localhost:3000/**,http://localhost:5173/**"
   }')
 
 # Check if the update was successful
@@ -73,6 +73,9 @@ else
     echo "3. Add these Redirect URLs:"
     echo "   - https://hushhtech.com/auth/callback"
     echo "   - https://hushhtech.com/auth/callback?redirect=/hushh-ai"
+    echo "   - https://www.hushhtech.com/auth/callback"
+    echo "   - https://www.hushhtech.com/auth/callback?redirect=/hushh-ai"
+    echo "   - hushh://auth/callback"
     echo "   - https://hushhtech.com/**"
     exit 1
 fi

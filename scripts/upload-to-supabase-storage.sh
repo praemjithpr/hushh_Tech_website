@@ -6,10 +6,15 @@
 
 set -e
 
-# Configuration
-SUPABASE_ACCESS_TOKEN="sbp_4668a0419af677f2adaa5c5532304598c2bee496"
-PROJECT_REF="ibsisfnjxeowvdtvgzff"
+SUPABASE_ACCESS_TOKEN="${SUPABASE_ACCESS_TOKEN:-}"
+PROJECT_REF="${SUPABASE_PROJECT_REF:-}"
 BUCKET_NAME="assets"
+
+if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$PROJECT_REF" ]; then
+    echo "❌ Set SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF before running this script."
+    exit 1
+fi
+
 SUPABASE_URL="https://${PROJECT_REF}.supabase.co"
 
 # File to upload

@@ -9,9 +9,14 @@ echo "======================================"
 echo ""
 
 # Configuration
-SUPABASE_URL="https://qhkddwlbcbbajqxwpmwv.supabase.co"
-SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFoa2Rkd2xiY2JiYWpxeHdwbXd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI4NzA0MTEsImV4cCI6MjA0ODQ0NjQxMX0.yKZ2VEhLBKP1Qpi56-3B2WNnp0A2FbQeNovE1Aolpk0"
+SUPABASE_URL="${VITE_SUPABASE_URL:-}"
+SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY:-}"
 ENDPOINT="${SUPABASE_URL}/functions/v1/resume-analysis-agent"
+
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+  echo "❌ Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY before running this script."
+  exit 1
+fi
 
 # Test user info - UPDATE THIS EMAIL TO YOUR EMAIL
 TEST_EMAIL="ankit@hushh.ai"

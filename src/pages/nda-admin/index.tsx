@@ -10,6 +10,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import config from '../../resources/config/config';
 
 interface NDARecord {
   user_id: string;
@@ -23,7 +24,7 @@ interface NDARecord {
 }
 
 const ADMIN_PASSWORD = '123456';
-const NDA_ADMIN_FETCH_URL = `${import.meta.env.VITE_SUPABASE_URL || 'https://ibsisfnjxeowvdtvgzff.supabase.co'}/functions/v1/nda-admin-fetch`;
+const NDA_ADMIN_FETCH_URL = `${config.SUPABASE_URL}/functions/v1/nda-admin-fetch`;
 
 const NDAAdminPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -72,12 +73,16 @@ const NDAAdminPage: React.FC = () => {
     setError(null);
 
     try {
+      if (!config.SUPABASE_ANON_KEY) {
+        throw new Error('VITE_SUPABASE_ANON_KEY is not configured');
+      }
+
       // Call the edge function with password for authentication
       const response = await fetch(NDA_ADMIN_FETCH_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlic2lzZm5qeGVvd3ZkdHZnemZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NTk1NzgsImV4cCI6MjA4MDEzNTU3OH0.K16sO1R9L2WZGPueDP0mArs2eDYZc-TnIk2LApDw_fs'}`,
+          'Authorization': `Bearer ${config.SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           password: ADMIN_PASSWORD,

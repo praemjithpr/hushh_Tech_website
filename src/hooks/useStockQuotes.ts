@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Supabase URL for edge function
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://ibsisfnjxeowvdtvgzff.supabase.co';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Exact 27 stocks as specified by user
@@ -183,6 +183,10 @@ export function useStockQuotes(refreshInterval = 120000) {
   const fetchAllQuotes = useCallback(async () => {
     try {
       setError(null);
+
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        throw new Error('VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not configured');
+      }
       
       // Call Supabase edge function
       const response = await fetch(`${SUPABASE_URL}/functions/v1/stock-quotes`, {

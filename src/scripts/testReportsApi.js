@@ -3,9 +3,8 @@
  * Run with: node src/scripts/testReportsApi.js
  */
 
-const API_BASE_URL = 'https://spmxyqxjqxcyywkapong.supabase.co/rest/v1';
-// Updated API key
-const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwbXh5cXhqcXhjeXl3a2Fwb25nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MTYwNDIsImV4cCI6MjA2MDI5MjA0Mn0._C6lZcTubk2VuwDKC2uDOsiFFPaKRiEJSqBjtGpm99E';
+const API_BASE_URL = process.env.MARKET_SUPABASE_API_BASE_URL || '';
+const API_KEY = process.env.MARKET_SUPABASE_ANON_KEY || '';
 
 // Storage bucket URLs for testing images and videos
 const STORAGE_BUCKETS = {
@@ -15,6 +14,10 @@ const STORAGE_BUCKETS = {
 
 async function testApiConnection() {
   try {
+    if (!API_BASE_URL || !API_KEY) {
+      throw new Error('Set MARKET_SUPABASE_API_BASE_URL and MARKET_SUPABASE_ANON_KEY before running this script.');
+    }
+
     console.log('Testing API connection with updated key...');
     
     // Test the GET All Reports endpoint with API key as query parameter per documentation
