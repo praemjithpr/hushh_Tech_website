@@ -9,12 +9,12 @@ echo "======================================"
 echo ""
 
 # Configuration
-SUPABASE_URL="${SUPABASE_URL:-${VITE_SUPABASE_URL:-https://qhkddwlbcbbajqxwpmwv.supabase.co}}"
+SUPABASE_URL="${SUPABASE_URL:-${VITE_SUPABASE_URL:-}}"
 SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-${VITE_SUPABASE_ANON_KEY:-}}"
 ENDPOINT="${SUPABASE_URL}/functions/v1/resume-analysis-agent"
 
-if [ -z "$SUPABASE_ANON_KEY" ]; then
-  echo "❌ Missing SUPABASE_ANON_KEY or VITE_SUPABASE_ANON_KEY."
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+  echo "❌ Set SUPABASE_URL/SUPABASE_ANON_KEY or VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY before running this script."
   exit 1
 fi
 

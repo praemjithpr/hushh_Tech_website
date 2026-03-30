@@ -10,6 +10,9 @@ export default async function googleSignIn() {
       return;
     }
 
+    const baseRedirectUrl =
+      resources.config.redirect_url || `${window.location.origin}/auth/callback`;
+
     // Preserve redirect parameter from current URL (for Hushh AI and other modules)
     const currentParams = new URLSearchParams(window.location.search);
     const rawRedirectPath = currentParams.get('redirect');
@@ -18,7 +21,7 @@ export default async function googleSignIn() {
       : null;
 
     // Force redirect to /auth/callback to ensure we handle MFA/Onboarding checks
-    let redirectTo = `${window.location.origin}/auth/callback`;
+    let redirectTo = baseRedirectUrl;
 
     // If there's a redirect param, append it to the callback URL
     if (redirectPath) {

@@ -74,13 +74,18 @@ export default function CodePage() {
     setResult(null);
 
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ibsisfnjxeowvdtvgzff.supabase.co';
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not configured');
+      }
 
       const res = await fetch(`${supabaseUrl}/functions/v1/claude-code-gen`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({ prompt, language, mode }),
       });

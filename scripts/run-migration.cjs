@@ -5,11 +5,11 @@
 
 const fs = require('fs');
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ibsisfnjxeowvdtvgzff.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SERVICE_KEY) {
-  console.error('❌ Missing SUPABASE_SERVICE_ROLE_KEY. Export it before running this script.');
+if (!SUPABASE_URL || !SERVICE_KEY) {
+  console.error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY before running this script.');
   process.exit(1);
 }
 
@@ -18,7 +18,6 @@ const sql = fs.readFileSync('./supabase/migrations/20260116000000_create_hushh_a
 
 console.log('📦 Reading migration SQL...');
 console.log('📡 Connecting to Supabase...');
-
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
@@ -45,7 +44,7 @@ async function runMigration() {
   }
   
   console.log('❌ Table does not exist. Please run the SQL manually in Supabase Dashboard.');
-  console.log('\n📋 Go to: https://supabase.com/dashboard/project/ibsisfnjxeowvdtvgzff/sql');
+  console.log('\n📋 Go to: https://supabase.com/dashboard/project/<your-project-ref>/sql');
   console.log('\n📝 Copy and paste this SQL:\n');
   console.log('='.repeat(80));
   console.log(sql);

@@ -5,6 +5,9 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
   readonly VITE_SUPABASE_REDIRECT_URL?: string;
+  readonly VITE_GUEST_MODE_ACCESS_TOKEN?: string;
+  readonly VITE_MARKET_SUPABASE_URL?: string;
+  readonly VITE_MARKET_SUPABASE_KEY?: string;
 
   // Gemini API Keys (with fallback support)
   readonly VITE_GEMINI_API_KEY: string;

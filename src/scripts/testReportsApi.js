@@ -3,21 +3,16 @@
  * Run with: node src/scripts/testReportsApi.js
  */
 
+const MARKET_SUPABASE_URL =
+  process.env.MARKET_SUPABASE_URL || process.env.VITE_MARKET_SUPABASE_URL || '';
 const API_BASE_URL =
+  process.env.MARKET_SUPABASE_API_BASE_URL ||
   process.env.MARKET_SUPABASE_API_BASE ||
-  (process.env.VITE_MARKET_SUPABASE_URL
-    ? `${process.env.VITE_MARKET_SUPABASE_URL}/rest/v1`
-    : 'https://spmxyqxjqxcyywkapong.supabase.co/rest/v1');
+  (MARKET_SUPABASE_URL ? `${MARKET_SUPABASE_URL}/rest/v1` : '');
 const API_KEY =
   process.env.MARKET_SUPABASE_ANON_KEY ||
-  process.env.VITE_MARKET_SUPABASE_KEY;
-
-if (!API_KEY) {
-  console.error(
-    'Missing MARKET_SUPABASE_ANON_KEY or VITE_MARKET_SUPABASE_KEY. Export one before running this script.'
-  );
-  process.exit(1);
-}
+  process.env.VITE_MARKET_SUPABASE_KEY ||
+  '';
 
 // Storage bucket URLs for testing images and videos
 const STORAGE_BUCKETS = {
@@ -27,6 +22,10 @@ const STORAGE_BUCKETS = {
 
 async function testApiConnection() {
   try {
+    if (!API_BASE_URL || !API_KEY) {
+      throw new Error('Set MARKET_SUPABASE_API_BASE_URL and MARKET_SUPABASE_ANON_KEY before running this script.');
+    }
+
     console.log('Testing API connection with updated key...');
     
     // Test the GET All Reports endpoint with API key as query parameter per documentation

@@ -36,7 +36,8 @@ export interface FinancialDataResponse {
 // Config
 // =====================================================
 
-const SUPABASE_URL = 'https://ibsisfnjxeowvdtvgzff.supabase.co/functions/v1';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
 const getAnonKey = (): string => {
   try {
@@ -60,6 +61,13 @@ const getHeaders = (token?: string) => ({
   'Authorization': `Bearer ${token || getAnonKey()}`,
 });
 
+const getFunctionsUrl = (): string => {
+  if (!SUPABASE_URL) {
+    throw new Error('VITE_SUPABASE_URL is not configured');
+  }
+  return SUPABASE_FUNCTIONS_URL;
+};
+
 // =====================================================
 // API Calls
 // =====================================================
@@ -78,8 +86,8 @@ export const createLinkToken = async (
   if (redirectUri) body.redirectUri = redirectUri;
   if (receivedRedirectUri) body.receivedRedirectUri = receivedRedirectUri;
 
-  console.log('[Plaid:createLinkToken] POST', `${SUPABASE_URL}/create-link-token`, body);
-  const res = await fetch(`${SUPABASE_URL}/create-link-token`, {
+  console.log('[Plaid:createLinkToken] POST', `${getFunctionsUrl()}/create-link-token`, body);
+  const res = await fetch(`${getFunctionsUrl()}/create-link-token`, {
     method: 'POST',
     headers: getHeaders(token),
     body: JSON.stringify(body),
@@ -101,7 +109,7 @@ export const exchangeToken = async (
   institutionName?: string, institutionId?: string,
 ) => {
   const token = await getUserAccessToken();
-  const res = await fetch(`${SUPABASE_URL}/exchange-public-token`, {
+  const res = await fetch(`${getFunctionsUrl()}/exchange-public-token`, {
     method: 'POST',
     headers: getHeaders(token),
     body: JSON.stringify({ publicToken, userId, institutionName, institutionId }),
@@ -117,7 +125,7 @@ export const exchangeToken = async (
 export const fetchAuthNumbers = async (accessToken: string) => {
   try {
     const token = await getUserAccessToken();
-    const res = await fetch(`${SUPABASE_URL}/get-auth-numbers`, {
+    const res = await fetch(`${getFunctionsUrl()}/get-auth-numbers`, {
       method: 'POST',
       headers: getHeaders(token),
       body: JSON.stringify({ accessToken }),
@@ -143,7 +151,7 @@ export const fetchAuthNumbers = async (accessToken: string) => {
 const fetchBalance = async (accessToken: string, userId: string): Promise<ProductResult> => {
   try {
     const token = await getUserAccessToken();
-    const res = await fetch(`${SUPABASE_URL}/get-balance`, {
+    const res = await fetch(`${getFunctionsUrl()}/get-balance`, {
       method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken, userId }),
     });
@@ -162,7 +170,7 @@ const fetchBalance = async (accessToken: string, userId: string): Promise<Produc
 const fetchAssets = async (accessToken: string, userId: string): Promise<ProductResult> => {
   try {
     const token = await getUserAccessToken();
-    const res = await fetch(`${SUPABASE_URL}/asset-report-create`, {
+    const res = await fetch(`${getFunctionsUrl()}/asset-report-create`, {
       method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken, userId }),
     });
@@ -183,7 +191,7 @@ const fetchAssets = async (accessToken: string, userId: string): Promise<Product
 const fetchInvestments = async (accessToken: string, userId: string): Promise<ProductResult> => {
   try {
     const token = await getUserAccessToken();
-    const res = await fetch(`${SUPABASE_URL}/investments-holdings`, {
+    const res = await fetch(`${getFunctionsUrl()}/investments-holdings`, {
       method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken, userId }),
     });
@@ -203,7 +211,7 @@ const fetchInvestments = async (accessToken: string, userId: string): Promise<Pr
 const fetchIdentity = async (accessToken: string): Promise<ProductResult> => {
   try {
     const token = await getUserAccessToken();
-    const res = await fetch(`${SUPABASE_URL}/get-identity`, {
+    const res = await fetch(`${getFunctionsUrl()}/get-identity`, {
       method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken }),
     });
@@ -225,7 +233,7 @@ export const fetchIdentityMatch = async (
 ): Promise<ProductResult> => {
   try {
     const token = await getUserAccessToken();
-    const res = await fetch(`${SUPABASE_URL}/identity-match`, {
+    const res = await fetch(`${getFunctionsUrl()}/identity-match`, {
       method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken, ...userData }),
     });
@@ -284,7 +292,7 @@ export const fetchAllFinancialData = async (
 /** Check asset report status */
 export const checkAssetReport = async (assetReportToken: string, userId: string) => {
   const token = await getUserAccessToken();
-  const res = await fetch(`${SUPABASE_URL}/asset-report-create`, {
+  const res = await fetch(`${getFunctionsUrl()}/asset-report-create`, {
     method: 'POST', headers: getHeaders(token),
     body: JSON.stringify({ assetReportToken, userId, action: 'get' }),
   });
@@ -377,7 +385,7 @@ export const getProductStatus = (product: ProductResult): ProductFetchStatus => 
 export const signalPrepare = async (accessToken: string) => {
   try {
     const token = await getUserAccessToken();
-    const res = await fetch(`${SUPABASE_URL}/signal-prepare`, {
+    const res = await fetch(`${getFunctionsUrl()}/signal-prepare`, {
       method: 'POST', headers: getHeaders(token),
       body: JSON.stringify({ accessToken }),
     });
@@ -408,7 +416,7 @@ export const signalEvaluate = async (params: {
   device?: { ip_address?: string; user_agent?: string };
 }) => {
   const token = await getUserAccessToken();
-  const res = await fetch(`${SUPABASE_URL}/signal-evaluate`, {
+  const res = await fetch(`${getFunctionsUrl()}/signal-evaluate`, {
     method: 'POST', headers: getHeaders(token),
     body: JSON.stringify({
       accessToken: params.accessToken,

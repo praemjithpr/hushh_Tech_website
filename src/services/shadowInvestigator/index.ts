@@ -92,7 +92,7 @@ export interface ShadowInvestigatorResult {
 
 // ============ API Client ============
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://ibsisfnjxeowvdtvgzff.supabase.co';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 
 /**
  * Calls the Shadow Investigator API to perform deep profile enrichment
@@ -105,6 +105,10 @@ export const invokeShadowInvestigator = async (
   params: ShadowInvestigatorParams
 ): Promise<ShadowInvestigatorResult> => {
   try {
+    if (!SUPABASE_URL) {
+      throw new Error('VITE_SUPABASE_URL is not configured');
+    }
+
     console.log('[ShadowInvestigator] Starting deep profile search for:', params.name);
     
     // Get Supabase client for auth token

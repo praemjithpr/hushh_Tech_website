@@ -1,11 +1,10 @@
 // Profile Search Service
 // Calls hushh-profile-search API and transforms response for onboarding/profile pre-population
 
-import { EnrichedProfileData, ParsedAddress, ParsedPhone, ProfilePreferences } from './types';
 import config from '../../resources/config/config';
+import { EnrichedProfileData, ParsedAddress, ParsedPhone, ProfilePreferences } from './types';
 
 const PROFILE_SEARCH_API = `${config.SUPABASE_URL}/functions/v1/hushh-profile-search`;
-const SUPABASE_ANON_KEY = config.SUPABASE_ANON_KEY;
 
 export interface SearchParams {
   name: string;
@@ -269,12 +268,16 @@ function transformApiResponse(apiResponse: any, searchQuery: string): EnrichedPr
 export async function searchProfile(params: SearchParams): Promise<ProfileSearchResult> {
   try {
     console.log('[ProfileSearch] Starting search for:', params.name);
+
+    if (!config.SUPABASE_ANON_KEY) {
+      throw new Error('VITE_SUPABASE_ANON_KEY is not configured');
+    }
     
     const response = await fetch(PROFILE_SEARCH_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${config.SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         name: params.name,

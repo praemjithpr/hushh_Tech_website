@@ -17,7 +17,9 @@ export async function hushhAIGoogleSignIn() {
     }
 
     // Set redirect to come back to Hushh AI
-    const redirectTo = `${window.location.origin}/auth/callback?redirect=/hushh-ai`;
+    const baseRedirectUrl =
+      config.redirect_url || `${window.location.origin}/auth/callback`;
+    const redirectTo = `${baseRedirectUrl}?redirect=${encodeURIComponent('/hushh-ai')}`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -57,7 +59,9 @@ export async function hushhAIAppleSignIn() {
     }
 
     // Set redirect to come back to Hushh AI
-    const redirectTo = `${window.location.origin}/auth/callback?redirect=/hushh-ai`;
+    const baseRedirectUrl =
+      config.redirect_url || `${window.location.origin}/auth/callback`;
+    const redirectTo = `${baseRedirectUrl}?redirect=${encodeURIComponent('/hushh-ai')}`;
     console.info('[HushhAI][AppleSignIn] Starting Apple OAuth', { redirectTo });
 
     const { data, error } = await supabase.auth.signInWithOAuth({

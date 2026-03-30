@@ -18,20 +18,18 @@ function readClientEnv(value: string | undefined, name: string, fallback = ""): 
 }
 
 const config: Config = {
-  SUPABASE_URL:
-    readClientEnv(
-      import.meta.env.VITE_SUPABASE_URL,
-      "VITE_SUPABASE_URL",
-      "https://ibsisfnjxeowvdtvgzff.supabase.co"
-    ),
-  SUPABASE_ANON_KEY:
-    readClientEnv(import.meta.env.VITE_SUPABASE_ANON_KEY, "VITE_SUPABASE_ANON_KEY"),
+  SUPABASE_URL: readClientEnv(import.meta.env.VITE_SUPABASE_URL, "VITE_SUPABASE_URL"),
+  SUPABASE_ANON_KEY: readClientEnv(import.meta.env.VITE_SUPABASE_ANON_KEY, "VITE_SUPABASE_ANON_KEY"),
   // Use platform-aware redirect URL for iOS Universal Links support
   redirect_url:
     import.meta.env.VITE_SUPABASE_REDIRECT_URL || getOAuthRedirectUrl(),
 };
 
 function createSupabaseClient() {
+  if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY) {
+    return undefined;
+  }
+
   const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY, {
     auth: {
       autoRefreshToken: true,

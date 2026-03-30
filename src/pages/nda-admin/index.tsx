@@ -76,6 +76,10 @@ const NDAAdminPage: React.FC = () => {
         return false;
       }
 
+      if (!config.SUPABASE_ANON_KEY) {
+        throw new Error('VITE_SUPABASE_ANON_KEY is not configured');
+      }
+
       // Call the edge function with password for authentication
       const response = await fetch(NDA_ADMIN_FETCH_URL, {
         method: 'POST',

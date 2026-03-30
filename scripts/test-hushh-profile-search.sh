@@ -2,11 +2,11 @@
 # Test script for hushh-profile-search API
 # Exact same functionality as the React app
 
-SUPABASE_URL="${SUPABASE_URL:-${VITE_SUPABASE_URL:-https://ibsisfnjxeowvdtvgzff.supabase.co}}"
+SUPABASE_URL="${SUPABASE_URL:-${VITE_SUPABASE_URL:-}}"
 ANON_KEY="${SUPABASE_ANON_KEY:-${VITE_SUPABASE_ANON_KEY:-}}"
 
-if [ -z "$ANON_KEY" ]; then
-  echo "❌ Missing SUPABASE_ANON_KEY or VITE_SUPABASE_ANON_KEY."
+if [ -z "$SUPABASE_URL" ] || [ -z "$ANON_KEY" ]; then
+  echo "❌ Set SUPABASE_URL/SUPABASE_ANON_KEY or VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY before running this script."
   exit 1
 fi
 
