@@ -78,7 +78,7 @@ import GlobalNDAGate from './components/GlobalNDAGate';
 import SignNDAPage from './pages/sign-nda';
 import DocumentViewerPage from './pages/document-viewer';
 import NDAAdminPage from './pages/nda-admin';
-import { AuthSessionProvider } from './auth/AuthSessionProvider';
+import { AuthSessionProvider, useAuthSession } from './auth/AuthSessionProvider';
 
 // Google Analytics configuration
 const GA_TRACKING_ID = 'G-R58S9WWPM0';
@@ -184,6 +184,7 @@ function App() {
   // Inner layout component that uses hooks for conditional rendering
   const AppLayout = () => {
     const { showNavbar, showFooter, showMobileNav } = useLayoutVisibility();
+    const { session } = useAuthSession();
     
     return (
       <div className="min-h-screen flex flex-col">
