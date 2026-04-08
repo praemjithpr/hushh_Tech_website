@@ -1,24 +1,30 @@
 /**
- * Step 4 — Confirm Your Residence
- * Premium Hushh design matching Step 1 & Step 2.
- * Logic stays in logic.ts — zero logic changes.
- * Uses HushhTechBackHeader + HushhTechCta reusable components.
+ * Step 3 — Confirm Your Residence & Address (Combined)
+ *
+ * Single page merging country/residence detection + full address entry.
+ * GPS fires ONCE → auto-fills citizenship, residence, address, city, state, zip.
  */
 import {
-  useStep4Logic,
+  useCombinedLocationLogic,
   countries,
-  CURRENT_STEP,
   TOTAL_STEPS,
   PROGRESS_PCT,
 } from "./logic";
+import { SearchableSelect } from "../../../components/onboarding/SearchableSelect";
 import HushhTechBackHeader from "../../../components/hushh-tech-back-header/HushhTechBackHeader";
 import HushhTechCta, {
   HushhTechCtaVariant,
 } from "../../../components/hushh-tech-cta/HushhTechCta";
 import PermissionHelpModal from "../../../components/PermissionHelpModal";
 
-export default function OnboardingStep4() {
-  const s = useStep4Logic();
+const DISPLAY_STEP = 3;
+
+export default function OnboardingStep3Combined() {
+  const s = useCombinedLocationLogic();
+
+  const isAutoFillComplete =
+    s.detectionStatus === "Address auto-filled from GPS" ||
+    s.detectionStatus === "Address fields populated";
 
   return (
     <div className="bg-white text-gray-900 min-h-screen antialiased flex flex-col selection:bg-hushh-blue selection:text-white relative overflow-hidden">
@@ -38,7 +44,7 @@ export default function OnboardingStep4() {
           <div className="py-4">
             <div className="flex justify-between text-[11px] font-semibold tracking-wide text-gray-500 mb-3">
               <span>
-                Step {CURRENT_STEP}/{TOTAL_STEPS}
+                Step {DISPLAY_STEP}/{TOTAL_STEPS}
               </span>
               <span>{PROGRESS_PCT}% Complete</span>
             </div>
@@ -67,12 +73,11 @@ export default function OnboardingStep4() {
             </h1>
             <p className="text-sm text-gray-500 mt-4 leading-relaxed font-light">
               We need to know where you live and pay taxes to open your
-              investment account. Your current location helps with context,
-              but you must confirm citizenship and residence yourself.
+              investment account. Your location auto-fills the details below.
             </p>
           </section>
 
-          {/* ── Status Banners ── */}
+          {/* ── Location Status Banners ── */}
           {s.locationStatus === "detecting" && (
             <div className="flex items-center gap-3 py-4 px-1 mb-4 border-b border-gray-100">
               <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
@@ -84,14 +89,12 @@ export default function OnboardingStep4() {
             </div>
           )}
 
-          {s.isSuccessStatus && (
+          {s.isSuccessStatus && !s.isAutoFilling && !s.detectionStatus && (
             <div className="flex items-center gap-4 py-5 px-1 mb-6 border-b border-gray-100">
               <div className="w-10 h-10 rounded-full bg-ios-green/10 border border-ios-green/20 flex items-center justify-center shrink-0">
                 <span
                   className="material-symbols-outlined text-ios-green text-lg"
-                  style={{
-                    fontVariationSettings: "'FILL' 1, 'wght' 600",
-                  }}
+                  style={{ fontVariationSettings: "'FILL' 1, 'wght' 600" }}
                 >
                   check
                 </span>
@@ -107,6 +110,46 @@ export default function OnboardingStep4() {
             </div>
           )}
 
+          {/* Auto-fill status (cascading dropdowns loading) */}
+          {(s.isAutoFilling || s.detectionStatus) && (
+            <div
+              className={`flex items-center gap-3 py-4 px-1 mb-4 border-b transition-colors ${
+                isAutoFillComplete ? "border-green-100" : "border-gray-100"
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                  isAutoFillComplete ? "bg-green-50" : "bg-gray-100"
+                }`}
+              >
+                {s.isAutoFilling && !isAutoFillComplete ? (
+                  <div className="animate-spin h-5 w-5 border-2 border-hushh-blue border-t-transparent rounded-full" />
+                ) : (
+                  <span
+                    className="material-symbols-outlined text-ios-green text-lg"
+                    style={{ fontVariationSettings: "'FILL' 1, 'wght' 600" }}
+                  >
+                    check
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p
+                  className={`text-sm font-medium ${
+                    isAutoFillComplete ? "text-green-700" : "text-gray-700"
+                  }`}
+                >
+                  {s.detectionStatus}
+                </p>
+                {s.isAutoFilling && !isAutoFillComplete && (
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Populating country, state, and city...
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {s.isErrorStatus && (
             <div className="mb-6">
               <div className="flex items-center justify-between py-4 px-1 border-b border-gray-100">
@@ -114,9 +157,7 @@ export default function OnboardingStep4() {
                   <div className="w-10 h-10 rounded-full bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
                     <span
                       className="material-symbols-outlined text-red-500 text-lg"
-                      style={{
-                        fontVariationSettings: "'FILL' 1, 'wght' 600",
-                      }}
+                      style={{ fontVariationSettings: "'FILL' 1, 'wght' 600" }}
                     >
                       error
                     </span>
@@ -148,137 +189,363 @@ export default function OnboardingStep4() {
             </div>
           )}
 
-          {/* ── Country Selection ── */}
-          {s.shouldShowForm && (
-            <section className="space-y-2 mb-8">
-              {/* Citizenship Country */}
-              <div className="py-5 border-b border-gray-200">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                    <span
-                      className="material-symbols-outlined text-gray-700 text-lg"
-                      style={{ fontVariationSettings: "'wght' 400" }}
-                    >
-                      flag
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 mb-0.5">
-                      Country of Citizenship
-                    </p>
-                    <div className="relative">
-                      <select
-                        value={s.citizenshipCountry}
-                        onChange={(e) =>
-                          s.handleCitizenshipChange(e.target.value)
-                        }
-                        disabled={s.isDetectingLocation}
-                        className="w-full text-xs text-gray-500 font-medium bg-transparent border-none outline-none cursor-pointer appearance-none pr-6 p-0"
-                        aria-label="Select citizenship country"
-                      >
-                        <option disabled value="">
-                          Select Country
-                        </option>
-                        {countries.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">
-                        expand_more
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          {/* ── General Error ── */}
+          {s.error && (
+            <div className="mb-6 flex items-center gap-3 py-4 px-1 border-b border-red-100">
+              <div className="w-10 h-10 rounded-full bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
+                <span
+                  className="material-symbols-outlined text-red-500 text-lg"
+                  style={{ fontVariationSettings: "'FILL' 1, 'wght' 600" }}
+                >
+                  error
+                </span>
               </div>
-
-              {/* Residence Country */}
-              <div className="py-5 border-b border-gray-200">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                    <span
-                      className="material-symbols-outlined text-gray-700 text-lg"
-                      style={{ fontVariationSettings: "'wght' 400" }}
-                    >
-                      home
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 mb-0.5">
-                      Country of Residence
-                    </p>
-                    <div className="relative">
-                      <select
-                        value={s.residenceCountry}
-                        onChange={(e) =>
-                          s.handleResidenceChange(e.target.value)
-                        }
-                        disabled={s.isDetectingLocation}
-                        className="w-full text-xs text-gray-500 font-medium bg-transparent border-none outline-none cursor-pointer appearance-none pr-6 p-0"
-                        aria-label="Select residence country"
-                      >
-                        <option disabled value="">
-                          Select Country
-                        </option>
-                        {countries.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">
-                        expand_more
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Confirm manual selection */}
-              {!s.locationDetected &&
-                s.canConfirmSelection &&
-                !s.userConfirmedManual && (
-                  <div className="pt-4">
-                    <button
-                      onClick={s.handleConfirmManualSelection}
-                      className="w-full py-3 text-xs font-bold uppercase tracking-widest text-hushh-blue border border-hushh-blue rounded-2xl hover:bg-hushh-blue hover:text-white transition-all active:scale-[0.98]"
-                    >
-                      Confirm Selection
-                    </button>
-                  </div>
-                )}
-            </section>
+              <p className="text-sm font-medium text-red-700">{s.error}</p>
+            </div>
           )}
 
-          {/* ── Detect Location Button ── */}
-          {!s.showLocationModal &&
-            !s.isDetectingLocation && (
-              <div className="py-5 border-b border-gray-200 mb-8">
-                <button
-                  onClick={s.handleAllowLocation}
-                  className="flex items-center gap-4 w-full text-left group"
-                  aria-label="Refresh current location"
-                >
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
-                    <span
-                      className="material-symbols-outlined text-gray-700 text-lg"
-                      style={{ fontVariationSettings: "'wght' 400" }}
+          {/* ═══ SECTION 1: Country Selection ═══ */}
+          <section className="space-y-2 mb-6">
+            <h3 className="text-[10px] tracking-[0.15em] text-gray-400 uppercase font-medium mb-2">
+              Citizenship & Residence
+            </h3>
+
+            {/* Citizenship Country */}
+            <div className="py-5 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                  <span
+                    className="material-symbols-outlined text-gray-700 text-lg"
+                    style={{ fontVariationSettings: "'wght' 400" }}
+                  >
+                    flag
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                    Country of Citizenship
+                  </p>
+                  <div className="relative">
+                    <select
+                      value={s.citizenshipCountry}
+                      onChange={(e) =>
+                        s.handleCitizenshipChange(e.target.value)
+                      }
+                      disabled={s.isDetectingLocation}
+                      className="w-full text-xs text-gray-500 font-medium bg-transparent border-none outline-none cursor-pointer appearance-none pr-6 p-0"
+                      aria-label="Select citizenship country"
                     >
-                      my_location
+                      <option disabled value="">
+                        Select Country
+                      </option>
+                      {countries.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">
+                      expand_more
                     </span>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      Refresh Current Location
-                    </p>
-                    <p className="text-xs text-gray-500 font-medium">
-                      Re-check your live location using GPS
-                    </p>
-                  </div>
-                </button>
+                </div>
               </div>
+            </div>
+
+            {/* Residence Country */}
+            <div className="py-5 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                  <span
+                    className="material-symbols-outlined text-gray-700 text-lg"
+                    style={{ fontVariationSettings: "'wght' 400" }}
+                  >
+                    home
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                    Country of Residence
+                  </p>
+                  <div className="relative">
+                    <select
+                      value={s.residenceCountry}
+                      onChange={(e) =>
+                        s.handleResidenceChange(e.target.value)
+                      }
+                      disabled={s.isDetectingLocation}
+                      className="w-full text-xs text-gray-500 font-medium bg-transparent border-none outline-none cursor-pointer appearance-none pr-6 p-0"
+                      aria-label="Select residence country"
+                    >
+                      <option disabled value="">
+                        Select Country
+                      </option>
+                      {countries.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">
+                      expand_more
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ═══ SECTION 2: Full Address ═══ */}
+          <section className="mb-6">
+            <h3 className="text-[10px] tracking-[0.15em] text-gray-400 uppercase font-medium mb-2">
+              Your Address
+            </h3>
+
+            {/* Use Current Location button */}
+            <div className="py-5 border-b border-gray-200 mb-2">
+              <button
+                type="button"
+                onClick={s.handleDetectClick}
+                disabled={s.isDetectingLocation || s.isAutoFilling}
+                className="flex items-center gap-4 w-full text-left group disabled:opacity-50"
+                aria-label="Use my current location"
+              >
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
+                  <span
+                    className="material-symbols-outlined text-gray-700 text-lg"
+                    style={{ fontVariationSettings: "'wght' 400" }}
+                  >
+                    my_location
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    Use My Current Location
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium">
+                    Auto-fill address using GPS
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            {/* Address Line 1 */}
+            <div className="py-5 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                  <span
+                    className="material-symbols-outlined text-gray-700 text-lg"
+                    style={{ fontVariationSettings: "'wght' 400" }}
+                  >
+                    location_on
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label
+                    htmlFor="addressLine1"
+                    className="text-sm font-semibold text-gray-900 block mb-1"
+                  >
+                    Address Line 1
+                  </label>
+                  <input
+                    id="addressLine1"
+                    type="text"
+                    value={s.addressLine1}
+                    onChange={(e) => s.handleAddressLine1Change(e.target.value)}
+                    onBlur={() => s.handleBlur("addressLine1", s.addressLine1)}
+                    placeholder="Street address"
+                    className="w-full text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder-gray-400 focus:ring-0"
+                    autoComplete="address-line1"
+                  />
+                </div>
+              </div>
+            </div>
+            {s.touched.addressLine1 && s.errors.addressLine1 && (
+              <p className="text-xs text-red-500 pl-14 py-1">
+                {s.errors.addressLine1}
+              </p>
             )}
+
+            {/* Address Line 2 */}
+            <div className="py-5 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                  <span
+                    className="material-symbols-outlined text-gray-700 text-lg"
+                    style={{ fontVariationSettings: "'wght' 400" }}
+                  >
+                    apartment
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label
+                    htmlFor="addressLine2"
+                    className="text-sm font-semibold text-gray-900 block mb-1"
+                  >
+                    Address Line 2
+                  </label>
+                  <input
+                    id="addressLine2"
+                    type="text"
+                    value={s.addressLine2}
+                    onChange={(e) => s.setAddressLine2(e.target.value)}
+                    placeholder="Apt, suite, bldg (optional)"
+                    className="w-full text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder-gray-400 focus:ring-0"
+                    autoComplete="address-line2"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ═══ SECTION 3: Country / State / City / ZIP ═══ */}
+          <section className="space-y-0 mb-6">
+            {/* Country — locked while auto-filling */}
+            <div
+              className={`border-b border-gray-200 relative ${
+                s.isAutoFilling ? "opacity-70" : ""
+              }`}
+            >
+              <SearchableSelect
+                id="country"
+                label="Country"
+                value={s.dropdowns.country}
+                options={s.dropdowns.countries.map((c) => ({
+                  value: c.isoCode,
+                  label: c.name,
+                }))}
+                onChange={s.dropdowns.setCountry}
+                placeholder="Search country..."
+                required
+                disabled={s.isAutoFilling}
+                autoComplete="country"
+              />
+              {s.isAutoFilling && s.dropdowns.country && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  <div className="animate-spin h-3.5 w-3.5 border-[1.5px] border-hushh-blue border-t-transparent rounded-full" />
+                  <span className="text-[10px] text-gray-400 font-medium">
+                    GPS
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* State — locked while auto-filling */}
+            <div
+              className={`border-b border-gray-200 relative ${
+                s.isAutoFilling ? "opacity-70" : ""
+              }`}
+            >
+              <SearchableSelect
+                id="state"
+                label="State / Province"
+                value={s.dropdowns.state}
+                options={s.dropdowns.states.map((st) => ({
+                  value: st.isoCode,
+                  label: st.name,
+                }))}
+                onChange={s.dropdowns.setState}
+                placeholder={
+                  s.isAutoFilling && s.dropdowns.loadingStates
+                    ? "Loading states..."
+                    : "Search state..."
+                }
+                disabled={!s.dropdowns.country || s.isAutoFilling}
+                loading={s.dropdowns.loadingStates}
+                loadError={s.dropdowns.statesError}
+                onRetry={s.dropdowns.retryStates}
+                required
+                autoComplete="address-level1"
+              />
+              {s.isAutoFilling && s.dropdowns.loadingStates && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  <div className="animate-spin h-3.5 w-3.5 border-[1.5px] border-hushh-blue border-t-transparent rounded-full" />
+                  <span className="text-[10px] text-gray-400 font-medium">
+                    Loading
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* City — locked while auto-filling */}
+            <div
+              className={`border-b border-gray-200 relative ${
+                s.isAutoFilling ? "opacity-70" : ""
+              }`}
+            >
+              <SearchableSelect
+                id="city"
+                label="City"
+                value={s.dropdowns.city}
+                options={s.dropdowns.cities.map((c) => ({
+                  value: c.name,
+                  label: c.name,
+                }))}
+                onChange={s.dropdowns.setCity}
+                placeholder={
+                  s.isAutoFilling && s.dropdowns.loadingCities
+                    ? "Loading cities..."
+                    : "Search city..."
+                }
+                disabled={!s.dropdowns.state || s.isAutoFilling}
+                loading={s.dropdowns.loadingCities}
+                loadError={s.dropdowns.citiesError}
+                onRetry={s.dropdowns.retryCities}
+                required
+                autoComplete="address-level2"
+              />
+              {s.isAutoFilling && s.dropdowns.loadingCities && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  <div className="animate-spin h-3.5 w-3.5 border-[1.5px] border-hushh-blue border-t-transparent rounded-full" />
+                  <span className="text-[10px] text-gray-400 font-medium">
+                    Loading
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* ZIP Code */}
+            <div className="py-5 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                  <span
+                    className="material-symbols-outlined text-gray-700 text-lg"
+                    style={{ fontVariationSettings: "'wght' 400" }}
+                  >
+                    pin
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label
+                    htmlFor="zipCode"
+                    className="text-sm font-semibold text-gray-900 block mb-1"
+                  >
+                    ZIP / Postal Code
+                  </label>
+                  <input
+                    id="zipCode"
+                    type="text"
+                    value={s.zipCode}
+                    inputMode="text"
+                    onChange={(e) => s.handleZipCodeChange(e.target.value)}
+                    onBlur={() => s.handleBlur("zipCode", s.zipCode)}
+                    placeholder="e.g. 10001"
+                    className="w-full text-sm text-gray-700 font-medium bg-transparent border-none outline-none p-0 placeholder-gray-400 focus:ring-0"
+                    autoComplete="postal-code"
+                  />
+                </div>
+              </div>
+            </div>
+            {s.touched.zipCode && s.errors.zipCode ? (
+              <p className="text-xs text-red-500 pl-14 py-1">
+                {s.errors.zipCode}
+              </p>
+            ) : (
+              <p className="text-[10px] text-gray-400 pl-14 pt-1 font-light">
+                Supports numeric and alphanumeric codes based on region.
+              </p>
+            )}
+          </section>
 
           {/* ── CTAs — Continue & Skip ── */}
           <section className="pb-12 space-y-3 mt-4">
@@ -286,11 +553,13 @@ export default function OnboardingStep4() {
               variant={HushhTechCtaVariant.BLACK}
               onClick={s.handleContinue}
               disabled={
-                !s.canContinue || s.isLoading || s.isDetectingLocation
+                !s.canContinue || s.isLoading || s.isDetectingLocation || s.isAutoFilling
               }
             >
               {s.isDetectingLocation
                 ? "Detecting..."
+                : s.isAutoFilling
+                ? "Auto-filling..."
                 : s.isLoading
                 ? "Saving..."
                 : "Continue"}
@@ -318,16 +587,12 @@ export default function OnboardingStep4() {
         </main>
       </div>
 
-      {/* ═══ Location Permission Modal — Premium Design ═══ */}
+      {/* ═══ Location Permission Modal ═══ */}
       {s.showLocationModal && (
         <>
-          {/* Dark glass overlay */}
           <div className="fixed inset-0 z-40 bg-white/60 backdrop-blur-sm" />
-
-          {/* Modal card */}
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0">
             <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08),0_0_1px_rgba(0,0,0,0.04)] p-8 flex flex-col items-center text-center border border-gray-100/50">
-              {/* Location icon in circle */}
               <div className="mb-8">
                 <div className="w-20 h-20 rounded-full border border-gray-200 bg-white flex items-center justify-center shadow-sm">
                   <span
@@ -338,8 +603,6 @@ export default function OnboardingStep4() {
                   </span>
                 </div>
               </div>
-
-              {/* Heading & description */}
               <div className="space-y-4 mb-10 px-2">
                 <h2
                   className="text-[1.75rem] leading-[1.2] text-black tracking-tight font-serif"
@@ -348,30 +611,23 @@ export default function OnboardingStep4() {
                   Enable Location Access
                 </h2>
                 <p className="text-gray-500 text-[0.85rem] leading-relaxed font-light max-w-[90%] mx-auto">
-                  Hushh uses your location to automatically determine your
-                  country and streamline the secure verification process.
+                  Hushh uses your location to automatically fill your country,
+                  address, and streamline the secure verification process.
                 </p>
               </div>
-
-              {/* Action buttons */}
               <div className="w-full space-y-4">
-                {/* Allow while using app — primary black */}
                 <button
                   onClick={s.handleAllowLocation}
                   className="w-full h-12 bg-hushh-blue text-white font-medium text-[0.8rem] flex items-center justify-center shadow-lg hover:shadow-xl transition-all active:scale-[0.99] border border-hushh-blue rounded-2xl hover:bg-hushh-blue/90"
                 >
                   Allow while using app
                 </button>
-
-                {/* Allow once — outlined */}
                 <button
                   onClick={s.handleAllowLocation}
                   className="w-full h-12 border border-gray-200 bg-white text-black font-medium text-[0.8rem] rounded-2xl hover:bg-gray-50 transition-colors active:scale-[0.99]"
                 >
                   Allow once
                 </button>
-
-                {/* Don't allow — text link */}
                 <div className="pt-2">
                   <button
                     onClick={s.handleDontAllow}

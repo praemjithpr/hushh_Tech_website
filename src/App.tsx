@@ -53,9 +53,8 @@ import OnboardingStep4 from './pages/onboarding/step-4/ui';
 import OnboardingStep5 from './pages/onboarding/step-5/ui';
 import OnboardingStep6 from './pages/onboarding/step-6/ui';
 import OnboardingStep7 from './pages/onboarding/step-7/ui';
-import OnboardingStep8 from './pages/onboarding/step-8/ui';
-import OnboardingReviewStep from './pages/onboarding/step-9/ui';
-import OnboardingBankDetailsStep from './pages/onboarding/step-10/ui';
+import OnboardingReviewStep from './pages/onboarding/step-8/ui';
+import OnboardingBankDetailsStep from './pages/onboarding/step-9/ui';
 import VerifyIdentityPage from './pages/onboarding/verify-identity/ui';
 import VerifyCompletePage from './pages/onboarding/verify-complete/ui';
 import MeetCeoPage from './pages/onboarding/meet-ceo/ui';
@@ -274,15 +273,10 @@ function App() {
             } />
             <Route path="/onboarding/step-8" element={
               <ProtectedRoute>
-                <OnboardingStep8 />
-              </ProtectedRoute>
-            } />
-            <Route path="/onboarding/step-9" element={
-              <ProtectedRoute>
                 <OnboardingReviewStep />
               </ProtectedRoute>
             } />
-            <Route path="/onboarding/step-10" element={
+            <Route path="/onboarding/step-9" element={
               <ProtectedRoute>
                 <OnboardingBankDetailsStep />
               </ProtectedRoute>

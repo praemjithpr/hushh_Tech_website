@@ -2,7 +2,7 @@ export const FINANCIAL_LINK_ROUTE = '/onboarding/financial-link' as const;
 
 export type FinancialLinkStatus = 'pending' | 'completed' | 'skipped';
 
-const TOTAL_VISIBLE_ONBOARDING_STEPS = 10;
+const TOTAL_VISIBLE_ONBOARDING_STEPS = 9;
 
 const CANONICAL_STEP_ROUTE_BY_DISPLAY_STEP = {
   1: '/onboarding/step-1',
@@ -14,7 +14,6 @@ const CANONICAL_STEP_ROUTE_BY_DISPLAY_STEP = {
   7: '/onboarding/step-7',
   8: '/onboarding/step-8',
   9: '/onboarding/step-9',
-  10: '/onboarding/step-10',
 } as const;
 
 export type CanonicalOnboardingRoute =
@@ -38,9 +37,16 @@ const DISPLAY_STEP_BY_ROUTE: Record<CanonicalOnboardingRoute, number> = {
   '/onboarding/step-7': 7,
   '/onboarding/step-8': 8,
   '/onboarding/step-9': 9,
-  '/onboarding/step-10': 10,
 };
 
+/**
+ * Maps raw Supabase `current_step` values to canonical routes.
+ * Multiple raw values can map to the same route (for backward compat).
+ *
+ * After combining old step-3 (country) + old step-6 (address) into new step-3:
+ *   raw 4 → step-3 (combined country + address)
+ *   raw 8 → step-3 (old address step now folded into step-3)
+ */
 const RAW_STEP_TO_ROUTE: Record<number, CanonicalOnboardingRoute> = {
   1: '/onboarding/step-1',
   2: '/onboarding/step-2',
@@ -49,12 +55,12 @@ const RAW_STEP_TO_ROUTE: Record<number, CanonicalOnboardingRoute> = {
   5: '/onboarding/step-4',
   6: '/onboarding/step-4',
   7: '/onboarding/step-5',
-  8: '/onboarding/step-6',
-  9: '/onboarding/step-7',
-  10: '/onboarding/step-8',
-  11: '/onboarding/step-8',
-  12: '/onboarding/step-9',
-  13: '/onboarding/step-10',
+  8: '/onboarding/step-3',  // old address step → now folded into combined step-3
+  9: '/onboarding/step-6',
+  10: '/onboarding/step-7',
+  11: '/onboarding/step-7',
+  12: '/onboarding/step-8',
+  13: '/onboarding/step-9',
 };
 
 export const getCanonicalOnboardingRoute = (currentStep: number): CanonicalOnboardingRoute => {
@@ -125,7 +131,6 @@ export const normalizeLegacyOnboardingRedirectTarget = (target: string): string 
 };
 
 const normalizeCompatibleOnboardingRoute = (route: string): CanonicalOnboardingRoute => {
-  // All step-1 through step-10 are valid canonical routes now
   if (CANONICAL_ONBOARDING_ROUTES.includes(route as CanonicalOnboardingRoute)) {
     return route as CanonicalOnboardingRoute;
   }

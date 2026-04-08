@@ -640,7 +640,6 @@ CREATE TABLE public.onboarding_data (
   recurring_day_of_month integer,
   current_step integer DEFAULT 1 CHECK (current_step >= 1 AND current_step <= 13),
   completed_steps ARRAY DEFAULT ARRAY[]::integer[],
-  financial_link_status text NOT NULL DEFAULT 'pending'::text CHECK (financial_link_status = ANY (ARRAY['pending'::text, 'completed'::text, 'skipped'::text])),
   is_completed boolean DEFAULT false,
   completed_at timestamp with time zone,
   ai_prefilled boolean DEFAULT false,
@@ -674,6 +673,7 @@ CREATE TABLE public.onboarding_data (
   bank_address_city text,
   bank_address_country text,
   bank_account_type text CHECK (bank_account_type = ANY (ARRAY['checking'::text, 'savings'::text, 'wire'::text])),
+  financial_link_status text NOT NULL DEFAULT 'pending'::text CHECK (financial_link_status = ANY (ARRAY['pending'::text, 'completed'::text, 'skipped'::text])),
   CONSTRAINT onboarding_data_pkey PRIMARY KEY (id),
   CONSTRAINT onboarding_data_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

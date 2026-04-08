@@ -1,6 +1,10 @@
 /**
- * Step 4 — All Business Logic
- * Country/residence detection, GPS/IP location, Supabase upsert
+ * Step 3 — Combined Country/Residence + Address Entry
+ *
+ * Merges old step-3 (country detection) and old step-6 (address entry).
+ * GPS fires ONCE and auto-fills: citizenship, residence, address, city, state, zip.
+ *
+ * Flow: step-2 → step-3 → step-4
  */
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +13,7 @@ import { TOTAL_VISIBLE_ONBOARDING_STEPS } from '../../../services/onboarding/flo
 import { resolveOnboardingPrefill } from '../../../services/onboarding/prefill';
 import { upsertOnboardingData } from '../../../services/onboarding/upsertOnboardingData';
 import { useFooterVisibility } from '../../../utils/useFooterVisibility';
+import { useLocationDropdowns } from '../../../hooks/useLocationDropdowns';
 import {
   locationService,
   type LocationCacheRecord,
@@ -16,10 +21,15 @@ import {
   COUNTRY_CODE_TO_NAME,
 } from '../../../services/location';
 
-export const CURRENT_STEP = 4;
-export const TOTAL_STEPS = TOTAL_VISIBLE_ONBOARDING_STEPS;
-export const PROGRESS_PCT = Math.round((CURRENT_STEP / TOTAL_STEPS) * 100);
+/* ═══════════════════════════════════════════════
+   CONSTANTS
+   ═══════════════════════════════════════════════ */
 
+export const CURRENT_STEP = 4; // raw Supabase current_step value
+export const TOTAL_STEPS = TOTAL_VISIBLE_ONBOARDING_STEPS;
+export const PROGRESS_PCT = Math.round((3 / TOTAL_STEPS) * 100); // display step = 3
+
+// Country list for citizenship/residence dropdowns
 export const countries = [
   'United States','Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia',
   'Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin',
@@ -47,39 +57,30 @@ export const countries = [
 
 export type LocationStatus = 'detecting' | 'success' | 'ip-success' | 'denied' | 'failed' | 'manual' | null;
 
-export interface Step4Logic {
-  citizenshipCountry: string; residenceCountry: string;
-  isLoading: boolean; isFooterVisible: boolean;
-  isDetectingLocation: boolean; locationDetected: boolean;
-  locationStatus: LocationStatus; detectedLocation: string;
-  userConfirmedManual: boolean; showPermissionHelp: boolean;
-  showLocationModal: boolean; canContinue: boolean;
-  isErrorStatus: boolean; isSuccessStatus: boolean;
-  shouldShowForm: boolean; canConfirmSelection: boolean;
-  handleCitizenshipChange: (v: string) => void;
-  handleResidenceChange: (v: string) => void;
-  handleConfirmManualSelection: () => void;
-  handleRetry: () => Promise<void>;
-  handleAllowLocation: () => Promise<void>;
-  handleDontAllow: () => void;
-  handleContinue: () => Promise<void>;
-  handleBack: () => void;
-  handleSkip: () => void;
-  setShowPermissionHelp: (v: boolean) => void;
-}
+/* ═══════════════════════════════════════════════
+   ADDRESS VALIDATION
+   ═══════════════════════════════════════════════ */
 
-export const mergeDetectedCountryIntoStep4Fields = ({
-  citizenshipCountry,
-  residenceCountry,
-}: {
-  citizenshipCountry: string;
-  residenceCountry: string;
-}): { citizenshipCountry: string; residenceCountry: string } => {
-  return {
-    citizenshipCountry,
-    residenceCountry,
-  };
+export const validateAddress = (v: string) => {
+  if (!v.trim()) return 'Address is required';
+  if (v.trim().length < 5) return 'Address is too short';
+  if (v.trim().length > 100) return 'Address is too long';
+  if (!/[a-zA-Z]/.test(v)) return 'Please enter a valid address';
+  return undefined;
 };
+
+export const validateRequired = (v: string, label: string) =>
+  !v ? `Please select a ${label}` : undefined;
+
+export const validateZip = (v: string) => {
+  if (!v.trim()) return 'ZIP / postal code is required';
+  if (v.trim().length < 3 || v.trim().length > 10) return 'Enter a valid postal code';
+  return undefined;
+};
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════ */
 
 export const getTrustedStep4Countries = (onboardingData: {
   citizenship_country?: string | null;
@@ -90,24 +91,18 @@ export const getTrustedStep4Countries = (onboardingData: {
   residence_country?: string;
 } => {
   if (!onboardingData) return {};
-
   const currentStep =
     typeof onboardingData.current_step === 'number'
       ? onboardingData.current_step
       : Number(onboardingData.current_step || 0);
-
-  // Ignore schema/default country values before Step 4 has actually been reached.
-  if (!Number.isFinite(currentStep) || currentStep < 4) {
-    return {};
-  }
-
+  if (!Number.isFinite(currentStep) || currentStep < 4) return {};
   return {
     citizenship_country: onboardingData.citizenship_country || undefined,
     residence_country: onboardingData.residence_country || undefined,
   };
 };
 
-export const getStep4StatusFromCacheRecord = (
+const getStatusFromCacheRecord = (
   cacheRecord: LocationCacheRecord | null
 ): LocationStatus => {
   if (!cacheRecord) return null;
@@ -122,93 +117,188 @@ const checkGeoPermission = async (): Promise<'granted' | 'denied' | 'prompt'> =>
       return result.state as 'granted' | 'denied' | 'prompt';
     }
   } catch {
-    // Permissions API not supported (e.g. older Safari)
+    // Permissions API not supported
   }
-  // Default to 'prompt' so we show the modal
   return 'prompt';
 };
 
-export const useStep4Logic = (): Step4Logic => {
+/* ═══════════════════════════════════════════════
+   COMBINED HOOK
+   ═══════════════════════════════════════════════ */
+
+export function useCombinedLocationLogic() {
   const navigate = useNavigate();
+  const isFooterVisible = useFooterVisibility();
+  const dropdowns = useLocationDropdowns();
   const autoDetectionStartedRef = useRef(false);
   const citizenshipCountryRef = useRef('');
   const residenceCountryRef = useRef('');
+
+  // ─── Auth ───
   const [userId, setUserId] = useState<string | null>(null);
+
+  // ─── Country/Residence fields (from old step-3) ───
   const [citizenshipCountry, setCitizenshipCountry] = useState('');
   const [residenceCountry, setResidenceCountry] = useState('');
+
+  // ─── Address fields (from old step-6) ───
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
+  const [zipCode, setZipCode] = useState('');
+
+  // ─── Location detection state ───
   const [isLoading, setIsLoading] = useState(false);
-  const isFooterVisible = useFooterVisibility();
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [locationDetected, setLocationDetected] = useState(false);
   const [locationStatus, setLocationStatus] = useState<LocationStatus>(null);
   const [detectedLocation, setDetectedLocation] = useState('');
-  const [userConfirmedManual, setUserConfirmedManual] = useState(false);
   const [showPermissionHelp, setShowPermissionHelp] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
 
+  // ─── Address auto-fill state ───
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const autoFillCascadeRef = useRef(false);
+  const [detectionStatus, setDetectionStatus] = useState<string | null>(null);
+
+  // ─── Validation state ───
+  const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  // ─── Derived state ───
   const canContinue = Boolean(citizenshipCountry && residenceCountry);
   const isErrorStatus = locationStatus === 'denied' || locationStatus === 'failed';
   const isSuccessStatus = locationStatus === 'success' || locationStatus === 'ip-success';
-  const shouldShowForm = true;
-  const canConfirmSelection = false;
+  const isAddressValid = !!(
+    addressLine1.trim() &&
+    dropdowns.country &&
+    dropdowns.state &&
+    dropdowns.city &&
+    zipCode.trim()
+  );
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.classList.add('onboarding-page-scroll');
+    document.body.classList.add('onboarding-page-scroll');
+    return () => {
+      document.documentElement.classList.remove('onboarding-page-scroll');
+      document.body.classList.remove('onboarding-page-scroll');
+    };
+  }, []);
 
+  // Keep refs in sync
   useEffect(() => { citizenshipCountryRef.current = citizenshipCountry; }, [citizenshipCountry]);
   useEffect(() => { residenceCountryRef.current = residenceCountry; }, [residenceCountry]);
 
+  // ─── Monitor cascade completion to clear isAutoFilling ───
+  useEffect(() => {
+    if (!autoFillCascadeRef.current) return;
+    const cascadeDone =
+      !dropdowns.loadingStates &&
+      !dropdowns.loadingCities &&
+      dropdowns.country &&
+      dropdowns.state &&
+      dropdowns.city;
+    if (cascadeDone) {
+      autoFillCascadeRef.current = false;
+      setIsAutoFilling(false);
+      setDetectionStatus('Address auto-filled from GPS');
+      setTimeout(() => setDetectionStatus(null), 3000);
+    }
+  }, [dropdowns.loadingStates, dropdowns.loadingCities, dropdowns.country, dropdowns.state, dropdowns.city]);
+
+  // ─── Safety timeout for auto-fill ───
+  useEffect(() => {
+    if (!isAutoFilling) return;
+    const timer = setTimeout(() => {
+      if (isAutoFilling) {
+        setIsAutoFilling(false);
+        autoFillCascadeRef.current = false;
+        if (dropdowns.country) {
+          setDetectionStatus('Address fields populated');
+          setTimeout(() => setDetectionStatus(null), 2500);
+        } else {
+          setDetectionStatus(null);
+        }
+      }
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [isAutoFilling, dropdowns.country]);
+
+  /* ─── Apply GPS result to ALL fields (country + address) ─── */
   const applyDetectedLocation = (locationData: LocationData, status: LocationStatus) => {
+    // 1. Country name for citizenship/residence
     const countryName = COUNTRY_CODE_TO_NAME[locationData.countryCode] || locationData.country;
     const matchedCountry = countries.includes(countryName) ? countryName : '';
 
-    // Pre-populate citizenship country from GPS if the user hasn't picked one yet
     if (!citizenshipCountryRef.current && matchedCountry) {
       citizenshipCountryRef.current = matchedCountry;
       setCitizenshipCountry(matchedCountry);
     }
-
-    // Pre-populate residence country from GPS if the user hasn't picked one yet
     if (!residenceCountryRef.current && matchedCountry) {
       residenceCountryRef.current = matchedCountry;
       setResidenceCountry(matchedCountry);
     }
 
     setDetectedLocation(
-      locationData.formattedAddress ||
-      locationData.city ||
-      locationData.state ||
-      countryName
+      locationData.formattedAddress || locationData.city || locationData.state || countryName
     );
     setLocationDetected(true);
     setLocationStatus(status);
+
+    // 2. Address auto-fill from GPS
+    if (locationData.postalCode && !zipCode) {
+      setZipCode(locationData.postalCode);
+    }
+    if (locationData.formattedAddress && !addressLine1) {
+      const parsed = locationService.parseFormattedAddress(locationData.formattedAddress, locationData);
+      const combined = [parsed.line1, parsed.line2].filter(Boolean).join(', ');
+      if (combined) setAddressLine1(combined);
+    }
+
+    // 3. Trigger cascading dropdowns (country → state → city)
+    if (!dropdowns.country || !dropdowns.state || !dropdowns.city) {
+      setIsAutoFilling(true);
+      autoFillCascadeRef.current = true;
+      setDetectionStatus('Auto-filling address from GPS...');
+      dropdowns.applyDetectedLocation(
+        locationData.countryCode,
+        locationData.stateCode,
+        locationData.state,
+        locationData.city,
+      );
+    }
   };
 
+  /* ─── GPS refresh ─── */
   const refreshLocation = async (uid: string) => {
     setIsDetectingLocation(true);
     setLocationStatus('detecting');
-
     try {
       const result = await locationService.refreshStep4Location(uid);
-
       if (result.fresh) {
         applyDetectedLocation(
           result.fresh.data,
           result.fresh.source === 'gps' ? 'success' : 'ip-success'
         );
+        // Save to DB in background
+        locationService
+          .saveLocationToOnboarding(uid, result.fresh.data, result.fresh.source === 'gps' ? 'gps' : 'ip')
+          .catch(() => {});
         return;
       }
-
       if (result.cached) {
-        applyDetectedLocation(result.cached.data, getStep4StatusFromCacheRecord(result.cached));
+        applyDetectedLocation(result.cached.data, getStatusFromCacheRecord(result.cached));
         return;
       }
-
       setLocationStatus('failed');
-    } catch (error) {
-      console.error('[Step4] Location refresh error:', error);
+    } catch (err) {
+      console.error('[Step3-Combined] Location refresh error:', err);
       const cachedRecord = await locationService.readSharedLocationCache(uid);
       if (cachedRecord) {
-        applyDetectedLocation(cachedRecord.data, getStep4StatusFromCacheRecord(cachedRecord));
+        applyDetectedLocation(cachedRecord.data, getStatusFromCacheRecord(cachedRecord));
       } else {
         setLocationStatus('failed');
       }
@@ -217,30 +307,58 @@ export const useStep4Logic = (): Step4Logic => {
     }
   };
 
+  /* ─── Init: Load saved data, detect location ─── */
   useEffect(() => {
-    const getCurrentUser = async () => {
+    const init = async () => {
       if (!config.supabaseClient) return;
       const { data: { user } } = await config.supabaseClient.auth.getUser();
       if (!user) { navigate('/login'); return; }
       setUserId(user.id);
 
-      const [onboardingResult, sharedCache] = await Promise.all([
+      // Fetch all relevant data in parallel
+      const [onboardingResult, financialResult, enrichedResult, sharedCache] = await Promise.all([
         config.supabaseClient
           .from('onboarding_data')
-          .select('citizenship_country, residence_country, current_step')
+          .select(`
+            citizenship_country, residence_country, current_step,
+            address_line_1, address_line_2, address_country, state, city, zip_code
+          `)
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        config.supabaseClient
+          .from('user_financial_data')
+          .select('identity_data')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        config.supabaseClient
+          .from('user_enriched_profiles')
+          .select('enriched_address_line1, enriched_address_city, enriched_address_state, enriched_address_zip, enriched_address_country')
           .eq('user_id', user.id)
           .maybeSingle(),
         locationService.readSharedLocationCache(user.id),
       ]);
-      const cachedLocation = sharedCache?.data || await locationService.getCachedLocation(user.id);
 
+      const cachedLocation = sharedCache?.data || await locationService.getCachedLocation(user.id);
       const onboardingData = onboardingResult.data || null;
+
+      // ─── Prefill citizenship/residence countries ───
       const trustedCountries = getTrustedStep4Countries(onboardingData);
       const resolved = resolveOnboardingPrefill({
-        onboardingData: trustedCountries,
+        onboardingData: { ...trustedCountries, ...(onboardingData || {}) },
+        plaidIdentity: financialResult.data?.identity_data,
+        enrichedProfile: enrichedResult.data
+          ? {
+              address_line_1: enrichedResult.data.enriched_address_line1 || '',
+              city: enrichedResult.data.enriched_address_city || '',
+              state: enrichedResult.data.enriched_address_state || '',
+              zip_code: enrichedResult.data.enriched_address_zip || '',
+              address_country: enrichedResult.data.enriched_address_country || '',
+            }
+          : undefined,
         locationData: cachedLocation || undefined,
       });
 
+      // Apply citizenship/residence
       if (resolved.values.citizenship_country) {
         citizenshipCountryRef.current = resolved.values.citizenship_country;
         setCitizenshipCountry(resolved.values.citizenship_country);
@@ -250,12 +368,27 @@ export const useStep4Logic = (): Step4Logic => {
         setResidenceCountry(resolved.values.residence_country);
       }
 
-      // Fallback: if prefill didn't set countries but we have cached GPS data, extract country
-      if (cachedLocation) {
-        const cachedCountryName =
-          COUNTRY_CODE_TO_NAME[cachedLocation.countryCode] || cachedLocation.country;
-        const matchedCached = countries.includes(cachedCountryName) ? cachedCountryName : '';
+      // Apply address fields
+      if (resolved.values.address_line_1) setAddressLine1(resolved.values.address_line_1);
+      if (resolved.values.address_line_2) setAddressLine2(resolved.values.address_line_2);
+      if (resolved.values.zip_code) setZipCode(resolved.values.zip_code);
 
+      // Parse cached GPS formatted address if no saved address
+      if (cachedLocation && !resolved.values.address_line_1) {
+        if (cachedLocation.formattedAddress) {
+          const parsed = locationService.parseFormattedAddress(cachedLocation.formattedAddress, cachedLocation);
+          const combined = [parsed.line1, parsed.line2].filter(Boolean).join(', ');
+          if (combined) setAddressLine1(combined);
+        }
+        if (cachedLocation.postalCode && !resolved.values.zip_code) {
+          setZipCode(cachedLocation.postalCode);
+        }
+      }
+
+      // Fallback: extract country from cached GPS for citizenship/residence
+      if (cachedLocation) {
+        const cachedCountryName = COUNTRY_CODE_TO_NAME[cachedLocation.countryCode] || cachedLocation.country;
+        const matchedCached = countries.includes(cachedCountryName) ? cachedCountryName : '';
         if (!citizenshipCountryRef.current && matchedCached) {
           citizenshipCountryRef.current = matchedCached;
           setCitizenshipCountry(matchedCached);
@@ -264,87 +397,247 @@ export const useStep4Logic = (): Step4Logic => {
           residenceCountryRef.current = matchedCached;
           setResidenceCountry(matchedCached);
         }
-
         setDetectedLocation(
-          cachedLocation.formattedAddress ||
-          cachedLocation.city ||
-          cachedLocation.state ||
-          cachedLocation.country
+          cachedLocation.formattedAddress || cachedLocation.city || cachedLocation.state || cachedLocation.country
         );
         setLocationDetected(true);
-        setLocationStatus(getStep4StatusFromCacheRecord(sharedCache) || 'ip-success');
+        setLocationStatus(getStatusFromCacheRecord(sharedCache) || 'ip-success');
       }
 
-      // Check geolocation permission before auto-detecting
+      // Trigger cascading dropdowns from resolved/cached address data
+      const resolvedCountry =
+        resolved.values.address_country || resolved.values.residence_country || cachedLocation?.country || '';
+      const countryCode = resolvedCountry ? locationService.mapCountryToIsoCode(resolvedCountry) : '';
+      const stateValue = resolved.values.state || cachedLocation?.stateCode || cachedLocation?.state || '';
+      const cityValue = resolved.values.city || cachedLocation?.city || '';
+
+      if (countryCode || stateValue || cityValue) {
+        setIsAutoFilling(true);
+        autoFillCascadeRef.current = true;
+        setDetectionStatus('Auto-filling address from GPS...');
+        dropdowns.applyDetectedLocation(countryCode, stateValue, stateValue, cityValue);
+      }
+
+      // ─── Auto-detect GPS if needed ───
       if (!autoDetectionStartedRef.current) {
         autoDetectionStartedRef.current = true;
-
-        // If we already have cached location data, just refresh silently
         if (cachedLocation) {
           void refreshLocation(user.id);
         } else {
-          // No cached data — check if browser permission is already granted
           const permState = await checkGeoPermission();
           if (permState === 'granted') {
-            // Permission already granted, detect silently
             void refreshLocation(user.id);
           } else {
-            // Permission not yet granted ('prompt') or denied — show our modal
             setShowLocationModal(true);
           }
         }
       }
     };
-    getCurrentUser();
+    init();
     return () => { locationService.cancel(); };
-  }, [navigate]);
+  }, [navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* ─── Country/Residence handlers ─── */
   const handleCitizenshipChange = (value: string) => {
     citizenshipCountryRef.current = value;
     setCitizenshipCountry(value);
-    setUserConfirmedManual(true);
     setLocationStatus('manual');
   };
 
   const handleResidenceChange = (value: string) => {
     residenceCountryRef.current = value;
     setResidenceCountry(value);
-    setUserConfirmedManual(true);
     setLocationStatus('manual');
   };
 
-  const handleConfirmManualSelection = () => {
-    if (citizenshipCountry && residenceCountry) { setUserConfirmedManual(true); setLocationStatus('manual'); }
+  /* ─── Location modal handlers ─── */
+  const handleAllowLocation = async () => {
+    if (!userId) return;
+    setShowLocationModal(false);
+    await refreshLocation(userId);
+  };
+  const handleDontAllow = () => {
+    setShowLocationModal(false);
+    setLocationStatus('manual');
   };
 
   const handleRetry = async () => {
-    setUserConfirmedManual(false);
     if (userId) await refreshLocation(userId);
   };
 
-  const handleAllowLocation = async () => { if (!userId) return; setShowLocationModal(false); await refreshLocation(userId); };
-  const handleDontAllow = () => { setShowLocationModal(false); setLocationStatus('manual'); };
+  const handleDetectClick = async () => {
+    if (!userId) return;
+    setIsDetectingLocation(true);
+    setIsAutoFilling(true);
+    autoFillCascadeRef.current = true;
+    setDetectionStatus('Auto-filling address from GPS...');
+    try {
+      const result = await locationService.detectLocation();
+      if (result.data) {
+        applyDetectedLocation(
+          result.data,
+          result.source === 'detected' ? 'success' : 'ip-success'
+        );
+        locationService
+          .saveLocationToOnboarding(userId, result.data, result.source === 'detected' ? 'gps' : 'ip')
+          .catch(() => {});
+      } else {
+        setDetectionStatus(null);
+        setIsAutoFilling(false);
+        autoFillCascadeRef.current = false;
+      }
+    } catch {
+      setDetectionStatus(null);
+      setIsAutoFilling(false);
+      autoFillCascadeRef.current = false;
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  };
 
+  /* ─── Address field handlers ─── */
+  const handleAddressLine1Change = (value: string) => {
+    setAddressLine1(value);
+    if (touched.addressLine1) setErrors((p) => ({ ...p, addressLine1: validateAddress(value) }));
+  };
+
+  const handleZipCodeChange = (value: string) => {
+    const next = value.slice(0, 10);
+    setZipCode(next);
+    if (touched.zipCode) setErrors((p) => ({ ...p, zipCode: validateZip(next) }));
+  };
+
+  const validate = (field: string, value: string) => {
+    switch (field) {
+      case 'addressLine1': return validateAddress(value);
+      case 'country': return validateRequired(value, 'country');
+      case 'state': return validateRequired(value, 'state');
+      case 'city': return validateRequired(value, 'city');
+      case 'zipCode': return validateZip(value);
+      default: return undefined;
+    }
+  };
+
+  const handleBlur = (field: string, value: string) => {
+    setTouched((p) => ({ ...p, [field]: true }));
+    setErrors((p) => ({ ...p, [field]: validate(field, value) }));
+  };
+
+  const validateAll = () => {
+    const next = {
+      addressLine1: validateAddress(addressLine1),
+      country: validateRequired(dropdowns.country, 'country'),
+      state: validateRequired(dropdowns.state, 'state'),
+      city: validateRequired(dropdowns.city, 'city'),
+      zipCode: validateZip(zipCode),
+    };
+    setErrors(next);
+    setTouched({ addressLine1: true, country: true, state: true, city: true, zipCode: true });
+    return !Object.values(next).some(Boolean);
+  };
+
+  /* ─── Navigation ─── */
   const handleContinue = async () => {
     if (!userId || !config.supabaseClient || !canContinue) return;
+
+    // Validate address fields if they're filled
+    if (addressLine1.trim() || zipCode.trim()) {
+      if (!validateAll()) {
+        setError('Please fix the errors above');
+        return;
+      }
+    }
+
     setIsLoading(true);
+    setError(null);
     try {
-      await upsertOnboardingData(userId, { citizenship_country: citizenshipCountry, residence_country: residenceCountry, current_step: 4 });
+      const payload: Record<string, unknown> = {
+        citizenship_country: citizenshipCountry,
+        residence_country: residenceCountry,
+        current_step: 4,
+      };
+
+      // Include address fields if filled
+      if (addressLine1.trim()) payload.address_line_1 = addressLine1.trim();
+      if (addressLine2.trim()) payload.address_line_2 = addressLine2.trim();
+      if (dropdowns.country) payload.address_country = dropdowns.country;
+      if (dropdowns.state) payload.state = dropdowns.state;
+      if (dropdowns.city) payload.city = dropdowns.city;
+      if (zipCode.trim()) payload.zip_code = zipCode.trim();
+
+      await upsertOnboardingData(userId, payload);
       navigate('/onboarding/step-4');
-    } catch (error) { console.error('Error:', error); }
-    finally { setIsLoading(false); }
+    } catch (err) {
+      console.error('[Step3-Combined] Save error:', err);
+      setError('Failed to save. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => navigate('/onboarding/step-2');
-  const handleSkip = () => navigate('/onboarding/step-4');
+
+  const handleSkip = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      if (userId && config.supabaseClient) {
+        await upsertOnboardingData(userId, { current_step: 4 });
+      }
+      navigate('/onboarding/step-4');
+    } catch {
+      navigate('/onboarding/step-4');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
-    citizenshipCountry, residenceCountry, isLoading, isFooterVisible,
-    isDetectingLocation, locationDetected, locationStatus, detectedLocation,
-    userConfirmedManual, showPermissionHelp, showLocationModal, canContinue,
-    isErrorStatus, isSuccessStatus, shouldShowForm, canConfirmSelection,
-    handleCitizenshipChange, handleResidenceChange, handleConfirmManualSelection,
-    handleRetry, handleAllowLocation, handleDontAllow, handleContinue,
-    handleBack, handleSkip, setShowPermissionHelp,
+    // Country/Residence
+    citizenshipCountry,
+    residenceCountry,
+    handleCitizenshipChange,
+    handleResidenceChange,
+
+    // Address fields
+    addressLine1,
+    addressLine2,
+    setAddressLine2,
+    zipCode,
+    handleAddressLine1Change,
+    handleZipCodeChange,
+    handleBlur,
+    touched,
+    errors,
+    error,
+    isAddressValid,
+
+    // Location detection
+    isDetectingLocation,
+    locationDetected,
+    locationStatus,
+    detectedLocation,
+    showPermissionHelp,
+    setShowPermissionHelp,
+    showLocationModal,
+    isAutoFilling,
+    detectionStatus,
+
+    // Handlers
+    handleAllowLocation,
+    handleDontAllow,
+    handleRetry,
+    handleDetectClick,
+    handleContinue,
+    handleBack,
+    handleSkip,
+
+    // UI state
+    isLoading,
+    isFooterVisible,
+    canContinue,
+    isErrorStatus,
+    isSuccessStatus,
+    dropdowns,
   };
-};
+}
