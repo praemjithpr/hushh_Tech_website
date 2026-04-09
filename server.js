@@ -84,6 +84,7 @@ app.all('/api/enrich-preferences', async (req, res) => wrapHandler(await loadApi
 app.all('/api/gemini-chat', async (req, res) => wrapHandler(await loadApi('gemini-chat'))(req, res));
 app.all('/api/gemini-ephemeral-token', async (req, res) => wrapHandler(await loadApi('gemini-ephemeral-token'))(req, res));
 app.all('/api/generate-investor-profile', async (req, res) => wrapHandler(await loadApi('generate-investor-profile'))(req, res));
+app.all('/api/delete-account', async (req, res) => wrapHandler(await loadApi('delete-account'))(req, res));
 app.all('/api/send-email-notification', async (req, res) => wrapHandler(await loadApi('send-email-notification'))(req, res));
 app.all('/api/wallet-pass', async (req, res) => wrapHandler(await loadApi('wallet-pass'))(req, res));
 app.all('/api/google-wallet-pass', async (req, res) => wrapHandler(await loadApi('google-wallet-pass'))(req, res));

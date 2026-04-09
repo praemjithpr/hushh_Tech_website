@@ -36,12 +36,22 @@ jobs:
           set -euo pipefail
           supabase_url="$(gcloud secrets versions access latest --project="$SHARED_SECRETS_PROJECT" --secret="SUPABASE_URL")"
           supabase_anon_key="$(gcloud secrets versions access latest --project="$SHARED_SECRETS_PROJECT" --secret="SUPABASE_ANON_KEY")"
+          supabase_service_role_key="$(gcloud secrets versions access latest --project="$SHARED_SECRETS_PROJECT" --secret="SUPABASE_SERVICE_ROLE_KEY")"
           if [ -z "$supabase_url" ] || [ -z "$supabase_anon_key" ]; then
             echo "::error::Supabase web auth secrets are empty"
             exit 1
           fi
+          if [ -z "$supabase_service_role_key" ]; then
+            echo "::error::Supabase service role secret is empty"
+            exit 1
+          fi
+          echo "::add-mask::$supabase_url"
+          echo "::add-mask::$supabase_anon_key"
+          echo "::add-mask::$supabase_service_role_key"
           printf 'VITE_SUPABASE_URL=%s\n' "$supabase_url" >> "$GITHUB_ENV"
           printf 'VITE_SUPABASE_ANON_KEY=%s\n' "$supabase_anon_key" >> "$GITHUB_ENV"
+          printf 'SUPABASE_URL=%s\n' "$supabase_url" >> "$GITHUB_ENV"
+          printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$supabase_service_role_key" >> "$GITHUB_ENV"
 
       # 3. Build Vite app in runner (FAST)
       - name: Validate client auth env
@@ -73,6 +83,7 @@ jobs:
             --min-instances=1 \
             --max-instances=10 \
             --port=8080 \
+            --update-env-vars="NODE_ENV=production,SUPABASE_URL=${SUPABASE_URL},SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}" \
             --clear-base-image \
             --quiet
 

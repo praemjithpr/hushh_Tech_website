@@ -71,22 +71,18 @@ const DeleteAccountModal = ({
       }
 
       console.log("[DeleteAccount] Calling delete endpoint...");
-      const supabaseUrl = config.SUPABASE_URL;
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/delete-user-account`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch("/api/delete-account", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok || data?.success !== true) {
-        console.error("[DeleteAccount] Edge function error:", data);
+        console.error("[DeleteAccount] Delete API error:", data);
         throw new Error(data?.error || "Failed to delete account");
       }
 
