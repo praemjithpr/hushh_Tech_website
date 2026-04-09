@@ -103,7 +103,20 @@ describe("wallet pass service", () => {
       investmentClass: "Class B",
       email: "test@example.com",
       qrValue: "https://hushhtech.com/investor/test-user",
+      profileUrl: "https://hushhtech.com/investor/test-user",
     });
+  });
+
+  it("marks the public profile link unavailable when there is no slug-backed URL", () => {
+    const preview = buildGoldPassPreviewModel({
+      name: "Test User",
+      email: "test@example.com",
+      organisation: "Hushh",
+      userId: "user-123",
+    });
+
+    expect(preview.qrValue).toBe("https://hushhtech.com");
+    expect(preview.profileUrl).toBeNull();
   });
 
   it("reads Google Wallet availability from the same-origin route", async () => {

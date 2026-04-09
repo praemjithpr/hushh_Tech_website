@@ -227,7 +227,9 @@ export function useInvestorProfileLogic() {
     }
   };
 
-  const profileUrl = `https://hushhtech.com/investor/${profile?.slug}`;
+  const profileUrl = profile?.slug
+    ? `https://hushhtech.com/investor/${profile.slug}`
+    : "";
 
   const handleCopyURL = () => {
     navigator.clipboard.writeText(profileUrl);

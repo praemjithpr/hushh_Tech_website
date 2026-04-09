@@ -154,17 +154,23 @@ describe("WalletCardPreviewModal", () => {
     const membershipPreview = document.querySelector(
       '[data-testid="wallet-preview-membership-id"]'
     );
+    const profileLinkTile = document.querySelector(
+      '[data-testid="wallet-preview-profile-link"]'
+    ) as HTMLAnchorElement | null;
     const profileUrlDetails = document.querySelector(
       '[data-testid="wallet-preview-profile-url"]'
     );
 
     expect(mobileQrNode).not.toBeNull();
+    expect(document.body.textContent).toContain(longPreview.holderName);
     expect(membershipPreview?.textContent).toContain("Membership ID · ");
     expect(membershipPreview?.textContent).toContain("…");
     expect(membershipPreview?.textContent).toContain("2597e6b8".slice(-6));
     expect(document.body.textContent).toContain(
       `Full membership ID · ${longPreview.membershipId}`
     );
+    expect(profileLinkTile?.getAttribute("href")).toBe(longPreview.profileUrl);
+    expect(profileLinkTile?.getAttribute("target")).toBe("_blank");
     expect(profileUrlDetails?.textContent).toContain(longPreview.profileUrl);
 
     setViewport(1280, 900);
@@ -182,6 +188,27 @@ describe("WalletCardPreviewModal", () => {
     expect(document.body.textContent).toContain("Add to Apple Wallet");
     expect(document.body.textContent).toContain(
       "Google Wallet is temporarily unavailable"
+    );
+  });
+
+  it("renders the profile tile as unavailable when there is no slug-backed public URL", async () => {
+    await renderModal({
+      preview: {
+        ...preview,
+        profileUrl: null,
+      },
+    });
+
+    const profileLinkTile = document.querySelector(
+      '[data-testid="wallet-preview-profile-link"]'
+    );
+    const profileUrlDetails = document.querySelector(
+      '[data-testid="wallet-preview-profile-url"]'
+    );
+
+    expect(profileLinkTile?.getAttribute("href")).toBeNull();
+    expect(profileUrlDetails?.textContent).toContain(
+      "Public profile link unavailable"
     );
   });
 });

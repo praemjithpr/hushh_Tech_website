@@ -3,7 +3,8 @@ import {
   InvestorProfileInput, 
   InvestorProfileRecord,
   InvestorProfile,
-  DerivedContext 
+  DerivedContext,
+  PublicInvestorProfileRecord,
 } from "../../types/investorProfile";
 import { enrichContext } from "./enrichContext";
 import { generateInvestorProfile as generateInvestorProfileAPI } from "./apiClient";
@@ -255,48 +256,36 @@ export async function deleteInvestorProfile(): Promise<void> {
 
 /**
  * Fetch a public investor profile by slug (no authentication required)
- * Used for public profile pages
- * Now includes onboarding_data
+ * Used for public profile pages through a secure server-side projection
  */
-export async function fetchPublicInvestorProfileBySlug(slug: string): Promise<any> {
+export async function fetchPublicInvestorProfileBySlug(
+  slug: string
+): Promise<PublicInvestorProfileRecord> {
   const supabase = resources.config.supabaseClient;
   
   if (!supabase) {
     throw new Error("Supabase client not initialized");
   }
 
-  const { data: profile, error } = await supabase
-    .from('investor_profiles')
-    .select('*')
-    .eq('slug', slug)
-    .eq('is_public', true)
-    .eq('user_confirmed', true)
-    .maybeSingle();
+  const trimmedSlug = slug.trim();
+
+  if (!trimmedSlug) {
+    throw new Error("Profile not found or is private");
+  }
+
+  const { data, error } = await supabase.rpc("get_public_investor_profile", {
+    p_slug: trimmedSlug,
+  });
 
   if (error) {
     throw new Error(`Public profile not found: ${error.message}`);
   }
 
-  // FIX: Null-check — profile can be null if is_public/user_confirmed are false
-  if (!profile) {
-    throw new Error('Profile not found or is private');
+  if (!data) {
+    throw new Error("Profile not found or is private");
   }
 
-  // Fetch onboarding_data for this user
-  const { data: onboardingData, error: onboardingError } = await supabase
-    .from('onboarding_data')
-    .select('*')
-    .eq('user_id', profile.user_id)
-    .maybeSingle();
-
-  if (onboardingError && onboardingError.code !== 'PGRST116') {
-    console.error('Error fetching onboarding data:', onboardingError);
-  }
-
-  return {
-    ...profile,
-    onboarding_data: onboardingData || null
-  };
+  return data as PublicInvestorProfileRecord;
 }
 
 /**

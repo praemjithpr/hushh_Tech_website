@@ -1,3 +1,5 @@
+import type { ShadowProfile } from "./shadowProfile";
+
 // 12 Investor Profile Field Types
 export type PrimaryGoal = 
   | "capital_preservation" 
@@ -177,6 +179,29 @@ export interface InvestorProfileRecord {
   confirmed_at?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface PublicInvestorBasicInfo {
+  name: string;
+  email: string | null;
+  age: number | null;
+  organisation: string | null;
+}
+
+export interface PublicInvestorOnboardingData {
+  account_type?: string | null;
+  selected_fund?: string | null;
+  citizenship_country?: string | null;
+  residence_country?: string | null;
+}
+
+export interface PublicInvestorProfileRecord {
+  slug: string;
+  profile_url: string;
+  basic_info: PublicInvestorBasicInfo;
+  investor_profile: Partial<InvestorProfile> | null;
+  onboarding_data: PublicInvestorOnboardingData | null;
+  shadow_profile: ShadowProfile | null;
 }
 
 // Field labels for UI

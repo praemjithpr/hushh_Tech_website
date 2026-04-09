@@ -2,6 +2,7 @@
 // Works with Gmail SMTP (Node.js compatible)
 
 import nodemailer from 'nodemailer';
+import { createClient } from '@supabase/supabase-js';
 
 // CORS headers
 const corsHeaders = {
@@ -9,6 +10,46 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
+
+function createSupabaseAdminClient() {
+  const supabaseUrl = process.env.SUPABASE_URL?.trim();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase server environment variables are missing');
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+async function resolvePublicProfileOwner(slug) {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('investor_profiles')
+    .select('email, name')
+    .eq('slug', slug)
+    .eq('is_public', true)
+    .eq('user_confirmed', true)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to resolve profile owner: ${error.message}`);
+  }
+
+  if (!data?.email) {
+    throw new Error('Public profile owner email not found');
+  }
+
+  return {
+    email: data.email,
+    name: data.name || 'Your Profile',
+  };
+}
 
 export default async function handler(req, res) {
   // Handle CORS preflight
@@ -53,8 +94,19 @@ export default async function handler(req, res) {
     }
 
     // Validate required fields
-    if (!type || !slug || !profileOwnerEmail) {
+    if (!type || !slug) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    let resolvedOwnerEmail = profileOwnerEmail || '';
+    let resolvedProfileName = profileName || 'Your Profile';
+
+    if (!resolvedOwnerEmail) {
+      const owner = await resolvePublicProfileOwner(slug);
+      resolvedOwnerEmail = owner.email;
+      if (!profileName) {
+        resolvedProfileName = owner.name;
+      }
     }
 
     let subject = '';
@@ -67,13 +119,13 @@ export default async function handler(req, res) {
         timeStyle: 'short',
       });
 
-      subject = `👀 New Profile View - ${profileName || 'Your Profile'}`;
+      subject = `👀 New Profile View - ${resolvedProfileName}`;
       html = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #0A84FF;">👀 Someone is viewing your profile!</h2>
           
           <div style="background: #F8FAFC; border-radius: 8px; padding: 20px; margin: 20px 0;">
-            <p style="margin: 8px 0;"><strong>Profile:</strong> ${profileName}</p>
+            <p style="margin: 8px 0;"><strong>Profile:</strong> ${resolvedProfileName}</p>
             <p style="margin: 8px 0;"><strong>Time:</strong> ${viewTime}</p>
             <p style="margin: 8px 0;"><strong>Visitor:</strong> Anonymous</p>
           </div>
@@ -107,7 +159,7 @@ export default async function handler(req, res) {
           <div style="background: #F0F9FF; border-left: 4px solid #0A84FF; padding: 20px; margin: 20px 0;">
             <p style="margin: 8px 0;"><strong>Amount:</strong> $1.00</p>
             <p style="margin: 8px 0;"><strong>Access:</strong> 30 minutes</p>
-            <p style="margin: 8px 0;"><strong>Profile:</strong> ${profileName}</p>
+            <p style="margin: 8px 0;"><strong>Profile:</strong> ${resolvedProfileName}</p>
             <p style="margin: 8px 0;"><strong>Time:</strong> ${paymentTime}</p>
           </div>
 
@@ -127,7 +179,7 @@ export default async function handler(req, res) {
     // Send email
     await transporter.sendMail({
       from: `"Hushh Notifications" <${process.env.GMAIL_USER}>`,
-      to: profileOwnerEmail,
+      to: resolvedOwnerEmail,
       subject,
       html,
     });

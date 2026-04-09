@@ -45,6 +45,29 @@ function formatPreviewMembershipId(membershipId: string) {
   return `${trimmedMembershipId.slice(0, 18)}…${trimmedMembershipId.slice(-6)}`;
 }
 
+function getHolderNameTypography(holderName: string) {
+  const nameLength = holderName.trim().length;
+
+  if (nameLength > 34) {
+    return {
+      fontSize: "clamp(1.18rem, 0.96rem + 1.2vw, 2rem)",
+      lineHeight: "1.08",
+    };
+  }
+
+  if (nameLength > 24) {
+    return {
+      fontSize: "clamp(1.38rem, 1rem + 1.9vw, 2.55rem)",
+      lineHeight: "1.05",
+    };
+  }
+
+  return {
+    fontSize: "clamp(1.7rem, 1.05rem + 3vw, 3.35rem)",
+    lineHeight: "1.02",
+  };
+}
+
 export default function WalletCardPreviewModal({
   isOpen,
   onClose,
@@ -87,7 +110,12 @@ export default function WalletCardPreviewModal({
   }
 
   const previewMembershipId = formatPreviewMembershipId(preview.membershipId);
+  const holderNameTypography = getHolderNameTypography(preview.holderName);
   const qrSize = qrFrameSize - qrPadding * 2;
+  const hasPublicProfileUrl = Boolean(preview.profileUrl);
+  const profileLinkDescription = hasPublicProfileUrl
+    ? preview.profileUrl
+    : "Public profile link unavailable until your shared profile is ready.";
 
   const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
     if (reducedMotion) {
@@ -226,17 +254,19 @@ export default function WalletCardPreviewModal({
                       gridColumn="1"
                       gridRow="2"
                       align="flex-start"
-                      justify="center"
+                      justify="flex-start"
                       spacing={{ base: 1, md: 1.5 }}
+                      pt={{ base: 0.5, md: 1 }}
                       minW={0}
                     >
                       <Text
-                        fontSize="clamp(1.7rem, 1.05rem + 3vw, 3.35rem)"
+                        fontSize={holderNameTypography.fontSize}
                         fontWeight="700"
                         color="rgba(11, 17, 32, 0.9)"
-                        textShadow="0 1px 0 rgba(255, 255, 255, 0.55)"
-                        lineHeight="0.98"
+                        textShadow="0 1px 0 rgba(255, 255, 255, 0.45)"
+                        lineHeight={holderNameTypography.lineHeight}
                         noOfLines={2}
+                        overflowWrap="anywhere"
                       >
                         {preview.holderName}
                       </Text>
@@ -359,11 +389,29 @@ export default function WalletCardPreviewModal({
                 </VStack>
               </Box>
               <Box
+                as={hasPublicProfileUrl ? "a" : "div"}
+                href={hasPublicProfileUrl ? preview.profileUrl || undefined : undefined}
+                target={hasPublicProfileUrl ? "_blank" : undefined}
+                rel={hasPublicProfileUrl ? "noopener noreferrer" : undefined}
+                data-testid="wallet-preview-profile-link"
                 borderRadius="20px"
                 border="1px solid rgba(15,23,42,0.08)"
                 bg="white"
                 px={4}
                 py={4}
+                display="block"
+                transition="transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease"
+                cursor={hasPublicProfileUrl ? "pointer" : "not-allowed"}
+                opacity={hasPublicProfileUrl ? 1 : 0.72}
+                _hover={
+                  hasPublicProfileUrl
+                    ? {
+                        borderColor: "rgba(15,23,42,0.18)",
+                        boxShadow: "0 10px 26px rgba(15, 23, 42, 0.08)",
+                        transform: "translateY(-1px)",
+                      }
+                    : undefined
+                }
               >
                 <HStack spacing={2} mb={2} color="#0B1120">
                   <ExternalLink size={16} />
@@ -377,7 +425,7 @@ export default function WalletCardPreviewModal({
                   color="gray.600"
                   overflowWrap="anywhere"
                 >
-                  {preview.profileUrl}
+                  {profileLinkDescription}
                 </Text>
               </Box>
             </Box>

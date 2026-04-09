@@ -17,9 +17,13 @@ import { useFooterVisibility } from "../../utils/useFooterVisibility";
 import { InvestorChatWidget } from "../../components/InvestorChatWidget";
 import WalletCardPreviewModal from "../../components/wallet/WalletCardPreviewModal";
 import { fetchPublicInvestorProfileBySlug } from "../../services/investorProfile";
-import { maskProfileData, maskOnboardingField } from "../../utils/maskSensitiveData";
-import { InvestorProfile, FIELD_LABELS, VALUE_LABELS, ONBOARDING_FIELD_LABELS } from "../../types/investorProfile";
-import { OnboardingData } from "../../types/onboarding";
+import {
+  FIELD_LABELS,
+  ONBOARDING_FIELD_LABELS,
+  PublicInvestorOnboardingData,
+  PublicInvestorProfileRecord,
+  VALUE_LABELS,
+} from "../../types/investorProfile";
 import type { ShadowProfile } from "../../types/shadowProfile";
 import { FINANCIAL_LINK_ROUTE } from "../../services/onboarding/flow";
 import {
@@ -38,7 +42,7 @@ const PublicInvestorProfilePage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const toast = useToast();
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<PublicInvestorProfileRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -87,7 +91,7 @@ const PublicInvestorProfilePage: React.FC = () => {
     };
   }, []);
   
-  const profileUrl = `https://hushhtech.com/investor/${slug}`;
+  const profileUrl = profileData?.profile_url || (slug ? `https://hushhtech.com/investor/${slug}` : "");
   const { hasCopied, onCopy } = useClipboard(profileUrl);
 
   useEffect(() => {
@@ -110,8 +114,7 @@ const PublicInvestorProfilePage: React.FC = () => {
           body: JSON.stringify({
             type: 'profile_view',
             slug,
-            profileOwnerEmail: data.email,
-            profileName: data.name
+            profileName: data.basic_info.name
           })
         }).catch(err => console.log('Email notification failed:', err));
         
@@ -238,17 +241,15 @@ const PublicInvestorProfilePage: React.FC = () => {
     );
   }
 
-  const maskedData = maskProfileData(profileData);
-  const investorProfile: InvestorProfile = profileData.investor_profile;
+  const basicInfo = profileData.basic_info;
+  const investorProfile = profileData.investor_profile;
   const shadowProfile: ShadowProfile | null = profileData.shadow_profile;
-  const onboardingData: OnboardingData | null = profileData.onboarding_data;
-  const privacySettings = profileData.privacy_settings || {};
-
-  // Helper function to check if a field should be displayed
-  const isFieldVisible = (section: 'investor_profile' | 'onboarding_data', fieldName: string): boolean => {
-    if (!privacySettings[section]) return true;
-    return privacySettings[section][fieldName] !== false;
-  };
+  const onboardingData: PublicInvestorOnboardingData | null = profileData.onboarding_data;
+  const visibleInvestorProfileEntries = investorProfile
+    ? Object.entries(investorProfile).filter(([, fieldData]) =>
+        Boolean(fieldData && typeof fieldData === "object" && "value" in fieldData)
+      )
+    : [];
 
   // Filter and format onboarding data for display
   const getVisibleOnboardingFields = () => {
@@ -256,17 +257,17 @@ const PublicInvestorProfilePage: React.FC = () => {
     
     const fields: Array<{key: string, label: string, value: any, category: string}> = [];
     
-    if (onboardingData.account_type && isFieldVisible('onboarding_data', 'account_type')) {
-      fields.push({ key: 'account_type', label: ONBOARDING_FIELD_LABELS.account_type, value: maskOnboardingField('account_type', VALUE_LABELS[onboardingData.account_type] || onboardingData.account_type), category: 'Basic Information' });
+    if (onboardingData.account_type) {
+      fields.push({ key: 'account_type', label: ONBOARDING_FIELD_LABELS.account_type, value: VALUE_LABELS[onboardingData.account_type] || onboardingData.account_type, category: 'Basic Information' });
     }
-    if (onboardingData.selected_fund && isFieldVisible('onboarding_data', 'selected_fund')) {
-      fields.push({ key: 'selected_fund', label: ONBOARDING_FIELD_LABELS.selected_fund, value: maskOnboardingField('selected_fund', onboardingData.selected_fund), category: 'Basic Information' });
+    if (onboardingData.selected_fund) {
+      fields.push({ key: 'selected_fund', label: ONBOARDING_FIELD_LABELS.selected_fund, value: onboardingData.selected_fund, category: 'Basic Information' });
     }
-    if (onboardingData.citizenship_country && isFieldVisible('onboarding_data', 'citizenship_country')) {
-      fields.push({ key: 'citizenship_country', label: ONBOARDING_FIELD_LABELS.citizenship_country, value: maskOnboardingField('citizenship_country', onboardingData.citizenship_country), category: 'Location' });
+    if (onboardingData.citizenship_country) {
+      fields.push({ key: 'citizenship_country', label: ONBOARDING_FIELD_LABELS.citizenship_country, value: onboardingData.citizenship_country, category: 'Location' });
     }
-    if (onboardingData.residence_country && isFieldVisible('onboarding_data', 'residence_country')) {
-      fields.push({ key: 'residence_country', label: ONBOARDING_FIELD_LABELS.residence_country, value: maskOnboardingField('residence_country', onboardingData.residence_country), category: 'Location' });
+    if (onboardingData.residence_country) {
+      fields.push({ key: 'residence_country', label: ONBOARDING_FIELD_LABELS.residence_country, value: onboardingData.residence_country, category: 'Location' });
     }
     
     return fields;
@@ -274,9 +275,9 @@ const PublicInvestorProfilePage: React.FC = () => {
 
   const visibleOnboardingFields = getVisibleOnboardingFields();
   const walletPassInput = {
-    name: maskedData.name || "Hushh Investor",
-    organisation: maskedData.organisation || profileData.organisation || null,
-    slug: slug || null,
+    name: basicInfo.name || "Hushh Investor",
+    organisation: basicInfo.organisation || null,
+    slug: profileData.slug || slug || null,
   };
   const walletPreview = buildGoldPassPreviewModel(walletPassInput);
 
@@ -349,15 +350,15 @@ const PublicInvestorProfilePage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{`${maskedData.name}'s Investor Profile | Hushh`}</title>
-        <meta name="description" content={`View ${maskedData.name}'s verified investor profile. ${maskedData.organisation ? `Works at ${maskedData.organisation}` : ''}`} />
-        <meta property="og:title" content={`${maskedData.name} - Investor Profile`} />
-        <meta property="og:description" content={`Verified investor on Hushh. Age ${maskedData.age}${maskedData.organisation ? ` • ${maskedData.organisation}` : ''}`} />
+        <title>{`${basicInfo.name}'s Investor Profile | Hushh`}</title>
+        <meta name="description" content={`View ${basicInfo.name}'s verified investor profile. ${basicInfo.organisation ? `Works at ${basicInfo.organisation}` : ''}`} />
+        <meta property="og:title" content={`${basicInfo.name} - Investor Profile`} />
+        <meta property="og:description" content={`Verified investor on Hushh.${basicInfo.age !== null ? ` Age ${basicInfo.age}` : ''}${basicInfo.organisation ? ` • ${basicInfo.organisation}` : ''}`} />
         <meta property="og:image" content={ogImageUrl} />
         <meta property="og:url" content={profileUrl} />
         <meta property="og:type" content="profile" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${maskedData.name} - Investor Profile`} />
+        <meta name="twitter:title" content={`${basicInfo.name} - Investor Profile`} />
         <meta name="twitter:description" content={`Verified investor on Hushh`} />
         <meta name="twitter:image" content={ogImageUrl} />
       </Helmet>
@@ -428,7 +429,7 @@ const PublicInvestorProfilePage: React.FC = () => {
                     className="text-[2.75rem] leading-[1.1] font-normal text-black tracking-tight font-serif"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
-                    {maskedData.name?.split(' ')[0] || 'Investor'} <br />
+                    {basicInfo.name?.split(' ')[0] || 'Investor'} <br />
                     <span className="text-gray-400 italic font-light">Investor Profile</span>
                   </h1>
                 </section>
@@ -441,8 +442,12 @@ const PublicInvestorProfilePage: React.FC = () => {
                         <User className="w-5 h-5 text-gray-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{maskedData.name}</p>
-                        <p className="text-xs text-gray-500 font-medium">Age {maskedData.age}</p>
+                        <p className="text-sm font-semibold text-gray-900">{basicInfo.name}</p>
+                        {basicInfo.age !== null ? (
+                          <p className="text-xs text-gray-500 font-medium">Age {basicInfo.age}</p>
+                        ) : (
+                          <p className="text-xs text-gray-500 font-medium">Verified investor</p>
+                        )}
                       </div>
                     </div>
                     <span className="px-2.5 py-1 bg-hushh-blue/10 text-hushh-blue text-[10px] font-semibold rounded-full">
@@ -453,18 +458,18 @@ const PublicInvestorProfilePage: React.FC = () => {
                     <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
                       <span className="material-symbols-outlined text-gray-600 text-xl" style={{ fontVariationSettings: "'wght' 400" }}>mail</span>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{maskedData.email}</p>
-                      <p className="text-xs text-gray-500 font-medium">Contact masked for privacy</p>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{basicInfo.email || 'Contact hidden'}</p>
+                        <p className="text-xs text-gray-500 font-medium">Contact masked for privacy</p>
+                      </div>
                     </div>
-                  </div>
-                  {maskedData.organisation && (
+                  {basicInfo.organisation && (
                     <div className="py-4 border-b border-gray-200 flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
                         <Briefcase className="w-5 h-5 text-gray-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{maskedData.organisation}</p>
+                        <p className="text-sm font-semibold text-gray-900">{basicInfo.organisation}</p>
                         <p className="text-xs text-gray-500 font-medium">Organisation</p>
                       </div>
                     </div>
@@ -522,7 +527,7 @@ const PublicInvestorProfilePage: React.FC = () => {
                 </section>
 
                 {/* AI Generated Investment Profile */}
-                {investorProfile && (
+                {visibleInvestorProfileEntries.length > 0 && (
                   <section className="mb-8">
                     <div className="flex items-center justify-between mb-6">
                       <h3
@@ -536,7 +541,7 @@ const PublicInvestorProfilePage: React.FC = () => {
                       </span>
                     </div>
                     <div className="space-y-0">
-                      {Object.entries(investorProfile).map(([fieldName, fieldData]: [string, any]) => {
+                      {visibleInvestorProfileEntries.map(([fieldName, fieldData]: [string, any]) => {
                         const label = FIELD_LABELS[fieldName as keyof typeof FIELD_LABELS] || fieldName;
                         const valueText = Array.isArray(fieldData.value)
                           ? fieldData.value.map((v: string) => VALUE_LABELS[v as keyof typeof VALUE_LABELS] || v).join(", ")
@@ -791,7 +796,7 @@ const PublicInvestorProfilePage: React.FC = () => {
             {/* CHAT TAB CONTENT */}
             {activeTab === 'chat' && (
               <div className="flex-1">
-                <InvestorChatWidget slug={slug!} investorName={maskedData.name} />
+                <InvestorChatWidget slug={slug!} investorName={basicInfo.name} />
               </div>
             )}
 

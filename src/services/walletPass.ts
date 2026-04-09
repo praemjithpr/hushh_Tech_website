@@ -24,7 +24,7 @@ export interface WalletPreviewModel {
   investmentClass: string;
   email: string;
   qrValue: string;
-  profileUrl: string;
+  profileUrl: string | null;
 }
 
 export interface GoogleWalletAvailability {
@@ -56,7 +56,8 @@ interface GoldPassDescriptor {
   investmentClass: string;
   membershipId: string;
   email: string;
-  profileUrl: string;
+  passUrl: string;
+  publicProfileUrl: string | null;
 }
 
 const DEFAULT_GOOGLE_WALLET_AVAILABILITY: GoogleWalletAvailability = {
@@ -87,22 +88,27 @@ const getInvestmentClass = (amount?: number | null) => {
   return "Class C";
 };
 
-const buildProfileUrl = (input: WalletPassInput) =>
-  input.slug ? `https://hushhtech.com/investor/${input.slug}` : "https://hushhtech.com";
+const buildPublicProfileUrl = (input: WalletPassInput) =>
+  input.slug ? `https://hushhtech.com/investor/${input.slug}` : null;
 
 const buildMembershipId = (input: WalletPassInput) =>
   input.slug ||
   input.userId ||
   (input.email ? input.email.split("@")[0] : "hushh-investor");
 
-const buildGoldPassDescriptor = (input: WalletPassInput): GoldPassDescriptor => ({
-  investorName: getDisplayValue(input.name, "Hushh Investor"),
-  organizationName: getDisplayValue(input.organisation, "Hushh"),
-  investmentClass: getInvestmentClass(input.investmentAmount),
-  membershipId: buildMembershipId(input),
-  email: getDisplayValue(input.email, "—"),
-  profileUrl: buildProfileUrl(input),
-});
+const buildGoldPassDescriptor = (input: WalletPassInput): GoldPassDescriptor => {
+  const publicProfileUrl = buildPublicProfileUrl(input);
+
+  return {
+    investorName: getDisplayValue(input.name, "Hushh Investor"),
+    organizationName: getDisplayValue(input.organisation, "Hushh"),
+    investmentClass: getInvestmentClass(input.investmentAmount),
+    membershipId: buildMembershipId(input),
+    email: getDisplayValue(input.email, "—"),
+    passUrl: publicProfileUrl || "https://hushhtech.com",
+    publicProfileUrl,
+  };
+};
 
 async function readWalletError(response: Response, fallback: string) {
   const contentType = response.headers.get("content-type") || "";
@@ -205,11 +211,11 @@ export const buildGoldPassPayload = (input: WalletPassInput) => {
       },
     ],
     barcode: {
-      message: descriptor.profileUrl,
+      message: descriptor.passUrl,
       format: "PKBarcodeFormatQR",
       altText: "Hushh Gold Pass QR",
     },
-    webServiceURL: descriptor.profileUrl,
+    webServiceURL: descriptor.passUrl,
   };
 };
 
@@ -226,8 +232,8 @@ export const buildGoldPassPreviewModel = (
     membershipId: descriptor.membershipId,
     investmentClass: descriptor.investmentClass,
     email: descriptor.email,
-    qrValue: descriptor.profileUrl,
-    profileUrl: descriptor.profileUrl,
+    qrValue: descriptor.passUrl,
+    profileUrl: descriptor.publicProfileUrl,
   };
 };
 
