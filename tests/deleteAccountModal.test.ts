@@ -23,7 +23,6 @@ vi.mock("react-i18next", () => ({
 
 vi.mock("../src/resources/config/config", () => ({
   default: {
-    SUPABASE_URL: "https://example.supabase.co",
     supabaseClient: {
       auth: {
         refreshSession: (...args: unknown[]) => refreshSessionMock(...args),
@@ -154,6 +153,15 @@ describe("DeleteAccountModal", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/delete-account",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: "Bearer fresh-access-token",
+        }),
+      })
+    );
     expect(handleAccountDeletedMock).toHaveBeenCalled();
     expect(onAccountDeleted).toHaveBeenCalled();
     expect(toastMock).toHaveBeenCalledWith(
