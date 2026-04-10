@@ -52,6 +52,7 @@ describe("wallet pass service", () => {
     expect(form?.getAttribute("method")).toBe("POST");
     expect(payloadInput).not.toBeNull();
     expect(JSON.parse(payloadInput!.value)).toMatchObject({
+      type: "storeCard",
       passType: "storeCard",
       description: "Hushh Gold Investor Pass",
       barcode: { message: "https://hushhtech.com/investor/test-user" },

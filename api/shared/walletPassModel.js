@@ -75,6 +75,7 @@ export const buildGoldPassPayload = (input = {}) => {
   const content = buildWalletCardContent(input);
 
   return {
+    type: "storeCard",
     passType: "storeCard",
     description: content.title,
     organizationName: WALLET_CARD_ORGANIZATION_NAME,
