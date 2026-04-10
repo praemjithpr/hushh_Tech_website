@@ -1,32 +1,73 @@
 # Hushh Tech Website
 
-This repository combines the public website, product surfaces, serverless APIs, Supabase assets, and mobile shells used across Hushh experiences.
+This repository is the public web and app wrapper for Hushh product surfaces. It contains the frontend, serverless wrapper routes, Supabase assets, tests, and documentation that shape the public experience around Hushh production services.
+
+Repository URL: https://github.com/hushh-labs/hushh_Tech_website
+
+## What this repo is
+
+- A public wrapper and integration layer around Hushh web experiences
+- A place for UI, UX, API wrapper, docs, test, and safe infrastructure contributions
+- A production-backed repository that is maintained with protected branches and maintainer-controlled deploys
+
+## What this repo is not
+
+- A source of production secrets, service-account keys, or private credentials
+- A promise that every internal service or deployment detail is exposed here
+- A safe place to commit `.env` files, `.p8` keys, service-account JSON, or vendor API keys
+
+## Production model
+
+- Production secrets belong in GCP Secret Manager or the minimal server-side secret store needed for a specific runtime
+- `main` is protected and intended to move through pull requests, checks, and maintainer review
+- Public contributors should assume that production infra, credentials, and secret rotation stay maintainer-owned
+
+## Safe contribution areas
+
+- frontend components and routes under `src/`
+- wrapper APIs under `api/`
+- docs, issue templates, and contributor tooling
+- tests and smoke coverage
+- safe build, CI, and repo-health improvements that do not expose or require secrets
+
+## Maintainer-owned or sensitive areas
+
+- secret rotation and vendor credential management
+- deploy credentials and service-role material
+- production GCP and Supabase configuration
+- destructive git history rewrites and incident/security response
+
+## Quick start
+
+```bash
+npm ci
+npm run test
+npm run security:gitleaks
+```
+
+See:
+
+- [CONTRIBUTING.md](/Users/ankitkumarsingh/hushhTech/CONTRIBUTING.md)
+- [SECURITY.md](/Users/ankitkumarsingh/hushhTech/SECURITY.md)
+- [CODE_OF_CONDUCT.md](/Users/ankitkumarsingh/hushhTech/CODE_OF_CONDUCT.md)
+- [SUPPORT.md](/Users/ankitkumarsingh/hushhTech/SUPPORT.md)
+- [LICENSE](/Users/ankitkumarsingh/hushhTech/LICENSE)
 
 ## Project layout
 
-- `src/`: Active frontend code.
-- `src/pages/`: Live route entry points. Prefer the folder-based `ui.tsx` + `logic.ts` pattern for new pages.
-- `src/hushh-*`, `src/kai*`: Product-specific app modules.
-- `public/`: Static assets served directly by Vite.
-- `api/`: Vercel-style serverless endpoints.
-- `supabase/`: Edge functions, timestamped migrations, local config, and manual SQL scripts.
-- `cloud-run/`: Standalone service deployments.
-- `scripts/`: Deployment, maintenance, and operational scripts.
-- `docs/`: Product, architecture, runbook, and archive documentation.
-- `tests/`: Vitest coverage for critical flows.
-- `playstore-assets/`: Store listing assets and release notes.
+- `src/`: Active frontend code and route modules
+- `api/`: Serverless wrapper endpoints
+- `supabase/`: Edge functions, migrations, and local Supabase assets
+- `cloud-run/`: Standalone service deployments
+- `scripts/`: Operational and repo-maintenance scripts
+- `docs/`: Architecture, runbooks, and contributor-facing documentation
+- `tests/`: Vitest coverage and route-level verification
+- `public/`: Static assets served directly by Vite
 
-## Structure conventions
+## Repo conventions
 
-- Keep runtime app code in `src/`.
-- Keep timestamped, environment-safe database changes in `supabase/migrations/`.
-- Keep one-off or historical SQL in `supabase/manual-sql/`.
-- Keep unused page snapshots out of `src/` and archive them under `docs/archive/`.
-- Avoid adding ad hoc files to the project root unless they are true repo entrypoints such as toolchain config files.
-
-## Cleanup notes
-
-- Legacy page snapshots that are no longer imported now live in `docs/archive/src-pages/`.
-- Operational SQL that used to sit in the repo root now lives in `supabase/manual-sql/`.
-- Product docs that are not part of the shipped app should live in `docs/`, not `src/`.
-- Capacitor native project files and mobile build scripts have been removed from this repo.
+- Keep runtime app code in `src/`
+- Keep timestamped DB changes in `supabase/migrations/`
+- Keep historical or manual SQL in `supabase/manual-sql/`
+- Keep repo-entrypoint files in the root; move product docs into `docs/`
+- Prefer PR-sized, decision-clear changes over broad mixed diffs

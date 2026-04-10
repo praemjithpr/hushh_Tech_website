@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "vite",
     "dev:vercel": "vercel dev --listen 3000",
+    "security:gitleaks": "bash scripts/security/run-gitleaks.sh",
+    "security:audit": "bash scripts/security/open-source-audit.sh",
+    "security:pre-commit": "PRE_COMMIT_HOME=.pre-commit-cache pre-commit run --all-files",
+    "security:rewrite-history": "bash scripts/security/rewrite-history.sh",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

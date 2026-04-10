@@ -31,3 +31,5 @@ vertex-ai-key.json
 .env.gemini-keys
 *.p8
 private_keys/
+.pre-commit-cache/
+.gitleaks-report.json
