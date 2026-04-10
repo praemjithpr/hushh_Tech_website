@@ -68,15 +68,6 @@ src/
 │   ├── presentation/     # Views, pages
 │   └── pages/            # Route pages
 │
-├── hushh-agent/          # Agent Module
-│   ├── components/       # UI components
-│   ├── hooks/            # Custom hooks
-│   ├── pages/            # Route pages
-│   ├── services/         # Agent services
-│   ├── types/            # TypeScript types
-│   ├── App.tsx           # Module app
-│   └── routes.tsx        # Module routes
-│
 ├── hushh-intelligence/   # Intelligence Module
 │   ├── core/             # Types, config
 │   └── services/         # Intelligence services
@@ -163,7 +154,7 @@ scripts/
 - Index files export from feature directories
 
 ### Module Structure
-- Self-contained modules: `hushh-ai`, `hushh-agent`, `kai`, etc.
+- Self-contained modules: `hushh-ai`, `kai`, `hushh-studio`, etc.
 - Each has its own App.tsx, routes, services
 - Clean architecture in `hushh-ai` (core/data/domain/presentation)
 

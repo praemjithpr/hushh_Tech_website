@@ -500,13 +500,12 @@ async function archivePaymentAuditRows(adminClient, paymentRows, userId, auditSe
 async function collectDeleteContext(adminClient, userId) {
   const userIdText = String(userId);
 
-  const [profileRows, investorAgentRows, leadRows, hushhAiUserRows, legacyAgentConversationRows, intelligenceUserRows, ndaSignatureRows, onboardingRows, plaidItemRows, kycProfileRows, financialRows, ceoPaymentRows, consumerConversationRows, hushhAgentsOwnerConversationRows, hushhAgentsTargetConversationRows] =
+  const [profileRows, investorAgentRows, leadRows, hushhAiUserRows, intelligenceUserRows, ndaSignatureRows, onboardingRows, plaidItemRows, kycProfileRows, financialRows, ceoPaymentRows, consumerConversationRows] =
     await Promise.all([
       selectEq(adminClient, "investor_profiles", "slug", "user_id", userId),
       selectEq(adminClient, "investor_agents", "slug", "user_id", userId),
       selectEq(adminClient, "lead_requests", "id", "user_id", userId),
       selectEq(adminClient, "hushh_ai_users", "id", "supabase_user_id", userId),
-      selectEq(adminClient, "hushh_agent_conversations", "id", "user_id", userId),
       selectEq(adminClient, "intelligence_users", "id", "supabase_user_id", userId),
       selectEq(adminClient, "nda_signatures", "pdf_url", "user_id", userId),
       selectEq(adminClient, "onboarding_data", "nda_pdf_url", "user_id", userId),
@@ -521,14 +520,6 @@ async function collectDeleteContext(adminClient, userId) {
         userId
       ),
       selectEq(adminClient, "conversations", "id", "consumer_id", userId),
-      selectEq(adminClient, "hushh_agents_conversations", "id", "owner_user_id", userId),
-      selectEq(
-        adminClient,
-        "hushh_agents_conversations",
-        "id",
-        "target_profile_user_id",
-        userId
-      ),
     ]);
 
   const leadIds = mapColumnValues(leadRows, "id");
@@ -578,19 +569,11 @@ async function collectDeleteContext(adminClient, userId) {
   return {
     ceoPaymentRows,
     conversationIds,
-    hushhAgentsConversationIds: uniqueValues([
-      ...mapColumnValues(hushhAgentsOwnerConversationRows, "id"),
-      ...mapColumnValues(hushhAgentsTargetConversationRows, "id"),
-    ]),
     hushhAiChatIds: mapColumnValues(hushhAiChatRows, "id"),
     hushhAiUserIds,
     intelligenceConversationIds: mapColumnValues(intelligenceConversationRows, "id"),
     intelligenceUserIds,
     leadIds,
-    legacyHushhAgentConversationIds: mapColumnValues(
-      legacyAgentConversationRows,
-      "id"
-    ),
     ndaAssetPaths: dedupeDeleteAccountPaths(
       [...mapColumnValues(ndaSignatureRows, "pdf_url"), ...mapColumnValues(onboardingRows, "nda_pdf_url")].map(
         buildSignedNdaAssetPathFromUrl
@@ -643,56 +626,6 @@ async function purgeUserData(adminClient, userId, context) {
   await deleteIn(adminClient, "plaid_accounts", "plaid_item_id", context.plaidItemIds);
   await deleteEq(adminClient, "plaid_items", "user_id", userIdText);
   await deleteEq(adminClient, "user_financial_data", "user_id", userId);
-
-  await deleteEq(adminClient, "hushh_agents_messages", "owner_user_id", userId);
-  await deleteIn(
-    adminClient,
-    "hushh_agents_messages",
-    "conversation_id",
-    context.hushhAgentsConversationIds
-  );
-  await deleteEq(adminClient, "hushh_agents_agent_swipes", "actor_user_id", userId);
-  await deleteEq(
-    adminClient,
-    "hushh_agents_agent_swipes",
-    "target_profile_user_id",
-    userId
-  );
-  await deleteEq(adminClient, "hushh_agents_matches", "owner_user_id", userId);
-  await deleteEq(
-    adminClient,
-    "hushh_agents_matches",
-    "target_profile_user_id",
-    userId
-  );
-  await deleteEq(adminClient, "hushh_agents_conversations", "owner_user_id", userId);
-  await deleteEq(
-    adminClient,
-    "hushh_agents_conversations",
-    "target_profile_user_id",
-    userId
-  );
-  await deleteEq(adminClient, "hushh_agents_chat_logs", "user_id", userId);
-  await deleteEq(adminClient, "hushh_agents_consumer_profiles", "user_id", userId);
-  await deleteEq(adminClient, "hushh_agents_sessions", "user_id", userId);
-  await deleteEq(adminClient, "hushh_agents_user_agent_selections", "user_id", userId);
-  await deleteEq(adminClient, "hushh_agents_users", "user_id", userId);
-  await deleteEq(adminClient, "hushh_agents_profiles", "user_id", userId);
-
-  await deleteIn(
-    adminClient,
-    "hushh_agent_messages",
-    "conversation_id",
-    context.legacyHushhAgentConversationIds
-  );
-  await deleteIn(
-    adminClient,
-    "hushh_agent_conversations",
-    "id",
-    context.legacyHushhAgentConversationIds
-  );
-  await deleteEq(adminClient, "hushh_agent_subscriptions", "user_id", userId);
-  await deleteEq(adminClient, "hushh_agent_usage", "user_id", userId);
 
   await deleteIn(adminClient, "hushh_ai_messages", "chat_id", context.hushhAiChatIds);
   await deleteIn(adminClient, "hushh_ai_chats", "user_id", context.hushhAiUserIds);

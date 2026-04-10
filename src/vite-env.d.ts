@@ -17,14 +17,6 @@ interface ImportMetaEnv {
   readonly VITE_GEMINI_API_KEY_FALLBACK_2?: string;
   readonly VITE_GEMINI_API_KEY_FALLBACK_3?: string;
 
-  // Firebase/Identity Platform
-  readonly VITE_FIREBASE_API_KEY?: string;
-  readonly VITE_FIREBASE_AUTH_DOMAIN?: string;
-  readonly VITE_FIREBASE_PROJECT_ID?: string;
-  readonly VITE_FIREBASE_STORAGE_BUCKET?: string;
-  readonly VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
-  readonly VITE_FIREBASE_APP_ID?: string;
-
   // OpenAI
   readonly VITE_OPENAI_API_KEY?: string;
   readonly VITE_ALLOW_INSECURE_BROWSER_LLM?: string;

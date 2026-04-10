@@ -9,6 +9,32 @@ import {
 import { enrichContext } from "./enrichContext";
 import { generateInvestorProfile as generateInvestorProfileAPI } from "./apiClient";
 
+function normalizePublicInvestorProfileRecord(
+  profile: Partial<PublicInvestorProfileRecord>
+): PublicInvestorProfileRecord {
+  const inferredConfirmed =
+    typeof profile.is_confirmed === "boolean"
+      ? profile.is_confirmed
+      : Boolean(
+          profile.investor_profile || profile.onboarding_data || profile.shadow_profile
+        );
+
+  return {
+    slug: profile.slug || "",
+    profile_url: profile.profile_url || "",
+    is_confirmed: inferredConfirmed,
+    basic_info: {
+      name: profile.basic_info?.name || "Public Investor",
+      email: profile.basic_info?.email || null,
+      age: profile.basic_info?.age ?? null,
+      organisation: profile.basic_info?.organisation || null,
+    },
+    investor_profile: profile.investor_profile || null,
+    onboarding_data: profile.onboarding_data || null,
+    shadow_profile: profile.shadow_profile || null,
+  };
+}
+
 /**
  * Create a new investor profile for the authenticated user
  * 
@@ -261,16 +287,44 @@ export async function deleteInvestorProfile(): Promise<void> {
 export async function fetchPublicInvestorProfileBySlug(
   slug: string
 ): Promise<PublicInvestorProfileRecord> {
-  const supabase = resources.config.supabaseClient;
-  
-  if (!supabase) {
-    throw new Error("Supabase client not initialized");
-  }
-
   const trimmedSlug = slug.trim();
 
   if (!trimmedSlug) {
     throw new Error("Profile not found or is private");
+  }
+
+  if (typeof window !== "undefined" && typeof fetch === "function") {
+    try {
+      const response = await fetch(
+        `/api/public-investor-profile?slug=${encodeURIComponent(trimmedSlug)}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (response.ok) {
+        return normalizePublicInvestorProfileRecord(
+          (await response.json()) as PublicInvestorProfileRecord
+        );
+      }
+
+      if (response.status === 404) {
+        throw new Error("Profile not found or is private");
+      }
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === "Profile not found or is private"
+      ) {
+        throw error;
+      }
+    }
+  }
+
+  const supabase = resources.config.supabaseClient;
+
+  if (!supabase) {
+    throw new Error("Supabase client not initialized");
   }
 
   const { data, error } = await supabase.rpc("get_public_investor_profile", {
@@ -285,7 +339,9 @@ export async function fetchPublicInvestorProfileBySlug(
     throw new Error("Profile not found or is private");
   }
 
-  return data as PublicInvestorProfileRecord;
+  return normalizePublicInvestorProfileRecord(
+    data as PublicInvestorProfileRecord
+  );
 }
 
 /**

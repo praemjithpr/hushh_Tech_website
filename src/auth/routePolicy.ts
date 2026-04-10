@@ -24,8 +24,6 @@ export const PUBLIC_MARKETING_ROUTE_PREFIXES = [
   "/contact",
   "/benefits",
   "/hushh-ai",
-  "/hushh-agent",
-  "/hushh-agents",
   "/kai",
   "/kai-india",
   "/studio",

@@ -44,28 +44,21 @@ The codebase is organized into distinct product modules:
 - Clean architecture (core/data/domain/presentation)
 - Supabase-backed conversations
 
-### 3. Hushh Agent (`src/hushh-agent/`)
-- Career/Resume node
-- Phone/Email authentication
-- ReAct agent pattern
-- Vision-based sessions
-- Emotion detection (MediaPipe)
-
-### 4. Kai (`src/kai/`)
+### 3. Kai (`src/kai/`)
 - Voice-based AI assistant
 - Gemini Live integration
 - Decision card interface
 
-### 5. Kai India (`src/kai-india/`)
+### 4. Kai India (`src/kai-india/`)
 - India-specific investment advisor
 - Market intelligence
 - Investment calculator
 
-### 6. Hushh Studio (`src/hushh-studio/`)
+### 5. Hushh Studio (`src/hushh-studio/`)
 - Video generation (Veo)
 - Creative tools
 
-### 7. Hushh Intelligence (`src/hushh-intelligence/`)
+### 6. Hushh Intelligence (`src/hushh-intelligence/`)
 - Intelligence services
 - Profile search
 - Data enrichment
@@ -102,8 +95,6 @@ Used in `src/hushh-ai/` and referenced in `.cursor/rules/clean-architecture-rule
 ```
 User → Supabase Auth → JWT Token → Protected Routes
      ↓
-Firebase (Phone Auth) → Supabase Session
-     ↓
 Apple/Google Sign-In → Supabase User
 ```
 
@@ -130,12 +121,12 @@ Located in `supabase/functions/`:
 
 | Category | Functions |
 |----------|-----------|
-| Chat | `investor-chat`, `hushh-ai-chat`, `chatnode-ai` |
+| Chat | `investor-chat`, `hushh-ai-chat` |
 | Profile | `generate-investor-profile`, `hushh-profile-search` |
 | KYC | `kyc-agent-a2a`, `kyc-agent-agentic` |
 | Payment | `chat-create-checkout`, `onboarding-create-checkout` |
 | AI Inference | `hushh-address-inference`, `hushh-dob-inference` |
-| Notifications | `nda-signed-notification`, `sales-mailer` |
+| Notifications | `nda-signed-notification` |
 
 ## State Management
 

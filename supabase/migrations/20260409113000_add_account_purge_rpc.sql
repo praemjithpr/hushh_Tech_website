@@ -163,8 +163,6 @@ DECLARE
   conversation_ids UUID[] := ARRAY[]::UUID[];
   hushh_ai_user_ids UUID[] := ARRAY[]::UUID[];
   hushh_ai_chat_ids UUID[] := ARRAY[]::UUID[];
-  hushh_agents_conversation_ids UUID[] := ARRAY[]::UUID[];
-  legacy_hushh_agent_conversation_ids UUID[] := ARRAY[]::UUID[];
   intelligence_user_ids UUID[] := ARRAY[]::UUID[];
   intelligence_conversation_ids UUID[] := ARRAY[]::UUID[];
   plaid_item_ids TEXT[] := ARRAY[]::TEXT[];
@@ -218,21 +216,6 @@ BEGIN
     INTO hushh_ai_user_ids
     FROM public.hushh_ai_users
     WHERE supabase_user_id = p_user_id;
-  END IF;
-
-  IF to_regclass('public.hushh_agents_conversations') IS NOT NULL THEN
-    SELECT COALESCE(array_agg(id), ARRAY[]::UUID[])
-    INTO hushh_agents_conversation_ids
-    FROM public.hushh_agents_conversations
-    WHERE owner_user_id = p_user_id
-       OR target_profile_user_id = p_user_id;
-  END IF;
-
-  IF to_regclass('public.hushh_agent_conversations') IS NOT NULL THEN
-    SELECT COALESCE(array_agg(id), ARRAY[]::UUID[])
-    INTO legacy_hushh_agent_conversation_ids
-    FROM public.hushh_agent_conversations
-    WHERE user_id = p_user_id;
   END IF;
 
   IF to_regclass('public.intelligence_users') IS NOT NULL THEN
@@ -446,98 +429,6 @@ BEGIN
   );
   PERFORM public.delete_rows_by_uuid_if_exists(
     'public.user_financial_data',
-    'user_id',
-    p_user_id
-  );
-
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_messages',
-    'owner_user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_array_if_exists(
-    'public.hushh_agents_messages',
-    'conversation_id',
-    hushh_agents_conversation_ids
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_agent_swipes',
-    'actor_user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_agent_swipes',
-    'target_profile_user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_matches',
-    'owner_user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_matches',
-    'target_profile_user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_conversations',
-    'owner_user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_conversations',
-    'target_profile_user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_chat_logs',
-    'user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_consumer_profiles',
-    'user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_sessions',
-    'user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_user_agent_selections',
-    'user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_users',
-    'user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agents_profiles',
-    'user_id',
-    p_user_id
-  );
-
-  PERFORM public.delete_rows_by_uuid_array_if_exists(
-    'public.hushh_agent_messages',
-    'conversation_id',
-    legacy_hushh_agent_conversation_ids
-  );
-  PERFORM public.delete_rows_by_uuid_array_if_exists(
-    'public.hushh_agent_conversations',
-    'id',
-    legacy_hushh_agent_conversation_ids
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agent_subscriptions',
-    'user_id',
-    p_user_id
-  );
-  PERFORM public.delete_rows_by_uuid_if_exists(
-    'public.hushh_agent_usage',
     'user_id',
     p_user_id
   );

@@ -3,7 +3,7 @@
  * 
  * Two OpenAI-powered agents communicate to verify KYC:
  * - Bank Agent: Requests verification, provides user data
- * - Hushh Agent: Queries real database, responds with verified data
+ * - Identity Oracle: Queries real database, responds with verified data
  * 
  * Uses A2A protocol concepts for structured communication.
  * Uses the Hushh Identity Oracle system prompt for AI reasoning.
@@ -42,7 +42,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // ============================================================================
 
 interface AgentMessage {
-  role: 'bank_agent' | 'hushh_agent' | 'system';
+  role: 'bank_agent' | 'identity_oracle' | 'system';
   content: string;
   timestamp: string;
   metadata?: Record<string, any>;
@@ -78,7 +78,7 @@ interface DatabaseUser {
 }
 
 // ============================================================================
-// DATABASE QUERY TOOLS FOR HUSHH AGENT
+// DATABASE QUERY TOOLS FOR THE IDENTITY ORACLE
 // ============================================================================
 
 async function searchByName(firstName: string, lastName: string): Promise<DatabaseUser | null> {
@@ -292,7 +292,7 @@ async function runAgentConversation(
   // ========================
   // BANK AGENT: Initial Request
   // ========================
-  const bankInitialMessage = `Hey Hushh Agent, I need to verify a user for KYC. The user's name is "${request.userName}".${
+  const bankInitialMessage = `Hey Identity Oracle, I need to verify a user for KYC. The user's name is "${request.userName}".${
     request.phoneCountryCode && request.phoneNumber
       ? ` I have their phone: ${request.phoneCountryCode} ${request.phoneNumber}.`
       : ''
@@ -334,7 +334,7 @@ async function runAgentConversation(
       const toolArgs = JSON.parse(toolCall.function.arguments);
       
       messages.push({
-        role: 'hushh_agent',
+        role: 'identity_oracle',
         content: `🔍 Searching database using ${toolName}...`,
         timestamp: new Date().toISOString(),
         tool_call: { name: toolName, arguments: toolArgs },
@@ -377,7 +377,7 @@ async function runAgentConversation(
   // Final Hushh response
   const hushhFinalContent = hushhChoice.message.content;
   messages.push({
-    role: 'hushh_agent',
+    role: 'identity_oracle',
     content: hushhFinalContent,
     timestamp: new Date().toISOString(),
     metadata: foundUser ? { userFound: true } : { userFound: false },
@@ -413,7 +413,7 @@ async function runAgentConversation(
 This user is verified in the Hushh system.`;
 
     messages.push({
-      role: 'hushh_agent',
+      role: 'identity_oracle',
       content: kycDataResponse,
       timestamp: new Date().toISOString(),
       metadata: { kycData: true },
@@ -431,7 +431,7 @@ This user is verified in the Hushh system.`;
 
       // Hushh verifies SSN
       messages.push({
-        role: 'hushh_agent',
+        role: 'identity_oracle',
         content: `🔐 SSN verification: The SSN last 4 digits have been verified cryptographically. Match confirmed.`,
         timestamp: new Date().toISOString(),
         metadata: { ssnVerified: true },
@@ -446,7 +446,7 @@ This user is verified in the Hushh system.`;
     });
 
     messages.push({
-      role: 'hushh_agent',
+      role: 'identity_oracle',
       content: `✅ Yes, proceeding with secure data migration...
       
 ⏳ Processing... 45 seconds remaining...
@@ -467,7 +467,7 @@ This user is verified in the Hushh system.`;
     });
 
     messages.push({
-      role: 'hushh_agent',
+      role: 'identity_oracle',
       content: `Correct, I couldn't find "${request.userName}" in our database. You'll need to collect fresh KYC information from this user. They haven't completed onboarding with Hushh yet.`,
       timestamp: new Date().toISOString(),
       metadata: { requiresFreshKyc: true },

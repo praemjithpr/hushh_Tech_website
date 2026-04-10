@@ -65,7 +65,6 @@
 |--------|------|--------|
 | Main Website | `src/pages/` | 🟢 Active |
 | Hushh AI | `src/hushh-ai/` | 🟢 Active |
-| Hushh Agent | `src/hushh-agent/` | 🟢 Active |
 | KAI | `src/kai/` | 🟢 Active |
 | KAI India | `src/kai-india/` | 🟢 Active |
 | Hushh Studio | `src/hushh-studio/` | 🟢 Active |

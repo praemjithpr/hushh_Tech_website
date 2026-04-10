@@ -828,7 +828,7 @@ async function runA2AConversation(request: KycRequest): Promise<{
 
   // ==============================
   // SEQUENCE 2: TASK_NEGOTIATION
-  // Hushh Agent requests additional input
+  // Identity oracle requests additional input
   // ==============================
   sequence++;
   messages.push({
@@ -876,7 +876,7 @@ async function runA2AConversation(request: KycRequest): Promise<{
 
   // ==============================
   // SEQUENCE 4: TASK_STATUS - Processing (45%)
-  // Hushh Agent begins processing
+  // Identity oracle begins processing
   // ==============================
   sequence++;
   messages.push({
@@ -1206,7 +1206,7 @@ async function runA2AConversation(request: KycRequest): Promise<{
 // ============================================================================
 
 const getAgentCard = (): AgentCard => ({
-  name: 'Hushh KYC Master Agent',
+  name: 'Hushh Identity Oracle',
   description: 'Enterprise-grade AI agent for KYC verification using the A2A Protocol. Provides trust scoring, risk assessment, and secure data exchange capabilities.',
   url: `${supabaseUrl}/functions/v1/kyc-agent-a2a-protocol`,
   protocolVersion: '1.0',

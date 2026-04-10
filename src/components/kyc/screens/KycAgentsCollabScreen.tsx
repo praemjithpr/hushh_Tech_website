@@ -217,7 +217,7 @@ const KycAgentsCollabScreen: React.FC<KycAgentsCollabScreenProps> = ({
               ))}
             </Flex>
 
-            {/* Hushh Agent */}
+            {/* Identity Oracle */}
             <VStack spacing={2}>
               <Box
                 p={3}

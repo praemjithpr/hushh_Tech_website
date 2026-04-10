@@ -10,11 +10,6 @@
 - JWT tokens with RLS policies
 - Session management
 
-### Firebase Auth
-- **Phone authentication** for Hushh Agent
-- OTP verification
-- Used in: `src/hushh-agent/config/firebase.ts`
-
 ### Social Sign-In
 - **Google Sign-In**: `src/services/authentication/googleSignIn.ts`
 - **Apple Sign-In**: `src/services/authentication/appleSignIn.ts`
@@ -38,11 +33,6 @@
   - Chat completions
   - Content generation
 - **Edge Functions**: `generate-investor-profile`
-
-### MediaPipe
-- **Package**: `@mediapipe/tasks-vision`
-- **Use Case**: Emotion detection in Hushh Agent
-- **Location**: `src/hushh-agent/services/mediapipeService.ts`
 
 ## Payment Processing
 
@@ -185,5 +175,4 @@ const event = stripe.webhooks.constructEvent(body, signature, secret)
 | `VITE_OPENAI_API_KEY` | OpenAI |
 | `STRIPE_SECRET_KEY` | Stripe |
 | `STRIPE_WEBHOOK_SECRET` | Stripe Webhooks |
-| `VITE_FIREBASE_*` | Firebase |
 | `GMAIL_CLIENT_*` | Gmail API |

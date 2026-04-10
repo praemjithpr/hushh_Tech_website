@@ -1,7 +1,0 @@
-{
-  "name": "resume-analysis-agent",
-  "version": "1.0.0",
-  "imports": {
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.3"
-  }
-}

@@ -242,9 +242,34 @@ const PublicInvestorProfilePage: React.FC = () => {
   }
 
   const basicInfo = profileData.basic_info;
+  const isConfirmedProfile =
+    typeof profileData.is_confirmed === "boolean"
+      ? profileData.is_confirmed
+      : Boolean(
+          profileData.investor_profile ||
+            profileData.onboarding_data ||
+            profileData.shadow_profile
+        );
   const investorProfile = profileData.investor_profile;
   const shadowProfile: ShadowProfile | null = profileData.shadow_profile;
   const onboardingData: PublicInvestorOnboardingData | null = profileData.onboarding_data;
+  const displayName = basicInfo.name || "Public Investor";
+  const profileEyebrow = isConfirmedProfile
+    ? "Verified Investor Profile"
+    : "Public Investor Profile";
+  const profileBadgeLabel = isConfirmedProfile ? "Verified" : "Public";
+  const metaDescription = isConfirmedProfile
+    ? `View ${displayName}'s verified investor profile. ${basicInfo.organisation ? `Works at ${basicInfo.organisation}` : ''}`
+    : `View ${displayName}'s public investor profile. ${basicInfo.organisation ? `Works at ${basicInfo.organisation}` : ''}`;
+  const socialDescription = isConfirmedProfile
+    ? `Verified investor on Hushh.${basicInfo.age !== null ? ` Age ${basicInfo.age}` : ''}${basicInfo.organisation ? ` • ${basicInfo.organisation}` : ''}`
+    : `Public investor profile on Hushh.${basicInfo.age !== null ? ` Age ${basicInfo.age}` : ''}${basicInfo.organisation ? ` • ${basicInfo.organisation}` : ''}`;
+  const secondaryBasicInfoLabel =
+    basicInfo.age !== null
+      ? `Age ${basicInfo.age}`
+      : isConfirmedProfile
+        ? "Verified investor"
+        : "Shared by investor";
   const visibleInvestorProfileEntries = investorProfile
     ? Object.entries(investorProfile).filter(([, fieldData]) =>
         Boolean(fieldData && typeof fieldData === "object" && "value" in fieldData)
@@ -350,16 +375,16 @@ const PublicInvestorProfilePage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{`${basicInfo.name}'s Investor Profile | Hushh`}</title>
-        <meta name="description" content={`View ${basicInfo.name}'s verified investor profile. ${basicInfo.organisation ? `Works at ${basicInfo.organisation}` : ''}`} />
-        <meta property="og:title" content={`${basicInfo.name} - Investor Profile`} />
-        <meta property="og:description" content={`Verified investor on Hushh.${basicInfo.age !== null ? ` Age ${basicInfo.age}` : ''}${basicInfo.organisation ? ` • ${basicInfo.organisation}` : ''}`} />
+        <title>{`${displayName}'s Investor Profile | Hushh`}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={`${displayName} - Investor Profile`} />
+        <meta property="og:description" content={socialDescription} />
         <meta property="og:image" content={ogImageUrl} />
         <meta property="og:url" content={profileUrl} />
         <meta property="og:type" content="profile" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${basicInfo.name} - Investor Profile`} />
-        <meta name="twitter:description" content={`Verified investor on Hushh`} />
+        <meta name="twitter:title" content={`${displayName} - Investor Profile`} />
+        <meta name="twitter:description" content={socialDescription} />
         <meta name="twitter:image" content={ogImageUrl} />
       </Helmet>
 
@@ -423,13 +448,13 @@ const PublicInvestorProfilePage: React.FC = () => {
                 {/* Welcome Section */}
                 <section className="py-8">
                   <h3 className="text-[10px] tracking-[0.2em] text-gray-400 uppercase mb-4 font-medium">
-                    Verified Investor Profile
+                    {profileEyebrow}
                   </h3>
                   <h1
                     className="text-[2.75rem] leading-[1.1] font-normal text-black tracking-tight font-serif"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
-                    {basicInfo.name?.split(' ')[0] || 'Investor'} <br />
+                    {displayName} <br />
                     <span className="text-gray-400 italic font-light">Investor Profile</span>
                   </h1>
                 </section>
@@ -442,16 +467,12 @@ const PublicInvestorProfilePage: React.FC = () => {
                         <User className="w-5 h-5 text-gray-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{basicInfo.name}</p>
-                        {basicInfo.age !== null ? (
-                          <p className="text-xs text-gray-500 font-medium">Age {basicInfo.age}</p>
-                        ) : (
-                          <p className="text-xs text-gray-500 font-medium">Verified investor</p>
-                        )}
+                        <p className="text-sm font-semibold text-gray-900">{displayName}</p>
+                        <p className="text-xs text-gray-500 font-medium">{secondaryBasicInfoLabel}</p>
                       </div>
                     </div>
                     <span className="px-2.5 py-1 bg-hushh-blue/10 text-hushh-blue text-[10px] font-semibold rounded-full">
-                      Verified
+                      {profileBadgeLabel}
                     </span>
                   </div>
                   <div className="py-4 border-b border-gray-200 flex items-center gap-4">

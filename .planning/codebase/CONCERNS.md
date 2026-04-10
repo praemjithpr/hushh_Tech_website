@@ -8,7 +8,7 @@
 **Risk Level:** Medium
 
 The codebase has grown significantly with multiple product modules:
-- `hushh-ai`, `hushh-agent`, `kai`, `kai-india`, `hushh-studio`, `hushh-intelligence`
+- `hushh-ai`, `kai`, `kai-india`, `hushh-studio`, `hushh-intelligence`
 
 **Potential Issues:**
 - Code duplication across modules
@@ -62,7 +62,6 @@ Multiple UI approaches in use:
 
 Multiple auth systems:
 - Supabase Auth (primary)
-- Firebase Auth (phone only)
 - Social providers
 
 **Potential Issues:**

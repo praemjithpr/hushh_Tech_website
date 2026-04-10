@@ -36,7 +36,7 @@ const HushhEmployeeChampionHandbook = () => {
       </Text>
       <List spacing={3} mb={4}>
         <ListItem>• Consistent Cash Flow: Weekly/monthly premium collection mitigates reliance on pure capital gains.</ListItem>
-        <ListItem>• Adaptive AI: A “Hushh Agent” continuously improves trade execution, informed by real-time data, sentiment, and proprietary analytics.</ListItem>
+        <ListItem>• Adaptive AI: A “Hushh AI” continuously improves trade execution, informed by real-time data, sentiment, and proprietary analytics.</ListItem>
         <ListItem>• Holistic Approach: Merges best-of-breed technology with user-consent data policies to help investors realize alpha in a sustainable, future-facing model.</ListItem>
       </List>
       <Text mb={4}>

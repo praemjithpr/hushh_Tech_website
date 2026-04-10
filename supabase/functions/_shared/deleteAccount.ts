@@ -27,20 +27,6 @@ export const DELETE_ACCOUNT_SCHEMA_COVERED_TABLES = [
   "conversations",
   "delete_requests",
   "devices",
-  "hushh_agents_agent_swipes",
-  "hushh_agents_chat_logs",
-  "hushh_agents_consumer_profiles",
-  "hushh_agents_conversations",
-  "hushh_agents_matches",
-  "hushh_agents_messages",
-  "hushh_agents_profiles",
-  "hushh_agents_sessions",
-  "hushh_agents_user_agent_selections",
-  "hushh_agents_users",
-  "hushh_agent_conversations",
-  "hushh_agent_messages",
-  "hushh_agent_subscriptions",
-  "hushh_agent_usage",
   "hushh_ai_chats",
   "hushh_ai_media_limits",
   "hushh_ai_messages",
@@ -77,8 +63,13 @@ export const DELETE_ACCOUNT_SCHEMA_COVERED_TABLES = [
 ] as const;
 
 export const DELETE_ACCOUNT_SCHEMA_IGNORED_TABLES = [
+  // These tables remain in historical migrations only; the forward cleanup
+  // migration drops them from active environments.
+  "hushh_agent_conversations",
   "hushh_agent_email_sessions",
   "hushh_agent_resume_sessions",
+  "hushh_agent_subscriptions",
+  "hushh_agent_usage",
   "resume_analyses",
 ] as const;
 

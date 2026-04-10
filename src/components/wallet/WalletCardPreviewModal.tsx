@@ -46,25 +46,34 @@ function formatPreviewMembershipId(membershipId: string) {
 }
 
 function getHolderNameTypography(holderName: string) {
-  const nameLength = holderName.trim().length;
+  const normalizedName = holderName.trim().replace(/\s+/g, " ");
+  const words = normalizedName.length > 0 ? normalizedName.split(" ") : [];
+  const nameLength = normalizedName.length;
+  const longestWordLength = words.reduce(
+    (longest, word) => Math.max(longest, word.length),
+    0
+  );
 
-  if (nameLength > 34) {
+  if (nameLength > 32 || longestWordLength > 12 || words.length > 3) {
     return {
-      fontSize: "clamp(1.18rem, 0.96rem + 1.2vw, 2rem)",
-      lineHeight: "1.08",
+      fontSize: "clamp(1.12rem, 0.94rem + 1vw, 1.9rem)",
+      lineHeight: "1.12",
+      minHeight: "calc(1.12em * 2)",
     };
   }
 
-  if (nameLength > 24) {
+  if (nameLength > 18 || longestWordLength > 8 || words.length > 1) {
     return {
-      fontSize: "clamp(1.38rem, 1rem + 1.9vw, 2.55rem)",
-      lineHeight: "1.05",
+      fontSize: "clamp(1.32rem, 1rem + 1.65vw, 2.35rem)",
+      lineHeight: "1.1",
+      minHeight: "calc(1.1em * 2)",
     };
   }
 
   return {
     fontSize: "clamp(1.7rem, 1.05rem + 3vw, 3.35rem)",
-    lineHeight: "1.02",
+    lineHeight: "1.04",
+    minHeight: "calc(1.04em * 2)",
   };
 }
 
@@ -83,6 +92,7 @@ export default function WalletCardPreviewModal({
 }: WalletCardPreviewModalProps) {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [supportsInteractiveTilt, setSupportsInteractiveTilt] = useState(false);
   const qrFrameSize = useBreakpointValue({ base: 98, sm: 112, md: 128 }) ?? 98;
   const qrPadding = useBreakpointValue({ base: 9, sm: 10, md: 12 }) ?? 9;
 
@@ -91,18 +101,33 @@ export default function WalletCardPreviewModal({
       return;
     }
 
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updatePreference = () => setReducedMotion(mediaQuery.matches);
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const tiltSupportQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const updatePreferences = () => {
+      setReducedMotion(reducedMotionQuery.matches);
+      setSupportsInteractiveTilt(tiltSupportQuery.matches);
+    };
 
-    updatePreference();
+    updatePreferences();
 
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", updatePreference);
-      return () => mediaQuery.removeEventListener("change", updatePreference);
+    if (
+      typeof reducedMotionQuery.addEventListener === "function" &&
+      typeof tiltSupportQuery.addEventListener === "function"
+    ) {
+      reducedMotionQuery.addEventListener("change", updatePreferences);
+      tiltSupportQuery.addEventListener("change", updatePreferences);
+      return () => {
+        reducedMotionQuery.removeEventListener("change", updatePreferences);
+        tiltSupportQuery.removeEventListener("change", updatePreferences);
+      };
     }
 
-    mediaQuery.addListener(updatePreference);
-    return () => mediaQuery.removeListener(updatePreference);
+    reducedMotionQuery.addListener(updatePreferences);
+    tiltSupportQuery.addListener(updatePreferences);
+    return () => {
+      reducedMotionQuery.removeListener(updatePreferences);
+      tiltSupportQuery.removeListener(updatePreferences);
+    };
   }, []);
 
   if (!preview) {
@@ -113,12 +138,13 @@ export default function WalletCardPreviewModal({
   const holderNameTypography = getHolderNameTypography(preview.holderName);
   const qrSize = qrFrameSize - qrPadding * 2;
   const hasPublicProfileUrl = Boolean(preview.profileUrl);
+  const enableCardTilt = supportsInteractiveTilt && !reducedMotion;
   const profileLinkDescription = hasPublicProfileUrl
     ? preview.profileUrl
     : "Public profile link unavailable until your shared profile is ready.";
 
   const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
-    if (reducedMotion) {
+    if (!enableCardTilt) {
       return;
     }
 
@@ -165,13 +191,15 @@ export default function WalletCardPreviewModal({
               <Box
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
+                data-testid="wallet-preview-shell"
+                data-tilt-enabled={enableCardTilt ? "true" : "false"}
                 transform={
-                  reducedMotion
-                    ? "none"
-                    : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale3d(1.01, 1.01, 1.01)`
+                  enableCardTilt
+                    ? `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale3d(1.01, 1.01, 1.01)`
+                    : "none"
                 }
-                transition={reducedMotion ? "none" : "transform 120ms ease-out"}
-                sx={{ transformStyle: "preserve-3d" }}
+                transition={enableCardTilt ? "transform 120ms ease-out" : "none"}
+                sx={enableCardTilt ? { transformStyle: "preserve-3d" } : undefined}
               >
                 <Box
                   position="relative"
@@ -260,11 +288,13 @@ export default function WalletCardPreviewModal({
                       minW={0}
                     >
                       <Text
+                        data-testid="wallet-preview-holder-name"
                         fontSize={holderNameTypography.fontSize}
                         fontWeight="700"
                         color="rgba(11, 17, 32, 0.9)"
                         textShadow="0 1px 0 rgba(255, 255, 255, 0.45)"
                         lineHeight={holderNameTypography.lineHeight}
+                        minH={holderNameTypography.minHeight}
                         noOfLines={2}
                         overflowWrap="anywhere"
                       >

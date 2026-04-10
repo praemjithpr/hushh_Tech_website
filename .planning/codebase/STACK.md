@@ -95,4 +95,3 @@ Required configuration:
 - `VITE_SUPABASE_ANON_KEY` - Supabase anon key
 - `VITE_GOOGLE_AI_KEY` - Google AI API key
 - `VITE_OPENAI_API_KEY` - OpenAI API key
-- `VITE_FIREBASE_*` - Firebase config for phone auth

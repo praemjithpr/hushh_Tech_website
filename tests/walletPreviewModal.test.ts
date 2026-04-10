@@ -35,7 +35,14 @@ describe("WalletCardPreviewModal", () => {
       "https://hushhtech.com/investor/ankit-kumar-singh-premier-member-2597e6b8",
   };
 
-  const setViewport = (width: number, height: number) => {
+  const setViewport = (
+    width: number,
+    height: number,
+    options: { finePointer?: boolean; reducedMotion?: boolean } = {}
+  ) => {
+    const finePointer = options.finePointer ?? width >= 1024;
+    const reducedMotion = options.reducedMotion ?? false;
+
     Object.defineProperty(window, "innerWidth", {
       configurable: true,
       value: width,
@@ -48,8 +55,35 @@ describe("WalletCardPreviewModal", () => {
       configurable: true,
       writable: true,
       value: vi.fn().mockImplementation((query: string) => {
-        const prefersReducedMotion =
-          query.includes("prefers-reduced-motion") && query.includes("reduce");
+        if (query.includes("(hover: hover) and (pointer: fine)")) {
+          return {
+            matches: finePointer,
+            media: query,
+            onchange: null,
+            addListener: vi.fn(),
+            removeListener: vi.fn(),
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+            dispatchEvent: vi.fn(),
+          };
+        }
+
+        if (
+          query.includes("prefers-reduced-motion") &&
+          query.includes("reduce")
+        ) {
+          return {
+            matches: reducedMotion,
+            media: query,
+            onchange: null,
+            addListener: vi.fn(),
+            removeListener: vi.fn(),
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+            dispatchEvent: vi.fn(),
+          };
+        }
+
         const minWidthMatch = query.match(/min-width:\s*(\d+)px/);
         const maxWidthMatch = query.match(/max-width:\s*(\d+)px/);
         const matchesMin = minWidthMatch
@@ -58,7 +92,7 @@ describe("WalletCardPreviewModal", () => {
         const matchesMax = maxWidthMatch
           ? width <= Number(maxWidthMatch[1])
           : true;
-        const matches = prefersReducedMotion ? false : matchesMin && matchesMax;
+        const matches = matchesMin && matchesMax;
 
         return {
           matches,
@@ -151,6 +185,9 @@ describe("WalletCardPreviewModal", () => {
     const mobileQrNode = document.querySelector(
       '[data-testid="wallet-preview-qr"] svg'
     );
+    const previewShell = document.querySelector(
+      '[data-testid="wallet-preview-shell"]'
+    );
     const membershipPreview = document.querySelector(
       '[data-testid="wallet-preview-membership-id"]'
     );
@@ -163,6 +200,7 @@ describe("WalletCardPreviewModal", () => {
 
     expect(mobileQrNode).not.toBeNull();
     expect(document.body.textContent).toContain(longPreview.holderName);
+    expect(previewShell?.getAttribute("data-tilt-enabled")).toBe("false");
     expect(membershipPreview?.textContent).toContain("Membership ID · ");
     expect(membershipPreview?.textContent).toContain("…");
     expect(membershipPreview?.textContent).toContain("2597e6b8".slice(-6));
@@ -172,6 +210,11 @@ describe("WalletCardPreviewModal", () => {
     expect(profileLinkTile?.getAttribute("href")).toBe(longPreview.profileUrl);
     expect(profileLinkTile?.getAttribute("target")).toBe("_blank");
     expect(profileUrlDetails?.textContent).toContain(longPreview.profileUrl);
+
+    await act(async () => {
+      root.unmount();
+    });
+    root = createRoot(container);
 
     setViewport(1280, 900);
     await renderModal({
@@ -183,8 +226,12 @@ describe("WalletCardPreviewModal", () => {
     const desktopQrNode = document.querySelector(
       '[data-testid="wallet-preview-qr"] svg'
     );
+    const desktopPreviewShell = document.querySelector(
+      '[data-testid="wallet-preview-shell"]'
+    );
 
     expect(desktopQrNode).not.toBeNull();
+    expect(desktopPreviewShell?.getAttribute("data-tilt-enabled")).toBe("true");
     expect(document.body.textContent).toContain("Add to Apple Wallet");
     expect(document.body.textContent).toContain(
       "Google Wallet is temporarily unavailable"

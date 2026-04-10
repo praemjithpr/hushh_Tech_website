@@ -2,7 +2,7 @@
  * A2A Playground Component Exports
  * 
  * Agent-to-Agent KYC Playground demo components.
- * Demonstrates privacy-preserving KYC verification between Bank Agent and Hushh Agent.
+ * Demonstrates privacy-preserving KYC verification between a bank agent and the identity oracle.
  */
 
 // Main container (state machine)

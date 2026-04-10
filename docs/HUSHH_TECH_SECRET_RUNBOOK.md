@@ -87,7 +87,6 @@ These files were the most important exposures:
 
 - `.env`
 - `src/scripts/AuthKey_LK53NZBH4L.p8`
-- `scripts/run-migration.cjs`
 
 After you confirm the new secret locations are populated:
 

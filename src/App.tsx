@@ -64,14 +64,11 @@ import KycFlowPage from './pages/kyc-flow';
 import A2APlaygroundPage from './pages/a2a-playground';
 import ReceiptGeneratorPage from './pages/receipt-generator';
 import DeveloperDocsPage from './pages/developer-docs';
-import HushhAgentMailerPage from './pages/hushh-agent-mailer';
 import MobileBottomNav from './components/MobileBottomNav';
 import HushhAIPage from './hushh-ai/pages';
 import { LoginPage as HushhAILoginPage, SignupPage as HushhAISignupPage } from './hushh-ai/presentation/pages';
-import HushhAgentApp from './hushh-agent/pages';
 import KaiApp from './kai/pages';
 import HushhStudioApp from './hushh-studio/pages';
-import HushhAgentsApp from './hushh-agents/pages';
 import GlobalNDAGate from './components/GlobalNDAGate';
 import SignNDAPage from './pages/sign-nda';
 import DocumentViewerPage from './pages/document-viewer';
@@ -95,8 +92,6 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isA2APlayground = location.pathname.startsWith('/a2a-playground');
   const isInvestorGuide = location.pathname === '/investor-guide';
   const isHushhAI = location.pathname.startsWith('/hushh-ai');
-  const isHushhAgent = location.pathname.startsWith('/hushh-agent');
-  const isHushhAgents = location.pathname.startsWith('/hushh-agents');
   const isKai = location.pathname.startsWith('/kai');
   const isStudio = location.pathname.startsWith('/studio');
   const isHushhUserProfile = location.pathname.startsWith('/hushh-user-profile');
@@ -112,7 +107,7 @@ const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const isProfile = location.pathname === '/profile';
 
   return (
-    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isKycDemo || isA2APlayground || isInvestorGuide || isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHushhUserProfile || isSignNda || isDocumentViewer || isInvestorProfile || isPublicInvestorProfile || isDiscoverFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isProfile ? '' : 'mt-20'}`}>
+    <div className={`${isHomePage || isAuthCallback || isUserRegistration || isOnboarding || isKycFlow || isKycDemo || isA2APlayground || isInvestorGuide || isHushhAI || isKai || isStudio || isHushhUserProfile || isSignNda || isDocumentViewer || isInvestorProfile || isPublicInvestorProfile || isDiscoverFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isProfile ? '' : 'mt-20'}`}>
       {children}
     </div>
   );
@@ -123,8 +118,6 @@ const useLayoutVisibility = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isHushhAI = location.pathname.startsWith('/hushh-ai');
-  const isHushhAgent = location.pathname.startsWith('/hushh-agent');
-  const isHushhAgents = location.pathname.startsWith('/hushh-agents');
   const isKai = location.pathname.startsWith('/kai');
   const isStudio = location.pathname.startsWith('/studio');
   const isOnboarding = location.pathname.startsWith('/onboarding');
@@ -143,7 +136,7 @@ const useLayoutVisibility = () => {
   const isKycDemo = location.pathname.startsWith('/kyc-demo');
   const isA2APlayground = location.pathname.startsWith('/a2a-playground');
   const isPublicInvestorProfile = location.pathname.startsWith('/investor/');
-  const hideOld = isHushhAI || isHushhAgent || isHushhAgents || isKai || isStudio || isHomePage || isOnboarding || isProfile || isFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isSignNda || isDocumentViewer || isHushhUserProfile || isKycFlow || isKycDemo || isA2APlayground || isPublicInvestorProfile;
+  const hideOld = isHushhAI || isKai || isStudio || isHomePage || isOnboarding || isProfile || isFundA || isCommunity || isDeleteAccount || isLogin || isSignup || isSignNda || isDocumentViewer || isHushhUserProfile || isKycFlow || isKycDemo || isA2APlayground || isPublicInvestorProfile;
   return {
     showNavbar: !hideOld,
     showFooter: !hideOld,
@@ -386,13 +379,9 @@ function App() {
             <Route path='/a2a-playground' element={<A2APlaygroundPage />} />
             <Route path='/receipt-generator' element={<ReceiptGeneratorPage />} />
             <Route path='/developer-docs' element={<DeveloperDocsPage />} />
-            <Route path='/hushh-agent-mailer' element={<HushhAgentMailerPage />} />
             <Route path='/hushh-ai' element={<HushhAIPage />} />
             <Route path='/hushh-ai/login' element={<HushhAILoginPage />} />
             <Route path='/hushh-ai/signup' element={<HushhAISignupPage />} />
-            {/* Hushh Agent - AI Voice/Video Coaching Platform */}
-            {/* Uses wildcard to enable nested routing within hushh-agent module */}
-            <Route path='/hushh-agent/*' element={<HushhAgentApp />} />
             {/* Kai - Financial Intelligence Agent */}
             {/* Real-time AI voice/video financial advisor powered by Gemini 2.0 Flash */}
             <Route path='/kai' element={<KaiApp />} />
@@ -414,9 +403,6 @@ function App() {
             <Route path='/document-viewer' element={<DocumentViewerPage />} />
             {/* NDA Admin Page - Password protected view of all NDA agreements */}
             <Route path='/nda-admin' element={<NDAAdminPage />} />
-            {/* Hushh Agents - Multi-lingual AI Chat Platform */}
-            {/* Powered by GCP Gemini Live API - Hindi, English, Tamil support */}
-            <Route path='/hushh-agents/*' element={<HushhAgentsApp />} />
           </Routes>
         </ContentWrapper>
         {showFooter && <Footer />}

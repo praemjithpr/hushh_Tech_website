@@ -198,6 +198,7 @@ export interface PublicInvestorOnboardingData {
 export interface PublicInvestorProfileRecord {
   slug: string;
   profile_url: string;
+  is_confirmed: boolean;
   basic_info: PublicInvestorBasicInfo;
   investor_profile: Partial<InvestorProfile> | null;
   onboarding_data: PublicInvestorOnboardingData | null;

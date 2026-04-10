@@ -88,7 +88,7 @@ const KYCDemoPage: React.FC = () => {
       addLogEntry({
         direction: 'request',
         from: `${selectedBankInfo?.name} KYC Copilot`,
-        to: 'Hushh KYC Agent',
+        to: 'Hushh Identity Oracle',
         method: 'GET',
         summary: 'Fetching AgentCard for discovery...',
         payload: { endpoint: `${API_BASE}/a2a/agent-card.json` },
@@ -102,7 +102,7 @@ const KYCDemoPage: React.FC = () => {
 
       addLogEntry({
         direction: 'response',
-        from: 'Hushh KYC Agent',
+        from: 'Hushh Identity Oracle',
         to: `${selectedBankInfo?.name} KYC Copilot`,
         summary: 'AgentCard returned with capabilities',
         payload: agentCard,
@@ -126,7 +126,7 @@ const KYCDemoPage: React.FC = () => {
       addLogEntry({
         direction: 'request',
         from: `${selectedBankInfo?.name} KYC Copilot`,
-        to: 'Hushh KYC Agent',
+        to: 'Hushh Identity Oracle',
         method: 'CheckKYCStatus',
         summary: `Requesting KYC verification for ${userEmail || 'demo@example.com'}`,
         payload: rpcPayload,
@@ -148,8 +148,8 @@ const KYCDemoPage: React.FC = () => {
       if (rpcResult.result?.policyUsed) {
         addLogEntry({
           direction: 'response',
-          from: 'Hushh KYC Agent',
-          to: 'Hushh KYC Agent (Internal)',
+          from: 'Hushh Identity Oracle',
+          to: 'Hushh Identity Oracle (Internal)',
           summary: 'Policy evaluation completed',
           payload: rpcResult.result.policyUsed,
           status: 'success',
@@ -178,7 +178,7 @@ const KYCDemoPage: React.FC = () => {
 
       addLogEntry({
         direction: 'response',
-        from: 'Hushh KYC Agent',
+        from: 'Hushh Identity Oracle',
         to: `${selectedBankInfo?.name} KYC Copilot`,
         method: 'CheckKYCStatus',
         summary: `KYC check complete: ${result.status}`,
@@ -206,7 +206,7 @@ const KYCDemoPage: React.FC = () => {
 
       addLogEntry({
         direction: 'response',
-        from: 'Hushh KYC Agent',
+        from: 'Hushh Identity Oracle',
         to: `${selectedBankInfo?.name} KYC Copilot`,
         summary: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         status: 'error',
@@ -258,7 +258,7 @@ const KYCDemoPage: React.FC = () => {
             KYC A2A Network
           </Heading>
           <Text color="gray.600" maxW="2xl" fontSize="lg">
-            Experience how banks and fintechs can verify user KYC status through the Hushh KYC Agent 
+            Experience how banks and fintechs can verify user KYC status through the Hushh Identity Oracle 
             using the A2A (Agent-to-Agent) protocol. No raw documents are shared.
           </Text>
         </VStack>
@@ -434,7 +434,7 @@ const KYCDemoPage: React.FC = () => {
                 </Text>
                 <VStack spacing={3} align="stretch">
                   {[
-                    { step: '1', title: 'Discovery', desc: 'Bank agent fetches Hushh AgentCard' },
+                    { step: '1', title: 'Discovery', desc: 'Bank agent fetches Hushh Profile Card' },
                     { step: '2', title: 'Request', desc: 'Bank sends CheckKYCStatus via JSON-RPC' },
                     { step: '3', title: 'Evaluate', desc: 'Hushh checks attestations against bank policy' },
                     { step: '4', title: 'Response', desc: 'Status + risk band returned (no raw docs)' },

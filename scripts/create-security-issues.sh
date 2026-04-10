@@ -140,12 +140,11 @@ create_issue_and_add_to_project \
 ### VULN-005: No Authentication on Vercel API Routes
 
 **Problem:**
-ALL 7 Vercel API routes have ZERO authentication. Anyone can burn OpenAI/Gemini credits or send emails.
+ALL 6 Vercel API routes have ZERO authentication. Anyone can burn OpenAI/Gemini credits or send emails.
 
 **Files:**
 - \`api/generate-investor-profile.js\`
 - \`api/send-email-notification.js\`
-- \`api/gemini-chat.js\`
 - \`api/gemini-ephemeral-token.js\`
 - \`api/career-application.js\`
 - \`api/enrich-preferences.js\`
