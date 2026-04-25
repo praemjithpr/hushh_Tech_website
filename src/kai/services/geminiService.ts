@@ -1,110 +1,100 @@
-/**
- * kai - Financial Intelligence Agent
- * Gemini Live API Service for real-time voice/video financial intelligence
- */
+import { GoogleGenAI } from '@google/genai';
+import { ConnectionState, DecisionCardData, UserCalibration } from '../types';
+import { createPcmBlob, decodeAudioData, base64ToUint8Array, PCM_SAMPLE_RATE, AUDIO_PLAYBACK_RATE } from '../utils/audioUtils';
+import { SessionMemoryService } from './sessionMemoryService';
 
-import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type, Tool } from '@google/genai';
-import { ConnectionState, DecisionCardData, UserPersona, GeminiServiceConfig } from '../types';
-import { createPcmBlob, decodeAudioData, PCM_SAMPLE_RATE, AUDIO_PLAYBACK_RATE, base64ToUint8Array } from '../utils/audioUtils';
+export interface GeminiConfig {
+  onConnectionStateChange: (state: ConnectionState) => void;
+  onVolumeChange: (volume: number) => void;
+  onAudioData: (data: Uint8Array) => void;
+  onStatusChange: (status: string) => void;
+  onDecisionCard: (data: DecisionCardData) => void;
+  onLatencyUpdate?: (latencyMs: number) => void;
+  onSessionMemorySync?: (sessions: number) => void;
+  onAgentSpeakingChange?: (isSpeaking: boolean) => void;
+  onTranscriptUpdate?: (turn: { role: 'user' | 'agent' | 'system', text: string, timestamp: Date }) => void;
+  videoElement?: HTMLVideoElement;
+}
 
-// Tool Definition for displaying decision cards
-const displayDecisionCardDeclaration: FunctionDeclaration = {
-  name: 'displayDecisionCard',
-  description: 'Displays a visual financial decision card to the user. Use this when you have reached a conclusion or recommendation.',
-  parameters: {
-    type: Type.OBJECT,
-    properties: {
-      recommendation: { type: Type.STRING, description: 'The core action: Buy, Hold, or Reduce.' },
-      confidence: { type: Type.NUMBER, description: 'Confidence percentage (0-100).' },
-      fundamental_insight: { type: Type.STRING, description: 'Key insight from the Fundamental Agent. Must be consumer-grade plain English.' },
-      sentiment_insight: { type: Type.STRING, description: 'Key insight from the Sentiment Agent.' },
-      valuation_insight: { type: Type.STRING, description: 'Key insight from the Valuation Agent (Math/Ratios).' },
-      debate_digest: { type: Type.STRING, description: 'A summary of the tension/conflict between the agents.' },
-      evidence: {
-        type: Type.ARRAY,
-        items: { type: Type.STRING },
-        description: 'List of specific citations, URLs from Google Search results, 10-K sections, or math formulas used.'
-      },
-      reliability_score: { type: Type.NUMBER, description: 'Score (0-100) based on data availability and source quality.' },
-      risk_alignment: { type: Type.STRING, description: 'Suitability (e.g., Low Volatility, Speculative).' },
-      target_persona: { type: Type.STRING, description: 'The user persona this is tailored for.' },
-      ticker_symbol: { type: Type.STRING, description: 'The stock ticker symbol (e.g., AAPL, NVDA).' },
-      current_price: { type: Type.STRING, description: 'Current stock price from real-time search data.' },
-      price_change_percentage: { type: Type.STRING, description: 'Percentage change for the day.' },
-      scenarios: {
-        type: Type.ARRAY,
-        description: 'For Professional Advisor only: A list of 2-3 hypothetical scenarios.',
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            name: { type: Type.STRING },
-            outcome: { type: Type.STRING, description: 'Brief description of what happens.' },
-            price_impact: { type: Type.STRING, description: 'Projected price impact.' },
-            probability: { type: Type.STRING, description: 'Likelihood.' }
-          }
-        }
-      },
-      compliance_stub: { type: Type.STRING, description: 'For Professional Advisor only: A short regulatory note.' }
-    },
-    required: ['recommendation', 'confidence', 'fundamental_insight', 'sentiment_insight', 'valuation_insight', 'debate_digest', 'evidence', 'reliability_score', 'risk_alignment', 'target_persona', 'ticker_symbol', 'current_price', 'price_change_percentage']
-  },
-};
-
-const tools: Tool[] = [
-  { googleSearch: {} },
-  { functionDeclarations: [displayDecisionCardDeclaration] }
-];
-
-/**
- * GeminiService - Handles real-time voice/video communication with Gemini AI
- */
 export class GeminiService {
-  private ai: GoogleGenAI | null = null;
-  private config: GeminiServiceConfig;
+  private config: GeminiConfig;
+  private session: any = null;
   private inputAudioContext: AudioContext | null = null;
   private outputAudioContext: AudioContext | null = null;
-  private stream: MediaStream | null = null;
-  private nextStartTime = 0;
-  private sources = new Set<AudioBufferSourceNode>();
-  private videoIntervalId: number | null = null;
-  private analyser: AnalyserNode | null = null;
+  private mediaStream: MediaStream | null = null;
+  private nextPlayTime: number = 0;
+  private videoInterval: any = null;
+  private sources: Set<AudioBufferSourceNode> = new Set();
+  private lastAudioSentTime: number = 0;
+  private conversationTurns: string[] = [];
+  private currentDecisionCards: DecisionCardData[] = [];
+  private sessionSummary: string = "";
   private gainNode: GainNode | null = null;
-  private session: any = null;
+  private analyser: AnalyserNode | null = null;
+  private agentSpeakingTimeout: any = null;
 
-  constructor(config: GeminiServiceConfig) {
+  constructor(config: GeminiConfig) {
     this.config = config;
   }
 
-  /**
-   * Connect to Gemini Live API with specified persona
-   */
-  async connect(persona: UserPersona = 'Everyday Investor') {
+  public async connect(calibration: UserCalibration) {
+    console.log("KAI: Initiating SDK Connection (Forced v1beta)...");
+    this.config.onConnectionStateChange(ConnectionState.CONNECTING);
+    this.config.onStatusChange("Validating Credentials...");
+
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+      (this as any).lastCalibration = calibration;
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (window as any).import?.meta?.env?.VITE_GEMINI_API_KEY || '';
+
       if (!apiKey) {
-        console.error("Gemini API Key not found");
-        this.config.onStatusChange("API Key Missing");
+        this.config.onStatusChange("API KEY MISSING");
         this.config.onConnectionStateChange(ConnectionState.ERROR);
         return;
       }
-      this.ai = new GoogleGenAI({ apiKey });
 
-      this.config.onConnectionStateChange(ConnectionState.CONNECTING);
-      this.config.onStatusChange(`Initializing ${persona} Protocol...`);
+      this.config.onStatusChange("Initializing Neural Link...");
 
-      // Initialize Audio Contexts
+      // We use the SDK again but with a VERY specific model/version combo
+      // verified in our Node test environment.
+      const client = new GoogleGenAI({
+        apiKey
+      });
+      console.log("KAI: SDK Client State (Original Style):", client);
+
+      const displayDecisionCardTool = {
+        name: 'displayDecisionCard',
+        description: 'Display a detailed financial decision card to the user containing full analysis',
+        parameters: {
+          type: 'object',
+          properties: {
+            recommendation: { type: 'string', enum: ['BUY', 'HOLD', 'SELL'] },
+            confidence: { type: 'number', description: 'Confidence score (1 to 100)' },
+            fundamental_insight: { type: 'string' },
+            sentiment_insight: { type: 'string' },
+            valuation_insight: { type: 'string' },
+            debate_digest: { type: 'string', description: 'A summary of the internal agent debate.' },
+            evidence: { type: 'array', items: { type: 'string' } },
+            reliability_score: { type: 'number' },
+            risk_alignment: { type: 'string' },
+            target_persona: { type: 'string' },
+            ticker_symbol: { type: 'string' },
+            current_price: { type: 'string' },
+            price_change_percentage: { type: 'string' },
+            next_steps: { type: 'array', items: { type: 'string' } },
+          },
+          required: [
+            'recommendation', 'confidence', 'fundamental_insight', 'sentiment_insight',
+            'valuation_insight', 'debate_digest', 'evidence', 'reliability_score',
+            'risk_alignment', 'target_persona', 'ticker_symbol'
+          ]
+        }
+      };
+
+      // Initialize Audio Contexts (separate for input vs output)
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       this.inputAudioContext = new AudioContextClass({ sampleRate: PCM_SAMPLE_RATE });
       this.outputAudioContext = new AudioContextClass({ sampleRate: AUDIO_PLAYBACK_RATE });
-
-      try {
-        await Promise.all([
-          this.inputAudioContext.resume(),
-          this.outputAudioContext.resume()
-        ]);
-      } catch (e) {
-        console.warn("Audio Context resume warning:", e);
-      }
+      await Promise.all([this.inputAudioContext.resume(), this.outputAudioContext.resume()]);
 
       this.gainNode = this.outputAudioContext.createGain();
       this.gainNode.connect(this.outputAudioContext.destination);
@@ -114,176 +104,147 @@ export class GeminiService {
 
       // Get Media Stream
       this.config.onStatusChange("Accessing sensory feeds...");
-
       const mediaStreamPromise = navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        },
-        video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: "user"
-        }
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
       }).then(async stream => {
-        this.stream = stream;
+        this.mediaStream = stream;
         if (this.config.videoElement) {
           this.config.videoElement.srcObject = stream;
           await this.config.videoElement.play().catch(console.error);
         }
         return stream;
       }).catch(err => {
-        console.error("Media access failed:", err);
+        console.error('Media access failed:', err);
         return null;
       });
 
       let sessionResolve: (value: any) => void;
-      const sessionPromise = new Promise<any>((resolve) => {
-        sessionResolve = resolve;
-      });
+      const sessionPromise = new Promise<any>((resolve) => { sessionResolve = resolve; });
 
-      // Start Connection
-      const connectPromise = this.ai.live.connect({
+      // We use the original model name from GitHub
+      const connectPromise = client.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } },
+          generationConfig: {
+            responseModalities: [(calibration as any).responseMode || 'AUDIO'],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: {
+                  voiceName: calibration.agentVoice || 'Aoede'
+                }
+              }
+            },
           },
-          tools: tools,
           systemInstruction: {
-            parts: [
-              { text: this.getSystemPrompt(persona) }
-            ]
+            parts: [{ text: await this.getSystemPrompt(calibration) }]
           },
-        },
+          tools: [{ functionDeclarations: [displayDecisionCardTool as any] }],
+          // Latency Optimization: Set Voice Activity Detection to be more aggressive
+          voiceConfig: {
+            vadConfig: {
+              silenceThresholdMs: 400, // Reduced from default to be more responsive
+              actionOnSilence: 'TRANSCRIPT_AND_RESPONSE'
+            }
+          }
+        } as any,
         callbacks: {
           onopen: async () => {
+            console.log("KAI: Neural Link Established.");
             this.config.onConnectionStateChange(ConnectionState.CONNECTED);
             this.config.onStatusChange("Link Established.");
 
             try {
               this.session = await connectPromise;
-              sessionResolve(this.session);
 
+              // LANGUAGE-AWARE GREETING
+              const lang = calibration.preferredLanguage || 'English';
+              const greetingInstruction = lang === 'English'
+                ? `SYSTEM_TRIGGER: Greet the user by saying exactly: "Hi, this is ${calibration.agentVoice || 'Kai'}. I'm your personal finance agent. You look great today!" Then ask a short, unique question tailored to your specific voice's personality to start the conversation.`
+                : `SYSTEM_TRIGGER: Greet the user in ${lang}. Specifically, say the equivalent of "Hi, this is ${calibration.agentVoice || 'Kai'}. I'm your personal finance agent. You look great today!" in ${lang}. Then ask a short, unique question in ${lang} tailored to your specific voice's personality to start the conversation. ALL future responses MUST be in ${lang}.`;
+
+              this.sendText(greetingInstruction);
+
+              // Then set up audio/video in parallel
               const stream = await mediaStreamPromise;
-
               if (stream) {
-                this.config.onStatusChange("Acquiring visual feed...");
-                await this.initiateVisualGreeting(this.session);
-              } else {
-                this.config.onStatusChange("Sensory input failed.");
-                this.sendTextTrigger(this.session, "SYSTEM_TRIGGER: Audio only mode. Greet me as the Financial Agent Kai.");
+                this.mediaStream = stream;
+                if (this.config.videoElement) {
+                  this.config.videoElement.srcObject = stream;
+                  await this.config.videoElement.play().catch(console.error);
+                }
+
+                this.startVisionStream();
+                this.startVisualizerLoop();
+                setTimeout(() => this.startAudioInputStream(), 200);
               }
             } catch (err) {
               console.error("Initialization failed in onopen:", err);
               this.config.onStatusChange("Initialization Error");
             }
           },
-          onmessage: async (message: LiveServerMessage) => {
+          onmessage: (message: any) => {
             this.handleServerMessage(message);
           },
-          onclose: () => {
+          onclose: (e: any) => {
+            console.warn(`KAI: Link Severed. Code: ${e.code}, Reason: ${e.reason}`, e);
             this.config.onConnectionStateChange(ConnectionState.DISCONNECTED);
-            this.config.onStatusChange("Link severed.");
+            this.config.onStatusChange(`Link Severed (${e.code})`);
             this.cleanup();
           },
-          onerror: (err) => {
-            console.error("Session error:", err);
+          onerror: (err: any) => {
+            console.error("KAI: SDK Error", err);
             this.config.onConnectionStateChange(ConnectionState.ERROR);
-            this.config.onStatusChange("Connection Error");
+            this.config.onStatusChange("System Error");
             this.cleanup();
-          },
-        },
+          }
+        }
       });
 
-      connectPromise.catch((error) => {
+      connectPromise.catch((error: any) => {
         console.error('Connection failed:', error);
         this.config.onConnectionStateChange(ConnectionState.ERROR);
         this.config.onStatusChange("Connection failed.");
         this.cleanup();
       });
 
-    } catch (error) {
-      console.error('Setup failed:', error);
+    } catch (error: any) {
+      console.error("KAI Connection Error:", error);
       this.config.onConnectionStateChange(ConnectionState.ERROR);
+      this.config.onStatusChange(error.message || "Access Denied");
       this.cleanup();
     }
   }
 
-  /**
-   * Generate system prompt based on user persona
-   */
-  private getSystemPrompt(persona: UserPersona): string {
-    const personaInstructions = persona === 'Active Trader' ? `
-    - **Focus**: Volatility, Catalysts, Price Action, Momentum.
-    - **Tone**: Concise, fast-paced, signal-oriented.
-    - **Data**: Highlight % changes, volume spikes, and earnings dates.
-    - **Risk**: User has high risk tolerance but needs clear exit strategies.
-    ` : persona === 'Professional Advisor' ? `
-    - **Focus**: Risk-Adjusted Return, Compliance, Macro Trends, Fundamentals.
-    - **Tone**: Professional, formal, data-heavy, objective.
-    - **Data**: Focus on Valuation metrics (P/E, PEG), Balance Sheet health, and Analyst Consensus.
-    - **Risk**: Highlight downside protection and reliability of sources.
-    - **Special Output**: You MUST populate 'scenarios' (bear/bull cases) and 'compliance_stub' in the tool call.
-    ` : `
-    - **Focus**: Long-term stability, "The Why", Education, Trust.
-    - **Tone**: Friendly, clear, jargon-free (or explain jargon immediately).
-    - **Data**: Focus on product strength, brand value, and simple growth narratives.
-    - **Risk**: User is likely risk-averse. Emphasize safety and reliability.
-    `;
-
-    return `You are Kai, a specialized Financial Intelligence Agent.
-
-    ### CRITICAL CONTEXT: USER PERSONA
-    You are communicating with a user who has explicitly identified as a: **${persona}**.
-    
-    **STRICTLY ADHERE to the following behavior protocol for this persona:**
-    
-    ${personaInstructions}
-
-    ### MISSION
-    Deliver consumer-grade, explainable financial decisions with visible agent debate. Achieve trust by design with citations and reliability scores.
-
-    ### TOOL USE: GOOGLE SEARCH
-    You have access to **Google Search**. You MUST use it to:
-    1. Fetch real-time stock prices, earnings reports, and breaking news.
-    2. Ground your "Sentiment Agent" analysis in the latest market mood.
-    3. Collect URLs to populate the 'evidence' list in the Decision Card.
-    4. Populate the 'ticker_symbol', 'current_price', and 'price_change_percentage' fields.
-
-    ### AGENT ARCHITECTURE
-    1. **Fundamental Agent**: Analyzes 10-K/10-Q filings. Focuses on "The Why".
-    2. **Sentiment Agent**: Analyzes news and market mood using Google Search. Focuses on "The Momentum".
-    3. **Valuation Agent**: Deterministic math. Focuses on "The Price".
-
-    ### PROTOCOL
-    1. **Visual Greeting**: Upon "SYSTEM_TRIGGER", observe the user's environment. Link it to the market if possible.
-    2. **Agent Debate**: Before deciding, briefly voice the internal conflict.
-    3. **Decision Card**: When you reach a conclusion, you MUST call 'displayDecisionCard'.
-       - **Target Persona**: Set this field to "${persona}".
-       - **Risk Alignment**: Ensure the recommendation fits the ${persona} profile.
-       - **Evidence**: MUST include actual URLs found via Google Search.
-       - **Scenarios/Compliance**: If persona is "Professional Advisor", include 2-3 stress-test scenarios and a compliance note.
-    
-    ### TONE
-    Objective, transparent, yet empathetic.
-    `;
+  private startVisionStream() {
+    if (!this.config.videoElement || !this.session) return;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 160;
+    canvas.height = 120;
+    this.videoInterval = setInterval(() => {
+      if (!this.session || !this.config.videoElement) return;
+      ctx?.drawImage(this.config.videoElement, 0, 0, canvas.width, canvas.height);
+      const base64Image = canvas.toDataURL('image/jpeg', 0.3).split(',')[1];
+      try {
+        this.session.sendRealtimeInput({
+          media: { mimeType: "image/jpeg", data: base64Image }
+        });
+      } catch (e) { }
+    }, 3000);
   }
 
-  /**
-   * Request a news update for a specific ticker
-   */
-  public requestNewsUpdate(ticker: string) {
+  public async disconnect() {
+    this.cleanup();
     if (this.session) {
-      this.sendTextTrigger(this.session, `SYSTEM_TRIGGER: User requested news update. Perform a Google Search for recent news on ${ticker}. Regenerate the Decision Card with updated evidence.`);
+      try { this.session.close(); } catch (e) { }
+      this.session = null;
     }
+    this.config.onConnectionStateChange(ConnectionState.DISCONNECTED);
   }
 
-  private async initiateVisualGreeting(session: any) {
+  private async initiateVisualGreeting() {
     let base64Image: string | null = null;
-
     if (this.config.videoElement) {
       for (let i = 0; i < 30; i++) {
         if (this.config.videoElement.readyState >= 2) {
@@ -293,39 +254,15 @@ export class GeminiService {
         await new Promise(r => setTimeout(r, 30));
       }
     }
-
-    if (base64Image) {
+    if (base64Image && this.session) {
       try {
-        session.sendRealtimeInput({
-          media: { mimeType: 'image/jpeg', data: base64Image }
-        });
-        session.sendRealtimeInput({
-          content: [
-            { text: "SYSTEM_TRIGGER: Visual feed active. Greet me based on my appearance/environment. Acknowledge my chosen persona immediately. State your financial agents are debating." }
-          ]
-        });
+        this.session.sendRealtimeInput({ media: { mimeType: 'image/jpeg', data: base64Image } });
+        this.sendText("SYSTEM_TRIGGER: Visual feed active. Greet me based on my appearance/environment. State your financial agents are debating.");
       } catch (e) {
         console.error("Failed to send visual greeting", e);
       }
     } else {
-      this.sendTextTrigger(session, "SYSTEM_TRIGGER: Video failed. Greet me and start the financial analysis sequence.");
-    }
-
-    this.startVideoInputStream(session);
-    this.startVisualizerLoop();
-
-    setTimeout(() => {
-      this.startAudioInputStream(session);
-    }, 200);
-  }
-
-  private sendTextTrigger(session: any, text: string) {
-    try {
-      session.sendRealtimeInput({
-        content: [{ text }]
-      });
-    } catch (e) {
-      console.error("Failed to send text trigger:", e);
+      this.sendText("SYSTEM_TRIGGER: Video failed. Greet me and start the financial analysis sequence.");
     }
   }
 
@@ -342,132 +279,34 @@ export class GeminiService {
     return null;
   }
 
-  private startAudioInputStream(session: any) {
-    if (!this.inputAudioContext || !this.stream) return;
-
-    const source = this.inputAudioContext.createMediaStreamSource(this.stream);
-    const scriptProcessor = this.inputAudioContext.createScriptProcessor(2048, 1, 1);
-
-    scriptProcessor.onaudioprocess = (audioProcessingEvent) => {
-      const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+  private startAudioInputStream() {
+    if (!this.inputAudioContext || !this.mediaStream || !this.session) return;
+    const source = this.inputAudioContext.createMediaStreamSource(this.mediaStream);
+    const scriptProcessor = this.inputAudioContext.createScriptProcessor(512, 1, 1);
+    scriptProcessor.onaudioprocess = (event) => {
+      const inputData = event.inputBuffer.getChannelData(0);
       const pcmBlob = createPcmBlob(inputData);
-      session.sendRealtimeInput({ media: pcmBlob });
+      if (this.session) {
+        this.lastAudioSentTime = Date.now();
+        this.session.sendRealtimeInput({ media: pcmBlob });
+      }
     };
-
     source.connect(scriptProcessor);
     scriptProcessor.connect(this.inputAudioContext.destination);
   }
 
-  private startVideoInputStream(session: any) {
-    if (!this.config.videoElement || !this.stream) return;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const FPS = 1;
-
-    this.videoIntervalId = window.setInterval(() => {
-      if (!this.config.videoElement || this.config.videoElement.paused || this.config.videoElement.ended) return;
-
-      canvas.width = this.config.videoElement.videoWidth * 0.5;
-      canvas.height = this.config.videoElement.videoHeight * 0.5;
-
-      if (ctx) {
-        ctx.drawImage(this.config.videoElement, 0, 0, canvas.width, canvas.height);
-        const base64Data = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
-        session.sendRealtimeInput({
-          media: { mimeType: 'image/jpeg', data: base64Data }
-        });
-      }
-    }, 1000 / FPS);
-  }
-
-  private async handleServerMessage(message: LiveServerMessage) {
-    const serverContent = message.serverContent;
-
-    // Handle Function Call
-    if (message.toolCall?.functionCalls) {
-      for (const fc of message.toolCall.functionCalls) {
-        if (fc.name === 'displayDecisionCard') {
-          try {
-            const args = fc.args as unknown as DecisionCardData;
-            this.config.onDecisionCard(args);
-
-            if (this.session) {
-              this.session.sendToolResponse({
-                functionResponses: {
-                  id: fc.id,
-                  name: fc.name,
-                  response: { result: "Decision Card Displayed Successfully" }
-                }
-              });
-            }
-          } catch (e) {
-            console.error("Error handling tool call:", e);
-          }
-        }
-      }
-    }
-
-    // Audio Output
-    if (serverContent?.modelTurn?.parts?.[0]?.inlineData) {
-      const base64Audio = serverContent.modelTurn.parts[0].inlineData.data;
-      if (base64Audio && this.outputAudioContext && this.gainNode) {
-        const currentTime = this.outputAudioContext.currentTime;
-        if (this.nextStartTime < currentTime) {
-          this.nextStartTime = currentTime;
-        }
-
-        const audioBuffer = await decodeAudioData(
-          base64ToUint8Array(base64Audio),
-          this.outputAudioContext,
-          AUDIO_PLAYBACK_RATE
-        );
-
-        const source = this.outputAudioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(this.gainNode);
-
-        source.start(this.nextStartTime);
-        this.nextStartTime += audioBuffer.duration;
-
-        this.sources.add(source);
-        source.onended = () => {
-          this.sources.delete(source);
-        };
-      }
-    }
-
-    if (serverContent?.interrupted) {
-      this.sources.forEach(source => {
-        try { source.stop(); } catch (e) { /* ignore */ }
-      });
-      this.sources.clear();
-      this.nextStartTime = 0;
-      this.config.onStatusChange("Interrupted.");
-    }
-
-    if (serverContent?.turnComplete) {
-      this.config.onStatusChange("Listening...");
-    }
-  }
-
   private startVisualizerLoop() {
+    if (!this.analyser) return;
+    const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
     const update = () => {
       if (!this.analyser) return;
-
-      const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
       this.analyser.getByteFrequencyData(dataArray);
-
       let sum = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
-      }
+      for (let i = 0; i < dataArray.length; i++) { sum += dataArray[i]; }
       const average = sum / dataArray.length;
       const volume = Math.min(1, average / 100);
-
       this.config.onVolumeChange(volume);
       this.config.onAudioData(dataArray);
-
       if (this.config.videoElement && !this.config.videoElement.paused) {
         requestAnimationFrame(update);
       }
@@ -475,26 +314,157 @@ export class GeminiService {
     update();
   }
 
-  async disconnect() {
-    this.cleanup();
-    this.config.onConnectionStateChange(ConnectionState.DISCONNECTED);
-  }
+  private handleServerMessage(message: any) {
+    // With @google/genai, the parsed JSON arrives here. The SDK still mirrors the underlying Bidi serverContent block.
+    if (message.serverContent?.modelTurn?.parts) {
+      // Calculate Latency if we just received audio response to our audio
+      if (this.lastAudioSentTime > 0) {
+        const latency = Date.now() - this.lastAudioSentTime;
+        this.config.onLatencyUpdate?.(latency);
+        this.lastAudioSentTime = 0;
+      }
 
-  private cleanup() {
-    if (this.videoIntervalId) {
-      clearInterval(this.videoIntervalId);
-      this.videoIntervalId = null;
+      for (const part of message.serverContent.modelTurn.parts) {
+        if (part.text) {
+          this.conversationTurns.push(`Kai: ${part.text}`);
+          this.config.onTranscriptUpdate?.({ role: 'agent', text: part.text, timestamp: new Date() });
+        }
+        if (part.inlineData && part.inlineData.data) {
+          this.playAudioChunk(part.inlineData.data);
+        }
+      }
+    } else if (message.serverContent?.turnComplete) {
+      console.log("KAI: Turn complete.");
     }
 
-    this.stream?.getTracks().forEach(track => track.stop());
+    // SDK function calling
+    const functionCalls = message?.toolCall?.functionCalls || message?.serverContent?.modelTurn?.parts?.[0]?.functionCall || message?.functionCalls;
+    if (functionCalls) {
+      const calls = Array.isArray(functionCalls) ? functionCalls : [functionCalls];
+      calls.forEach((fc: any) => {
+        if (fc.name === 'displayDecisionCard') {
+          const data = fc.args as DecisionCardData;
+          if (data.confidence && data.confidence <= 1) {
+            data.confidence = Math.round(data.confidence * 100);
+          }
+          this.currentDecisionCards.push(data);
+          this.config.onDecisionCard(data);
+        }
+      });
+    }
+  }
+
+  public requestNewsUpdate(ticker: string) {
+    this.sendText(`SYSTEM_REQUEST: Provide a brief news update and sentiment analysis for ${ticker}.`);
+  }
+
+  private async playAudioChunk(base64Data: string) {
+    if (!this.outputAudioContext || !this.gainNode) return;
+    try {
+      const audioBuffer = await decodeAudioData(
+        base64ToUint8Array(base64Data),
+        this.outputAudioContext,
+        AUDIO_PLAYBACK_RATE
+      );
+
+      const currentTime = this.outputAudioContext.currentTime;
+      if (this.nextPlayTime < currentTime) {
+        this.nextPlayTime = currentTime;
+      }
+
+      const source = this.outputAudioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(this.gainNode);
+      source.start(this.nextPlayTime);
+      this.nextPlayTime += audioBuffer.duration;
+
+      this.sources.add(source);
+
+      // Update speaking state
+      if (this.sources.size === 1 && this.config.onAgentSpeakingChange) {
+        this.config.onAgentSpeakingChange(true);
+      }
+
+      if (this.agentSpeakingTimeout) clearTimeout(this.agentSpeakingTimeout);
+
+      source.onended = () => {
+        this.sources.delete(source);
+        if (this.sources.size === 0) {
+          // Add a small debounce to prevent flickering between fast chunks
+          this.agentSpeakingTimeout = setTimeout(() => {
+            if (this.sources.size === 0 && this.config.onAgentSpeakingChange) {
+              this.config.onAgentSpeakingChange(false);
+            }
+          }, 500);
+        }
+      };
+    } catch (e) {
+      console.error("Playback Error:", e);
+    }
+  }
+
+  public sendText(text: string) {
+    if (this.session) {
+      try {
+        this.conversationTurns.push(`User: ${text}`);
+
+        // Exclude system triggers from showing up in user's visual transcript
+        if (!text.startsWith('SYSTEM_TRIGGER') && !text.startsWith('SYSTEM_REQUEST')) {
+          this.config.onTranscriptUpdate?.({ role: 'user', text, timestamp: new Date() });
+        }
+
+        console.log("KAI: Sending text via sendClientContent:", text.substring(0, 50) + "...");
+        this.session.sendClientContent({
+          turns: text,
+          turnComplete: true
+        });
+      } catch (e) {
+        console.error("SDK Send Error:", e);
+      }
+    }
+  }
+
+  private async cleanup() {
+    // Persist session if we have turns
+    if (this.conversationTurns.length > 0) {
+      const userId = "DEFAULT_USER";
+      const calibration = (this as any).lastCalibration; // We'll need to store this
+      const summary = this.conversationTurns.join('\n').substring(0, 500); // Dynamic summary goal
+      await SessionMemoryService.saveSession(userId, calibration, summary, this.currentDecisionCards);
+    }
+
+    if (this.videoInterval) {
+      clearInterval(this.videoInterval);
+      this.videoInterval = null;
+    }
+
+    this.mediaStream?.getTracks().forEach(track => track.stop());
     this.inputAudioContext?.close();
     this.outputAudioContext?.close();
 
     this.inputAudioContext = null;
     this.outputAudioContext = null;
-    this.stream = null;
+    this.mediaStream = null;
     this.sources.clear();
-    this.nextStartTime = 0;
+    this.nextPlayTime = 0;
     this.session = null;
+  }
+
+  private async getSystemPrompt(calibration: UserCalibration): Promise<string> {
+    // Add context from session memory service
+    const userId = "DEFAULT_USER"; // In a real app, this would come from auth
+    const pastContext = await SessionMemoryService.getSessionContext(userId);
+    const sessionCount = (pastContext.match(/Session \d+/g) || []).length;
+    this.config.onSessionMemorySync?.(sessionCount);
+
+    return `You are a High-fidelity financial agent.
+    - Your Name/Identity: ${calibration.agentVoice || 'Kai'}
+    - User: ${calibration.userName}
+    - Role: ${calibration.persona}
+    ${pastContext}
+    
+    ### PROTOCOLS
+    1. **Identity**: You must ALWAYS refer to yourself as ${calibration.agentVoice || 'Kai'}. Never break character.
+    2. **Tone**: Adopt the specific personality of your voice. Executive, analytical, warm, etc.`;
   }
 }

@@ -10,6 +10,28 @@ export enum ConnectionState {
   ERROR = 'ERROR',
 }
 
+export enum AgentSentiment {
+  NEUTRAL = 'NEUTRAL',
+  BULLISH = 'BULLISH',
+  BEARISH = 'BEARISH',
+  THINKING = 'THINKING',
+}
+
+export type RiskTolerance = 'Conservative' | 'Moderate' | 'Aggressive';
+export type InvestmentHorizon = 'Short-term' | 'Medium-term' | 'Long-term';
+export type InvestmentGoal = 'Growth' | 'Income' | 'Stability' | 'Speculation';
+
+export interface UserCalibration {
+  userName: string;
+  persona: UserPersona;
+  risk: RiskTolerance;
+  horizon: InvestmentHorizon;
+  goal: InvestmentGoal;
+  agentVoice?: string;
+  responseMode?: 'AUDIO' | 'TEXT';
+  preferredLanguage?: string;
+}
+
 export interface AudioVisualizerState {
   volume: number; // 0 to 1
   frequencyData: Uint8Array;
@@ -38,6 +60,7 @@ export interface DecisionCardData {
   ticker_symbol?: string;
   current_price?: string;
   price_change_percentage?: string;
+  next_steps?: string[];
   // V1.1 Pro Features
   scenarios?: Scenario[];
   compliance_stub?: string;
@@ -60,4 +83,13 @@ export interface PersonaConfig {
   description: string;
   icon: string;
   color: string;
+}
+
+export interface SessionRecord {
+  id: string;
+  user_id: string;
+  calibration: UserCalibration;
+  summary: string;
+  decision_cards: DecisionCardData[];
+  created_at: string;
 }

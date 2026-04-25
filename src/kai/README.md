@@ -2,22 +2,24 @@
 
 A real-time AI-powered financial intelligence assistant built with Gemini 2.0 Flash Live API, featuring voice/video interaction and multi-agent analysis.
 
-## Features
+## Hardened Features
 
-- **Real-time Voice/Video AI**: Powered by Gemini 2.0 Flash Live API
-- **Multi-Agent Architecture**: Three specialized AI agents (Fundamental, Sentiment, Valuation)
-- **User Personas**: Tailored responses for Everyday Investors, Active Traders, and Professional Advisors
-- **Live Market Data**: Google Search integration for real-time market information
-- **Decision Cards**: Visual financial recommendations with confidence scores
-- **Audio-Reactive Avatar**: 3D animated avatar that responds to voice input
+- **Real-time Voice/Video AI**: Powered by Gemini 2.0 Flash Live API.
+- **Conflict Resolution Protocol**: Advanced **Round 3 debate** logic to resolve deadlocks between Fundamental, Sentiment, and Valuation agents.
+- **Performance Caching**: Integrated `CacheService` with TTL support to minimize redundant API calls and improve dashboard responsiveness.
+- **Multi-Agent Architecture**: Three specialized AI agents (Fundamental, Sentiment, Valuation) that debate in real-time.
+- **User Personas**: Tailored responses for Everyday Investors, Active Traders, and Professional Advisors.
+- **Live Market Data**: Google Search integration for up-to-the-minute market intelligence.
+- **Decision Cards**: Visual financial recommendations with confidence scores and agent-specific insights.
+- **Audio-Reactive Avatar**: 3D animated avatar with optimized, composited animations for zero-jank performance.
 
 ## Tech Stack
 
 - **AI**: Gemini 2.0 Flash Live API (`@google/genai`)
 - **Audio**: Web Audio API (16kHz input, 24kHz output PCM)
 - **Video**: MediaStream API for camera capture
-- **UI**: React + TypeScript + Tailwind CSS
-- **Animations**: CSS animations with audio-reactive visualization
+- **UI**: React 18+ + TypeScript + Tailwind CSS
+- **Performance**: Lightweight client-side caching + GPU-accelerated animations
 
 ## Project Structure
 
@@ -32,8 +34,6 @@ src/kai/
 │   └── geminiService.ts      # Gemini 2.0 Flash Live API integration
 ├── utils/
 │   └── audioUtils.ts         # PCM audio processing utilities
-├── pages/
-│   └── index.tsx             # Route entry point
 ├── types.ts                   # Type definitions
 ├── App.tsx                    # Main application component
 └── README.md                  # This file
@@ -55,62 +55,10 @@ Navigate to `/kai` in your browser to access the Financial Intelligence Agent.
 
 ### User Flow
 
-1. **Identity Calibration**: Select your investor persona
-   - Everyday Investor: Long-term focused, plain English
-   - Active Trader: High-frequency updates, technical signals
-   - Professional Advisor: Deep research, compliance-ready
-
-2. **Initiate Connection**: Click "INITIATE KAI" to start voice/video session
-
-3. **Interact**: Speak naturally about stocks, markets, or financial topics
-
-4. **Decision Cards**: Receive visual recommendations with:
-   - Buy/Hold/Sell recommendation
-   - Confidence score
-   - Multi-agent insights
-   - Evidence and sources
-
-## API Integration
-
-### Gemini 2.0 Flash Live API
-
-The service uses Gemini's multimodal live API for real-time voice and video interaction:
-
-```typescript
-const session = await client.live.connect({
-  model: 'gemini-2.0-flash-exp',
-  config: {
-    responseModalities: ['AUDIO'],
-    systemInstruction: systemPrompt,
-    tools: [displayDecisionCardTool, googleSearchTool]
-  }
-});
-```
-
-### Function Calling
-
-The AI can trigger visual decision cards through function calling:
-
-```typescript
-const displayDecisionCardDeclaration = {
-  name: 'displayDecisionCard',
-  description: 'Display a financial decision card',
-  parameters: {
-    type: 'object',
-    properties: {
-      recommendation: { type: 'string' },
-      confidence: { type: 'number' },
-      // ... more fields
-    }
-  }
-};
-```
-
-## Audio Processing
-
-- **Input**: 16kHz mono PCM audio captured from microphone
-- **Output**: 24kHz PCM audio played through speakers
-- **Format**: Base64 encoded for transmission
+1. **Identity Calibration**: Select your investor persona.
+2. **Initiate Connection**: Click "INITIATE KAI" to start the session.
+3. **Interact**: Speak naturally about stocks, markets, or financial topics.
+4. **Decision Cards**: Receive visual recommendations with multi-agent insights.
 
 ## Development
 
@@ -118,15 +66,19 @@ const displayDecisionCardDeclaration = {
 # Start development server
 npm run dev
 
-# Access the Kai module
-open http://localhost:5173/kai
+# Run Security Audit (Unix/Bash)
+npm run security:audit
+
+# Run Security Audit (Windows/PowerShell)
+npm run security:audit:win
 ```
 
 ## Security Considerations
 
-- API key is loaded from environment variables
-- Camera/microphone access requires user permission
-- All data is processed client-side and through Google's Gemini API
+- API key is loaded from `.env.local` (ensure it is git-ignored).
+- Camera/microphone access requires user permission.
+- **Current Tree Audit**: Mandatory `npm run security:audit:win` before any PR.
+- **Historical Cleanup**: The repo requires a history rewrite for historical secret exposures before public release.
 
 ## License
 

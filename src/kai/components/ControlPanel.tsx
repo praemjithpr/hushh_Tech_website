@@ -1,5 +1,11 @@
+/**
+ * kai - Financial Intelligence Agent
+ * ControlPanel - Dynamic Island (Apple Intelligence Style)
+ */
+
 import React from 'react';
 import { ConnectionState } from '../types';
+import { getAvatarUrl } from './VoiceSelectorModal';
 
 interface ControlPanelProps {
   state: ConnectionState;
@@ -7,90 +13,96 @@ interface ControlPanelProps {
   onConnect: () => void;
   onDisconnect: () => void;
   volume: number;
+  currentVoice?: string;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnect, onDisconnect, volume }) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnect, onDisconnect, volume, currentVoice }) => {
   const isConnected = state === ConnectionState.CONNECTED;
   const isConnecting = state === ConnectionState.CONNECTING;
 
-  // Determine display text: Prefer specific status updates during connection/active states
   const displayText = statusText || (
-    state === ConnectionState.DISCONNECTED ? 'System Standby' :
-    state === ConnectionState.ERROR ? 'Link Malfunction' : ''
+    state === ConnectionState.DISCONNECTED ? 'KAI STANDBY' :
+      state === ConnectionState.ERROR ? 'SYNC MALFUNCTION' : 'SYSTEM READY'
   );
 
   return (
-    <div className="absolute bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center gap-3 md:gap-4 w-full max-w-md px-4 pointer-events-auto">
-      <style>{`
-        @keyframes kai-observe {
-          0%, 100% { 
-            opacity: 0.6; 
-            color: #94a3b8; /* slate-400 */
-            text-shadow: 0 0 0px transparent;
-          }
-          50% { 
-            opacity: 1; 
-            color: #e2e8f0; /* slate-200 */
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); /* sky-400 glow */
-          }
-        }
-        .animate-kai-observe {
-          animation: kai-observe 3s ease-in-out infinite;
-        }
-      `}</style>
+    <div className="flex flex-col items-center gap-6 group">
 
-      {/* Narrative Status Line - The "Hush" Feedback */}
-      <div className="h-6 md:h-8 flex items-center justify-center gap-3">
-        {isConnected && displayText && (
-            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]"></div>
-        )}
-        
-        {displayText && (
-          <div className={`text-xs md:text-sm font-mono tracking-widest uppercase transition-all duration-500 ${
-            isConnected ? 'animate-kai-observe' : 
-            isConnecting ? 'animate-pulse text-blue-200' : 
-            'text-gray-600'
-          }`}>
-             {displayText}
+      {/* 1. STATUS LINE - Elegant Floating Text */}
+      <div className="h-4 flex items-center justify-center">
+        <div className={`
+          text-[10px] md:text-[11px] font-mono tracking-[0.5em] uppercase transition-all duration-1000
+          ${isConnected ? 'text-purple-300 opacity-60' : 'text-white/20'}
+        `}>
+          {displayText}
+        </div>
+      </div>
+
+      {/* 2. DYNAMIC ISLAND PILL */}
+      <div className={`
+        relative flex items-center gap-6 px-3 py-3 rounded-full 
+        bg-white/[0.04] border border-white/10 backdrop-blur-xl
+        transition-all duration-700 ease-out shadow-2xl
+        ${isConnected ? 'w-auto px-8' : 'w-auto px-10'}
+      `}>
+
+        {/* Character Avatar or Status Orb */}
+        {currentVoice ? (
+          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-slate-800/80 shadow-inner flex-shrink-0 border border-white/10" style={{ transform: isConnected ? `scale(${1 + volume * 0.4})` : 'scale(1)' }}>
+            <img src={getAvatarUrl(currentVoice)} className="w-full h-full object-cover scale-110" alt="Avatar" />
+            {isConnected && (
+              <div className="absolute inset-0 rounded-full border border-purple-500/50 animate-pulse pointer-events-none" />
+            )}
           </div>
+        ) : (
+          <div className={`
+            w-2 h-2 rounded-full transition-all duration-500 shadow-lg
+            ${isConnected ? 'bg-purple-500 animate-pulse shadow-purple-500/50' : 'bg-white/10'}
+          `} />
         )}
 
-        {isConnected && displayText && (
-            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]" style={{ animationDelay: '0.5s' }}></div>
+        {/* Primary Action */}
+        <button
+          onClick={isConnected ? onDisconnect : onConnect}
+          disabled={isConnecting}
+          className="relative px-2 py-1 text-xs md:text-sm font-bold tracking-[0.2em] text-white uppercase group"
+        >
+          <span className="relative z-10 transition-all duration-300 group-hover:tracking-[0.3em]">
+            {isConnected ? 'TERMINATE' : isConnecting ? 'SYNCING...' : 'INITIATE'}
+          </span>
+
+          {/* Subtle underline glow */}
+          <div className="absolute -bottom-1 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        </button>
+
+        {/* Sensory Detail (Mini) */}
+        {!isConnected && (
+          <div className="h-4 w-[1px] bg-white/10" />
+        )}
+
+        {!isConnected && (
+          <div className="text-[8px] text-white/20 font-bold tracking-widest hidden sm:block">
+            MK.5
+          </div>
         )}
       </div>
 
-      {/* Main Action Button */}
-      <button
-        onClick={isConnected ? onDisconnect : onConnect}
-        disabled={isConnecting}
-        className={`
-          relative group overflow-hidden rounded-full px-8 py-3 md:px-12 md:py-4 transition-all duration-300
-          ${isConnected 
-            ? 'bg-red-950/30 hover:bg-red-900/40 border border-red-500/30 text-red-200' 
-            : 'bg-white/5 hover:bg-white/10 border border-white/20 text-white'
-          }
-          backdrop-blur-md shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed
-        `}
-      >
-        <span className="relative z-10 font-bold text-base md:text-lg tracking-wider whitespace-nowrap">
-          {isConnected ? 'TERMINATE LINK' : isConnecting ? 'SYNCHRONIZING...' : 'INITIATE KAI'}
-        </span>
-        
-        {/* Glow effect on hover */}
-        <div className={`absolute inset-0 z-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${
-           isConnected ? 'bg-red-500/10' : 'bg-white/10'
-        }`}></div>
-      </button>
-
-      {/* Instructional / Flavor Text */}
-      {!isConnected && !isConnecting && (
-        <p className="text-gray-600 text-[8px] md:text-[10px] text-center max-w-xs mt-2 opacity-40 uppercase tracking-widest">
-          Grant sensory access for 4D resonance
-        </p>
-      )}
+      {/* 3. SIRI STYLE AMBIENT GLOW (Only when active) */}
+      <AnimatePresence>
+        {isConnected && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="absolute -inset-4 -z-10 bg-purple-500/10 blur-[40px] rounded-full pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
+
+// Simple AnimatePresence stub if needed (usually imported from framer-motion in App.tsx)
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default ControlPanel;
