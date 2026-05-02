@@ -1,4 +1,5 @@
-import { toast, ToastContainer } from "react-toastify";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaGlobe, FaAt, FaRss, FaPhone } from "react-icons/fa";
 import HushhLogo from "./images/Hushhogo.png";
@@ -73,18 +74,18 @@ export default function Footer() {
           <nav className="flex flex-col gap-0 border-l border-[#1F2937] pl-4">
             <div className="grid grid-cols-2 gap-x-8">
               <div className="space-y-0">
-                <a 
-                  href="/about/leadership" 
+                <Link 
+                  to="/about/leadership" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   About Us
-                </a>
-                <a 
-                  href="/discover-fund-a" 
+                </Link>
+                <Link 
+                  to="/discover-fund-a" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   Fund A
-                </a>
+                </Link>
                 <a 
                   href="https://www.hushh.ai/solutions" 
                   target="_blank" 
@@ -93,79 +94,80 @@ export default function Footer() {
                 >
                   Solutions
                 </a>
-                <a 
-                  href="/benefits" 
+                <Link 
+                  to="/benefits" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   Benefits
-                </a>
-                <a 
-                  href="/careers" 
+                </Link>
+                <Link 
+                  to="/career" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   Careers
-                </a>
+                </Link>
               </div>
               <div className="space-y-0">
-                <a 
-                  href="/community" 
+                <Link 
+                  to="/community" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   Community
-                </a>
-                <a 
-                  href="/faq" 
+                </Link>
+                <Link 
+                  to="/faq" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   FAQ
-                </a>
-                <a 
-                  href="/contact" 
+                </Link>
+                <Link 
+                  to="/contact" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   Contact
-                </a>
-                <a 
-                  href="/kyc-verification" 
+                </Link>
+                <Link 
+                  to="/kyc-verification" 
                   className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group block"
                 >
                   KYC Verification
-                </a>
+                </Link>
               </div>
             </div>
           </nav>
         </div>
-
+ 
         {/* Legal Links */}
         <div className="flex flex-col gap-4">
           <h3 className="text-white tracking-wide text-sm uppercase font-bold text-opacity-80">
             Legal
           </h3>
           <nav className="flex flex-col gap-0 border-l border-[#1F2937] pl-4">
-            <a 
-              href="/privacy-policy" 
+            <Link 
+              to="/privacy-policy" 
               className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group"
             >
               Website Privacy Policy
-            </a>
-            <a 
-              href="/eu-uk-jobs-privacy-policy" 
+            </Link>
+            <Link 
+              to="/eu-uk-jobs-privacy-policy" 
               className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group"
             >
               EU and UK Privacy Policies
-            </a>
-            <a 
-              href="/california-privacy-policy" 
+            </Link>
+            <Link 
+              to="/california-privacy-policy" 
               className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group"
             >
               California Privacy Policy
-            </a>
-            <a 
-              href="/carrer-privacy-policy" 
+            </Link>
+            <Link 
+              to="/career-privacy-policy" 
               className="py-2 text-gray-300 hover:text-white text-base font-medium flex items-center justify-between group"
             >
               Careers Site Privacy Notice
-            </a>
+            </Link>
+>
           </nav>
         </div>
       </div>
@@ -201,7 +203,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <p className="text-gray-400 text-sm font-normal mb-4">
-          © 2025 Hushh All Rights Reserved.
+          © {new Date().getFullYear()} Hushh All Rights Reserved.
         </p>
 
         {/* Disclaimer */}

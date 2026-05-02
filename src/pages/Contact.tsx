@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import emailjs from "@emailjs/browser";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
   Container,
@@ -379,8 +379,6 @@ export default function Contact() {
           </Box>
         </GridItem>
       </Grid>
-      
-      <ToastContainer />
     </Container>
   );
 }

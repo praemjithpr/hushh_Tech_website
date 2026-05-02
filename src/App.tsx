@@ -1,5 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
 import HomePage from './pages/home/ui';
 import Leadership from './components/Leadership';
@@ -178,7 +180,7 @@ function App() {
             <Route path="/career" element={<Career />} />
             <Route path="/career/*" element={<Career />} />
             <Route path='/privacy-policy' element={<PrivacyPolicy />} />
-            <Route path='/carrer-privacy-policy' element={<CareersPrivacyPolicy />} />
+            <Route path='/career-privacy-policy' element={<CareersPrivacyPolicy />} />
             <Route path="/community" element={
               <CommunityPage />
             } />
@@ -400,6 +402,7 @@ function App() {
           <GlobalNDAGate>
             <AppLayout />
           </GlobalNDAGate>
+          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         </Router>
       </AuthSessionProvider>
     </ChakraProvider>
