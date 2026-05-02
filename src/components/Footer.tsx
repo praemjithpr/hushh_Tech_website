@@ -167,7 +167,6 @@ export default function Footer() {
             >
               Careers Site Privacy Notice
             </Link>
->
           </nav>
         </div>
       </div>
