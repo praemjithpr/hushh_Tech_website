@@ -502,16 +502,29 @@ const existing = comments.find((comment) =>
   markers.some((candidate) => comment.body?.includes(candidate))
 );
 
-if (existing) {
-  await githubRequest(`/issues/comments/${existing.id}`, {
-    method: "PATCH",
-    body: { body },
-  });
-} else {
-  await githubRequest(`/issues/${prNumber}/comments`, {
-    method: "POST",
-    body: { body },
-  });
+try {
+  if (existing) {
+    await githubRequest(`/issues/comments/${existing.id}`, {
+      method: "PATCH",
+      body: { body },
+    });
+  } else {
+    await githubRequest(`/issues/${prNumber}/comments`, {
+      method: "POST",
+      body: { body },
+    });
+  }
+} catch (error) {
+  const message = String(error?.message || error);
+  // If GitHub blocks the integration token from commenting, degrade gracefully.
+  if (message.includes("403") || message.includes("Resource not accessible by integration")) {
+    console.warn(
+      "Signalkeeper preflight: cannot write PR comment in this context (403). " +
+      "Continuing with step summary only."
+    );
+  } else {
+    throw error; // keep failing for real problems
+  }
 }
 
 writeSummary(
