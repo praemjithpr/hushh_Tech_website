@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useCallback } from 'react';
 import { DecisionCardData } from '../types';
 
 interface DecisionCardProps {
@@ -9,12 +8,8 @@ interface DecisionCardProps {
 }
 
 const DecisionCard: React.FC<DecisionCardProps> = ({ data, onClose, onRequestNews }) => {
-  const [visible, setVisible] = useState(false);
+  const [visible] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
-
-  useEffect(() => {
-    setVisible(true);
-  }, []);
 
   const handleNewsSearch = useCallback(() => {
     if (data.ticker_symbol && onRequestNews) {

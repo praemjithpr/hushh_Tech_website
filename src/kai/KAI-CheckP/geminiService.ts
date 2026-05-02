@@ -5,7 +5,7 @@
 
 import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type, Tool } from '@google/genai';
 import { ConnectionState, DecisionCardData, UserPersona, GeminiServiceConfig } from '../types';
-import { createPcmBlob, decodeAudioData, PCM_SAMPLE_RATE, AUDIO_PLAYBACK_RATE, base64ToUint8Array } from '../utils/audioUtils';
+import { decodeAudioData, PCM_SAMPLE_RATE, AUDIO_PLAYBACK_RATE, base64ToUint8Array } from '../utils/audioUtils';
 
 // Tool Definition for displaying decision cards
 const displayDecisionCardDeclaration: FunctionDeclaration = {
@@ -69,7 +69,7 @@ export class GeminiService {
     private videoIntervalId: number | null = null;
     private analyser: AnalyserNode | null = null;
     private gainNode: GainNode | null = null;
-    private session: any = null;
+    private session: unknown = null;
     private isConnecting: boolean = false;
 
     constructor(config: GeminiServiceConfig) {
@@ -105,7 +105,7 @@ export class GeminiService {
             this.config.onStatusChange(`Initializing ${persona} Protocol...`);
 
             // Initialize Audio Contexts as memoized singletons
-            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            const AudioContextClass = window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
             if (!this.inputAudioContext) {
                 this.inputAudioContext = new AudioContextClass({ sampleRate: PCM_SAMPLE_RATE });
             }
@@ -154,8 +154,8 @@ export class GeminiService {
                 return null;
             });
 
-            let sessionResolve: (value: any) => void;
-            const sessionPromise = new Promise<any>((resolve) => {
+            let sessionResolve: (value: unknown) => void;
+            new Promise<unknown>((resolve) => {
                 sessionResolve = resolve;
             });
 
@@ -252,16 +252,16 @@ export class GeminiService {
         }
     }
 
-    private handleToolCall(toolCall: any) {
+    private handleToolCall(toolCall: { functionCalls: Array<{ name: string, id: string, args: Record<string, unknown> }> }) {
         const calls = toolCall.functionCalls;
-        calls.forEach(async (call: any) => {
+        calls.forEach(async (call) => {
             if (call.name === 'displayDecisionCard') {
                 const data: DecisionCardData = call.args;
                 this.config.onDecisionCard(data);
                 
                 // Send response back to Gemini
                 if (this.session) {
-                    this.session.send({
+                    (this.session as { send: (data: unknown) => void }).send({
                         toolResponse: {
                             functionResponses: [{
                                 name: call.name,
@@ -299,7 +299,7 @@ export class GeminiService {
 
     private stopAllAudio() {
         this.sources.forEach(source => {
-            try { source.stop(); } catch(e) {}
+            try { source.stop(); } catch { /* ignore cleanup error */ }
         });
         this.sources.clear();
         this.nextStartTime = 0;
@@ -324,7 +324,7 @@ export class GeminiService {
         this.isConnecting = false;
     }
 
-    private async initiateVisualGreeting(session: any) {
+    private async initiateVisualGreeting(session: { send: (data: unknown) => void }) {
         if (!this.stream || !session) return;
         
         // Send initial greeting trigger with visual context
@@ -336,7 +336,7 @@ export class GeminiService {
         }, 1000);
     }
 
-    private async sendVideoFrame(session: any) {
+    private async sendVideoFrame(session: { send: (data: unknown) => void }) {
         if (!this.config.videoElement || !session) return;
         
         const canvas = document.createElement('canvas');
@@ -358,7 +358,7 @@ export class GeminiService {
         });
     }
 
-    private sendTextTrigger(session: any, text: string) {
+    private sendTextTrigger(session: { send: (data: unknown) => void }, text: string) {
         session.send({
             clientContent: {
                 turns: [{

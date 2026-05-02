@@ -9,7 +9,7 @@ interface ControlPanelProps {
   volume: number;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnect, onDisconnect, volume }) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnect, onDisconnect }) => {
   const isConnected = state === ConnectionState.CONNECTED;
   const isConnecting = state === ConnectionState.CONNECTING;
 

@@ -5,6 +5,8 @@ interface OnboardingScreenProps {
   onSelect: (persona: UserPersona) => void;
 }
 
+const SESSION_ID = `KAI-${Math.random().toString(36).substring(7).toUpperCase()}`;
+
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onSelect }) => {
   const [exiting, setExiting] = useState(false);
 
@@ -97,10 +99,11 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onSelect }) => {
         </div>
         
         <div className="mt-8 md:mt-12 text-[8px] md:text-[10px] text-gray-700 font-mono tracking-widest">
-           SESSION ID: {Math.random().toString(36).substring(7).toUpperCase()} // SECURE
+           SESSION ID: {SESSION_ID} // SECURE
         </div>
       </div>
     </div>
+
   );
 };
 
