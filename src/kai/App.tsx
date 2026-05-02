@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ConnectionState, DecisionCardData, UserPersona } from './types';
 import { GeminiService } from './services/geminiService';
 import KaiAvatar from './components/KaiAvatar';
@@ -36,25 +36,25 @@ const KaiApp: React.FC = () => {
     };
   }, []);
 
-  const handleConnect = async () => {
+  const handleConnect = useCallback(async () => {
     if (!userPersona) return;
     setDecisionData(null);
     await geminiServiceRef.current?.connect(userPersona);
-  };
+  }, [userPersona]);
 
-  const handleDisconnect = async () => {
+  const handleDisconnect = useCallback(async () => {
     await geminiServiceRef.current?.disconnect();
     setVolume(0);
     setAudioData(new Uint8Array(0));
     setStatusText("Link terminated.");
     setTimeout(() => setStatusText(""), 2000);
-  };
+  }, []);
 
-  const handleBackToOnboarding = async () => {
+  const handleBackToOnboarding = useCallback(async () => {
     await handleDisconnect();
     setUserPersona(null);
     setDecisionData(null);
-  };
+  }, [handleDisconnect]);
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col items-center justify-center">
