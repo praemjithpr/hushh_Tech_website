@@ -7,16 +7,17 @@ interface ControlPanelProps {
   onConnect: () => void;
   onDisconnect: () => void;
   volume: number;
+  isProcessing?: boolean;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnect, onDisconnect, volume }) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnect, onDisconnect, isProcessing }) => {
   const isConnected = state === ConnectionState.CONNECTED;
-  const isConnecting = state === ConnectionState.CONNECTING;
+  const isConnecting = state === ConnectionState.CONNECTING || isProcessing;
 
   // Determine display text: Prefer specific status updates during connection/active states
   const displayText = statusText || (
     state === ConnectionState.DISCONNECTED ? 'System Standby' :
-    state === ConnectionState.ERROR ? 'Link Malfunction' : ''
+      state === ConnectionState.ERROR ? 'Link Malfunction' : ''
   );
 
   return (
@@ -40,23 +41,26 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnec
       `}</style>
 
       {/* Narrative Status Line - The "Hush" Feedback */}
-      <div className="h-6 md:h-8 flex items-center justify-center gap-3">
+      <div className="h-6 md:h-8 flex items-center justify-center gap-3" aria-live="polite" aria-atomic="true">
         {isConnected && displayText && (
-            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]"></div>
+          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]"></div>
         )}
-        
+
         {displayText && (
-          <div className={`text-xs md:text-sm font-mono tracking-widest uppercase transition-all duration-500 ${
-            isConnected ? 'animate-kai-observe' : 
-            isConnecting ? 'animate-pulse text-blue-200' : 
-            'text-gray-600'
-          }`}>
-             {displayText}
+          <div 
+            className={`text-xs md:text-sm font-mono tracking-widest uppercase transition-all duration-500 ${
+              isConnected ? 'animate-kai-observe' :
+              isConnecting ? 'animate-pulse text-blue-200' :
+              'text-gray-600'
+            }`}
+            role="status"
+          >
+            {displayText}
           </div>
         )}
 
         {isConnected && displayText && (
-            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]" style={{ animationDelay: '0.5s' }}></div>
+          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]" style={{ animationDelay: '0.5s' }}></div>
         )}
       </div>
 
@@ -64,28 +68,29 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ state, statusText, onConnec
       <button
         onClick={isConnected ? onDisconnect : onConnect}
         disabled={isConnecting}
+        aria-label={isConnected ? "Terminate Link with KAI" : isConnecting ? "Synchronizing with KAI" : "Initiate KAI Link"}
         className={`
           relative group overflow-hidden rounded-full px-8 py-3 md:px-12 md:py-4 transition-all duration-300
-          ${isConnected 
-            ? 'bg-red-950/30 hover:bg-red-900/40 border border-red-500/30 text-red-200' 
+          ${isConnected
+            ? 'bg-red-950/30 hover:bg-red-900/40 border border-red-500/30 text-red-200'
             : 'bg-white/5 hover:bg-white/10 border border-white/20 text-white'
           }
           backdrop-blur-md shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed
+          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black ${isConnected ? 'focus:ring-red-500/50' : 'focus:ring-white/50'}
         `}
       >
         <span className="relative z-10 font-bold text-base md:text-lg tracking-wider whitespace-nowrap">
           {isConnected ? 'TERMINATE LINK' : isConnecting ? 'SYNCHRONIZING...' : 'INITIATE KAI'}
         </span>
-        
+
         {/* Glow effect on hover */}
-        <div className={`absolute inset-0 z-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${
-           isConnected ? 'bg-red-500/10' : 'bg-white/10'
-        }`}></div>
+        <div className={`absolute inset-0 z-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${isConnected ? 'bg-red-500/10' : 'bg-white/10'
+          }`}></div>
       </button>
 
       {/* Instructional / Flavor Text */}
       {!isConnected && !isConnecting && (
-        <p className="text-gray-600 text-[8px] md:text-[10px] text-center max-w-xs mt-2 opacity-40 uppercase tracking-widest">
+        <p className="text-gray-600 text-[8px] md:text-[10px] text-center max-w-xs mt-2 opacity-40 uppercase tracking-widest" aria-hidden="true">
           Grant sensory access for 4D resonance
         </p>
       )}

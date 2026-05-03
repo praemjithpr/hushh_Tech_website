@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { UserPersona } from '../types';
 
 interface OnboardingScreenProps {
@@ -6,49 +6,38 @@ interface OnboardingScreenProps {
 }
 
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onSelect }) => {
-  const [exiting, setExiting] = useState(false);
-
   const handleSelect = (persona: UserPersona) => {
-    setExiting(true);
-    setTimeout(() => onSelect(persona), 800);
+    onSelect(persona);
   };
 
   return (
-    <div className={`
-      absolute inset-0 z-[60] flex flex-col bg-black
-      transition-all duration-1000 ease-in-out overflow-y-auto overflow-x-hidden
-      ${exiting ? 'opacity-0 scale-110 pointer-events-none' : 'opacity-100 scale-100'}
-    `}>
-      {/* Background Grid */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none fixed" style={{
-        backgroundImage: 'radial-gradient(circle at center, #111827 0%, #000 70%)'
-      }}></div>
+    <div className="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 md:p-10 bg-black/40 backdrop-blur-sm">
       
-      <div className="relative z-10 w-full px-4 pt-24 pb-12 md:px-6 md:py-12 flex flex-col items-center min-h-screen md:justify-center">
-        {/* Header */}
-        <div className="text-center mb-8 md:mb-12 space-y-3 md:space-y-4">
-          <div className="inline-block px-3 py-1 border border-gray-800 rounded-full text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-gray-500 animate-pulse">
+      <div className="w-full max-w-4xl flex flex-col items-center animate-in fade-in zoom-in duration-1000">
+        <div className="mb-10 md:mb-16 text-center">
+          <div className="inline-block px-3 py-1 rounded-full border border-gray-800 bg-gray-950/50 text-gray-500 text-[10px] uppercase tracking-[0.3em] font-mono mb-4">
             System Initialization
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
-            Identity Calibration
+          <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-4 uppercase">
+            Select Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-orange-400">Tactical Profile</span>
           </h1>
-          <p className="text-gray-400 max-w-lg mx-auto text-xs md:text-sm leading-relaxed px-4">
-            Select your operating profile to align Kai's financial models with your risk tolerance and information density preferences.
+          <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto font-light leading-relaxed">
+            Kai adapts its intelligence core based on your operational needs. Choose a profile to calibrate the real-time link.
           </p>
         </div>
 
         {/* Cards Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 w-full max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 w-full max-w-5xl" role="radiogroup" aria-label="Select User Persona">
           
           {/* Option 1: Everyday Investor */}
           <button 
             onClick={() => handleSelect('Everyday Investor')}
-            className="group relative bg-gray-900/40 border border-blue-900/30 hover:border-blue-500/60 rounded-2xl p-6 md:p-8 text-left transition-all duration-500 hover:bg-gray-900/80 hover:-translate-y-2 active:scale-95"
+            aria-label="Everyday Investor: Focus on long-term growth and stability"
+            className="group relative bg-gray-900/40 border border-blue-900/30 hover:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded-2xl p-6 md:p-8 text-left transition-all duration-500 hover:bg-gray-900/80 hover:-translate-y-2 active:scale-95"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-900/20 flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-500">
-               <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                </svg>
             </div>
@@ -62,11 +51,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onSelect }) => {
           {/* Option 2: Active Trader */}
           <button 
             onClick={() => handleSelect('Active Trader')}
-            className="group relative bg-gray-900/40 border border-orange-900/30 hover:border-orange-500/60 rounded-2xl p-6 md:p-8 text-left transition-all duration-500 hover:bg-gray-900/80 hover:-translate-y-2 active:scale-95"
+            aria-label="Active Trader: Focus on signals and volatility"
+            className="group relative bg-gray-900/40 border border-orange-900/30 hover:border-orange-500/60 focus:outline-none focus:ring-2 focus:ring-orange-500/50 rounded-2xl p-6 md:p-8 text-left transition-all duration-500 hover:bg-gray-900/80 hover:-translate-y-2 active:scale-95"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/0 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-900/20 flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-500">
-               <svg className="w-5 h-5 md:w-6 md:h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <svg className="w-5 h-5 md:w-6 md:h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                </svg>
             </div>
@@ -80,11 +70,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onSelect }) => {
           {/* Option 3: Professional Advisor */}
           <button 
             onClick={() => handleSelect('Professional Advisor')}
-            className="group relative bg-gray-900/40 border border-purple-900/30 hover:border-purple-500/60 rounded-2xl p-6 md:p-8 text-left transition-all duration-500 hover:bg-gray-900/80 hover:-translate-y-2 active:scale-95"
+            aria-label="Professional Advisor: Focus on risk and data modeling"
+            className="group relative bg-gray-900/40 border border-purple-900/30 hover:border-purple-500/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-2xl p-6 md:p-8 text-left transition-all duration-500 hover:bg-gray-900/80 hover:-translate-y-2 active:scale-95"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/0 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-900/20 flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-500">
-               <svg className="w-5 h-5 md:w-6 md:h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <svg className="w-5 h-5 md:w-6 md:h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                </svg>
             </div>
@@ -95,9 +86,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onSelect }) => {
             </p>
           </button>
         </div>
-        
-        <div className="mt-8 md:mt-12 text-[8px] md:text-[10px] text-gray-700 font-mono tracking-widest">
-           SESSION ID: {Math.random().toString(36).substring(7).toUpperCase()} // SECURE
+
+        <div className="mt-12 text-gray-600 text-[10px] uppercase tracking-widest font-mono animate-pulse">
+          Awaiting Secure Calibration...
         </div>
       </div>
     </div>

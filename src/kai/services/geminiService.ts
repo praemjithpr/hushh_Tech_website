@@ -69,7 +69,7 @@ export class GeminiService {
   private videoIntervalId: number | null = null;
   private analyser: AnalyserNode | null = null;
   private gainNode: GainNode | null = null;
-  private session: any = null;
+  private session: unknown = null;
 
   constructor(config: GeminiServiceConfig) {
     this.config = config;
@@ -93,7 +93,8 @@ export class GeminiService {
       this.config.onStatusChange(`Initializing ${persona} Protocol...`);
 
       // Initialize Audio Contexts
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) throw new Error("AudioContext not supported");
       this.inputAudioContext = new AudioContextClass({ sampleRate: PCM_SAMPLE_RATE });
       this.outputAudioContext = new AudioContextClass({ sampleRate: AUDIO_PLAYBACK_RATE });
 
@@ -138,8 +139,8 @@ export class GeminiService {
         return null;
       });
 
-      let sessionResolve: (value: any) => void;
-      const sessionPromise = new Promise<any>((resolve) => {
+      let sessionResolve: (value: unknown) => void;
+      new Promise<unknown>((resolve) => {
         sessionResolve = resolve;
       });
 
@@ -281,7 +282,7 @@ export class GeminiService {
     }
   }
 
-  private async initiateVisualGreeting(session: any) {
+  private async initiateVisualGreeting(session: { sendRealtimeInput: (data: unknown) => void }) {
     let base64Image: string | null = null;
 
     if (this.config.videoElement) {
@@ -319,7 +320,7 @@ export class GeminiService {
     }, 200);
   }
 
-  private sendTextTrigger(session: any, text: string) {
+  private sendTextTrigger(session: { sendRealtimeInput: (data: unknown) => void }, text: string) {
     try {
       session.sendRealtimeInput({
         content: [{ text }]
@@ -342,7 +343,7 @@ export class GeminiService {
     return null;
   }
 
-  private startAudioInputStream(session: any) {
+  private startAudioInputStream(session: { sendRealtimeInput: (data: unknown) => void }) {
     if (!this.inputAudioContext || !this.stream) return;
 
     const source = this.inputAudioContext.createMediaStreamSource(this.stream);
@@ -358,7 +359,7 @@ export class GeminiService {
     scriptProcessor.connect(this.inputAudioContext.destination);
   }
 
-  private startVideoInputStream(session: any) {
+  private startVideoInputStream(session: { sendRealtimeInput: (data: unknown) => void }) {
     if (!this.config.videoElement || !this.stream) return;
 
     const canvas = document.createElement('canvas');
@@ -439,7 +440,7 @@ export class GeminiService {
 
     if (serverContent?.interrupted) {
       this.sources.forEach(source => {
-        try { source.stop(); } catch (e) { /* ignore */ }
+        try { source.stop(); } catch { /* ignore */ }
       });
       this.sources.clear();
       this.nextStartTime = 0;

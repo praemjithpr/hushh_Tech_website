@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ConnectionState, DecisionCardData, UserPersona } from './types';
 import { GeminiService } from './services/geminiService';
 import KaiAvatar from './components/KaiAvatar';
@@ -13,7 +13,8 @@ const KaiApp: React.FC = () => {
   const [statusText, setStatusText] = useState<string>("");
   const [decisionData, setDecisionData] = useState<DecisionCardData | null>(null);
   const [userPersona, setUserPersona] = useState<UserPersona | null>(null);
-  
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const geminiServiceRef = useRef<GeminiService | null>(null);
 
@@ -29,39 +30,44 @@ const KaiApp: React.FC = () => {
         videoElement: videoRef.current,
       });
     }
-    
+
     // Cleanup on unmount
     return () => {
       geminiServiceRef.current?.disconnect();
     };
   }, []);
 
-  const handleConnect = async () => {
-    if (!userPersona) return;
+  const handleConnect = useCallback(async () => {
+    if (!userPersona || isProcessing) return;
+    setIsProcessing(true);
     setDecisionData(null);
-    await geminiServiceRef.current?.connect(userPersona);
-  };
+    try {
+      await geminiServiceRef.current?.connect(userPersona);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [userPersona, isProcessing]);
 
-  const handleDisconnect = async () => {
+  const handleDisconnect = useCallback(async () => {
     await geminiServiceRef.current?.disconnect();
     setVolume(0);
     setAudioData(new Uint8Array(0));
     setStatusText("Link terminated.");
     setTimeout(() => setStatusText(""), 2000);
-  };
+  }, []);
 
-  const handleBackToOnboarding = async () => {
+  const handleBackToOnboarding = useCallback(async () => {
     await handleDisconnect();
     setUserPersona(null);
     setDecisionData(null);
-  };
+  }, [handleDisconnect]);
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col items-center justify-center">
-      
+
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-950 via-black to-black pointer-events-none"></div>
-      
+
       {/* Grid Pattern Overlay for Sci-Fi feel */}
       <div className="absolute inset-0 opacity-[0.05]" style={{
         backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)',
@@ -69,11 +75,11 @@ const KaiApp: React.FC = () => {
       }}></div>
 
       {/* Hidden Video Element for capturing frames */}
-      <video 
-        ref={videoRef} 
+      <video
+        ref={videoRef}
         className="absolute top-4 right-4 w-24 h-16 md:w-32 md:h-24 object-cover rounded-lg border border-gray-800 opacity-50 z-20 grayscale hover:grayscale-0 transition-all"
-        muted 
-        playsInline 
+        muted
+        playsInline
       />
 
       {/* Navigation: Back to Persona Selection */}
@@ -83,9 +89,9 @@ const KaiApp: React.FC = () => {
           className="absolute top-4 left-4 md:top-6 md:left-6 z-50 p-2 md:p-3 rounded-full bg-gray-900/40 border border-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all backdrop-blur-sm group"
           aria-label="Back to Setup"
         >
-           <svg className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-           </svg>
+          <svg className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
         </button>
       )}
 
@@ -93,24 +99,24 @@ const KaiApp: React.FC = () => {
       {!userPersona && (
         <OnboardingScreen onSelect={setUserPersona} />
       )}
-      
+
       {/* The 3D/4D Avatar */}
       <div className={`
         relative w-full h-full max-w-4xl max-h-[80vh] flex items-center justify-center transition-all duration-1000
         ${!userPersona ? 'opacity-0 scale-90 blur-lg' : 'opacity-100 scale-100 blur-0'}
       `}
-           style={{ opacity: decisionData ? 0.3 : (userPersona ? 1 : 0), transform: decisionData ? 'scale(0.9)' : 'scale(1)' }}>
-         <KaiAvatar 
-           volume={volume} 
-           audioData={audioData}
-           active={connectionState === ConnectionState.CONNECTED} 
-         />
+        style={{ opacity: decisionData ? 0.3 : (userPersona ? 1 : 0), transform: decisionData ? 'scale(0.9)' : 'scale(1)' }}>
+        <KaiAvatar
+          volume={volume}
+          audioData={audioData}
+          active={connectionState === ConnectionState.CONNECTED}
+        />
       </div>
 
       {/* Decision Card Overlay */}
       {decisionData && (
-        <DecisionCard 
-          data={decisionData} 
+        <DecisionCard
+          data={decisionData}
           onClose={() => setDecisionData(null)}
           onRequestNews={(ticker) => geminiServiceRef.current?.requestNewsUpdate(ticker)}
         />
@@ -118,15 +124,16 @@ const KaiApp: React.FC = () => {
 
       {/* UI Controls */}
       <div className={`transition-all duration-1000 delay-500 ${!userPersona ? 'opacity-0 translate-y-10' : 'opacity-100 translate-y-0'} ${decisionData ? 'opacity-20 pointer-events-none' : ''}`}>
-        <ControlPanel 
-            state={connectionState} 
-            statusText={statusText}
-            onConnect={handleConnect} 
-            onDisconnect={handleDisconnect} 
-            volume={volume}
+        <ControlPanel
+          state={connectionState}
+          statusText={statusText}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
+          volume={volume}
+          isProcessing={isProcessing}
         />
       </div>
-      
+
       {/* Footer / Version */}
       <div className="absolute bottom-2 right-4 text-gray-800 text-[8px] md:text-[10px] uppercase font-mono tracking-widest flex items-center gap-3">
         {userPersona && (
